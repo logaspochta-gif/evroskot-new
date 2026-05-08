@@ -1,0 +1,98 @@
+---
+---
+<section class="bento-section" id="bento-breeds">
+  <div class="bento-grid">
+    <div class="bento-item large">
+      <div class="bento-content">
+        <h3>Голштинская</h3>
+        <p>Мировой лидер по удоям молока. Генетика из лучших хозяйств Дании. Продуктивность до 12 000 кг молока за лактацию.</p>
+      </div>
+    </div>
+    <div class="bento-item">
+      <div class="bento-content">
+        <h3>Джерсейская</h3>
+        <p>Высокая жирность молока (до 6%) и исключительное долголетие коров. Идеальна для сыроварения.</p>
+      </div>
+    </div>
+    <div class="bento-item">
+      <div class="bento-content">
+        <h3>Красная Датская</h3>
+        <p>Идеальный баланс мяса и молока. Выносливость, крепкое здоровье, отличная адаптация к разным климатическим условиям.</p>
+      </div>
+    </div>
+    <div class="bento-item wide">
+      <div class="bento-content">
+        <h3>Лицензия Министерства Дании</h3>
+        <p>Официальная аккредитация экспортёра: № 2011‑Ø1‑7510‑00068/LHEN. Компания Scanova A/S зарегистрирована в Датском Регистре компаний 03 июля 1996 года. Входим в ТОП-750 быстрорастущих компаний Дании по версии деловой газеты Børsen.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .bento-section {
+    height: 100vh;                    /* весь экран */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5%;
+    box-sizing: border-box;
+    background: #000;
+  }
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 250px;
+    gap: 20px;
+    width: 100%;
+    max-width: 1200px;
+  }
+  .bento-item {
+    background: var(--card-bg);
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    align-items: flex-end;
+    border: 1px solid var(--border);
+    transition: 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .bento-item:hover {
+    border-color: var(--accent);
+    transform: scale(1.02);
+  }
+  .bento-item.large {
+    grid-row: span 2;
+    background: url('https://images.unsplash.com/photo-1746401671955-60e6e1039904?auto=format&fit=crop&w=1200&q=80') center/cover;
+  }
+  .bento-item.large .bento-content {
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    padding: 20px;
+    margin: -30px;
+    padding-top: 100px;
+  }
+  .bento-item.wide {
+    grid-column: span 2;
+    background: linear-gradient(135deg, #1e3a8a, #2563eb);
+  }
+  .bento-content h3 {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+  .bento-content p {
+    opacity: 0.8;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+  @media (max-width: 768px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+      grid-auto-rows: 200px;
+    }
+    .bento-item.wide {
+      grid-column: span 1;
+    }
+  }
+</style>

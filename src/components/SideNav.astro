@@ -1,0 +1,112 @@
+---
+---
+<Fragment>
+  <nav class="side-nav" id="sideNav" aria-label="Навигация по секциям">
+    <ul>
+      <li><a href="#hero" data-section="hero" class="nav-dot"></a></li>
+      <li><a href="#bento-breeds" data-section="bento-breeds" class="nav-dot"></a></li>
+      <li><a href="#about" data-section="about" class="nav-dot"></a></li>
+      <li><a href="#steps" data-section="steps" class="nav-dot"></a></li>   <!-- новая точка -->
+      <li><a href="#breeds" data-section="breeds" class="nav-dot"></a></li>
+      <li><a href="#advantages" data-section="advantages" class="nav-dot"></a></li>
+      <li><a href="#staldren" data-section="staldren" class="nav-dot"></a></li>
+      <li><a href="#contact" data-section="contact" class="nav-dot"></a></li>
+    </ul>
+  </nav>
+</Fragment>
+
+<style>
+  .side-nav {
+    position: fixed;
+    top: 90%;
+    right: 20px;
+    transform: translateY(-90%);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .side-nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .nav-dot {
+    display: block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: 2px solid transparent;
+    transition: background 0.3s, border-color 0.3s, transform 0.3s;
+    cursor: pointer;
+  }
+  .nav-dot:hover {
+    background: rgba(255, 255, 255, 0.8);
+    transform: scale(1.2);
+  }
+  .nav-dot.active {
+    background: var(--accent, #10b981);
+    border-color: #fff;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  }
+  @media (max-width: 768px) {
+    .side-nav {
+      right: 10px;
+    }
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const dots = document.querySelectorAll('.nav-dot');
+    const sections: HTMLElement[] = [];
+
+    dots.forEach(dot => {
+      const id = dot.getAttribute('data-section');
+      if (id) {
+        const section = document.getElementById(id);
+        if (section) {
+          sections.push(section);
+        }
+      }
+    });
+
+    function updateActiveDot() {
+      const scrollPos = window.scrollY + window.innerHeight / 2;
+      let activeIndex = 0;
+      sections.forEach((section, index) => {
+        if (section && section.offsetTop <= scrollPos) {
+          activeIndex = index;
+        }
+      });
+      dots.forEach((dot, i) => {
+        dot.classList.toggle('active', i === activeIndex);
+      });
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', (e) => {
+        e.preventDefault();
+        const targetId = dot.getAttribute('data-section');
+        if (targetId) {
+          const target = document.getElementById(targetId);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }
+      });
+    });
+
+    window.addEventListener('scroll', updateActiveDot);
+    window.addEventListener('resize', updateActiveDot);
+    updateActiveDot();
+  });
+</script>

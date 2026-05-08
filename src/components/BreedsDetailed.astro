@@ -1,0 +1,195 @@
+---
+---
+<section class="breeds-section" id="breeds">
+  <h2 class="section-title">Породы <span class="accent">крупного рогатого скота</span></h2>
+  <p class="section-subtitle">Молочное и мясное направление. Только датская селекция.</p>
+
+  <!-- Горизонтальный бесконечный слайдер -->
+  <div class="swiper breeds-swiper">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1746401671955-60e6e1039904?auto=format&fit=crop&w=600&q=80" alt="Голштинская" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Голштинская</h3>
+            <p>Лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика датской селекции.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1592249991251-5abf6a8beac6?auto=format&fit=crop&w=600&q=80" alt="Джерсейская" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Джерсейская</h3>
+            <p>Молоко с жирностью до 6%. Светло-коричневая масть. Компактное телосложение и долголетие.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?auto=format&fit=crop&w=600&q=80" alt="Красная Датская" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Красная Датская</h3>
+            <p>Универсальная порода двойного назначения. Красно-пёстрая масть. Отличное здоровье и плодовитость.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1617038264886-89bc294cf78a?auto=format&fit=crop&w=600&q=80" alt="Шароле" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Шароле</h3>
+            <p>Мясная порода с высокой энергией роста. Кремово-белая масть. Тяжёлые быки до 1 400 кг.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1606103921002-1c0fbb75dbf1?auto=format&fit=crop&w=600&q=80" alt="Абердин-Ангус" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Абердин-Ангус</h3>
+            <p>Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость отёлов и скороспелость.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1594751963761-7ee9e1fdba39?auto=format&fit=crop&w=600&q=80" alt="Герефордская" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Герефордская</h3>
+            <p>Красно-белая масть. Выносливость и неприхотливость. Отличная адаптация к пастбищному содержанию.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1585086158078-df8c2e343a79?auto=format&fit=crop&w=600&q=80" alt="Лимузин" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Лимузин</h3>
+            <p>Золотисто-красная масть. Высокий выход постного мяса. Отличные материнские качества.</p>
+          </div>
+        </div>
+      </div>
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <img src="https://images.unsplash.com/photo-1598045755602-63d2749f1fb3?auto=format&fit=crop&w=600&q=80" alt="Симментальская" loading="lazy" />
+          <div class="breed-card-body">
+            <h3>Симментальская</h3>
+            <p>Палево-пёстрая масть. Двойное назначение: молоко и мясо. Крепкая конституция и высокая продуктивность.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+</section>
+
+<style>
+  .breeds-section {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    padding: 0 5%;
+    box-sizing: border-box;
+  }
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin-bottom: 0.5rem;
+    text-align: center;
+  }
+  .section-subtitle {
+    color: var(--muted);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+  }
+  .accent { color: var(--accent); }
+
+  .breeds-swiper {
+    width: 100%;
+    max-width: 1200px;
+    padding-bottom: 40px; /* место для точек */
+    overflow: hidden;     /* убираем случайный вертикальный скролл */
+  }
+  .breed-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    height: 100%;
+    transition: transform 0.3s;
+  }
+  .breed-card:hover {
+    transform: translateY(-5px);
+  }
+  .breed-card img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+  }
+  .breed-card-body {
+    padding: 20px;
+  }
+  .breed-card-body h3 {
+    font-size: 1.2rem;
+    margin: 0 0 6px;
+    font-weight: 700;
+  }
+  .breed-card-body p {
+    opacity: 0.7;
+    font-size: 0.9rem;
+    margin: 0;
+  }
+
+  :global(.breeds-swiper .swiper-button-prev),
+  :global(.breeds-swiper .swiper-button-next) {
+    color: var(--accent);
+  }
+  :global(.breeds-swiper .swiper-pagination-bullet-active) {
+    background: var(--accent);
+  }
+
+  @media (max-width: 768px) {
+    .breed-card img {
+      height: 150px;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const swiperEl = document.querySelector('.breeds-swiper');
+    if (swiperEl && typeof Swiper !== 'undefined') {
+      new Swiper(swiperEl, {
+        loop: true,                     // бесконечная карусель
+        slidesPerView: 3,
+        spaceBetween: 24,
+        pagination: {
+          el: '.swiper-pagination',
+          clickable: true,
+        },
+        navigation: {
+          nextEl: '.swiper-button-next',
+          prevEl: '.swiper-button-prev',
+        },
+        breakpoints: {
+          320: { slidesPerView: 1 },
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+        },
+        // Очень важно: не даём слайдеру перехватывать колесо
+        simulateTouch: true,
+        allowTouchMove: true,
+        // Убираем возможность скролла колесом внутри слайдера
+        // (по умолчанию Swiper слушает wheel, поэтому отключаем)
+        mousewheel: false,
+      });
+    }
+  });
+</script>

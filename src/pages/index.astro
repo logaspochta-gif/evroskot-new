@@ -1,0 +1,31 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import BentoBreeds from '../components/BentoBreeds.astro';
+import About from '../components/About.astro';
+import Steps from '../components/Steps.astro';          // новая секция
+import BreedsDetailed from '../components/BreedsDetailed.astro';
+import Advantages from '../components/Advantages.astro';
+import Staldren from '../components/Staldren.astro';
+import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
+import SideNav from '../components/SideNav.astro';
+---
+
+<BaseLayout
+  title="EVROSKOT — Племенной скот из Дании | Экспортёр № 2011-Ø1"
+  description="Племенной скот Датской селекции. Прямые поставки высокопродуктивных животных из Дании в РФ и СНГ."
+>
+  <main>
+    <Hero />
+    <BentoBreeds />
+    <About />
+    <Steps />
+    <BreedsDetailed />
+    <Advantages />
+    <Staldren />
+    <Contact />
+  </main>
+  <Footer />
+  <SideNav />
+</BaseLayout>

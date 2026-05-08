@@ -1,0 +1,73 @@
+---
+---
+<section class="breeds-section" id="breeds">
+  <h2 class="section-title wow animate__fadeInUp">Наши <span class="accent">породы</span></h2>
+  <p class="section-subtitle wow animate__fadeInUp" data-wow-delay="0.2s">Только проверенная датская генетика</p>
+  <div class="swiper breeds-swiper wow animate__fadeInUp" data-wow-delay="0.4s">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide">
+        <div class="breed-card">
+          <div class="img" style="background-image: url('https://images.unsplash.com/photo-1746401671955-60e6e1039904?auto=format&fit=crop&w=600&q=80');"></div>
+          <h3>Голштинская</h3>
+          <p>Мировой лидер по удоям</p>
+        </div>
+      </div>
+      <!-- ещё 7 пород -->
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
+</section>
+
+<style>
+  .breeds-section {
+    padding: 80px 5%;
+    background: #000;
+  }
+  .breeds-swiper {
+    width: 100%;
+    padding-bottom: 50px;
+  }
+  .breed-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+  .breed-card:hover { transform: translateY(-5px); }
+  .img {
+    height: 220px;
+    background-size: cover;
+    background-position: center;
+  }
+  .breed-card h3 {
+    font-size: 1.3rem;
+    margin: 1rem 0 0.5rem;
+    font-weight: 700;
+  }
+  .breed-card p {
+    opacity: 0.7;
+    font-size: 0.9rem;
+    padding: 0 1rem 1.5rem;
+  }
+  /* ... swiper pagination ... */
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const swiperContainer = document.querySelector('.breeds-swiper');
+    if (swiperContainer) {
+      new Swiper(swiperContainer, {
+        slidesPerView: 3,
+        spaceBetween: 24,
+        pagination: { el: '.swiper-pagination', clickable: true },
+        breakpoints: {
+          320: { slidesPerView: 1 },
+          768: { slidesPerView: 2 },
+          1024: { slidesPerView: 3 },
+        }
+      });
+    }
+  });
+</script>

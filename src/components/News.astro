@@ -1,0 +1,237 @@
+---
+// src/components/News.astro
+interface NewsItem {
+  title: string;
+  link: string;
+  pubDate: string;
+  content: string;
+  image: string | null;
+}
+
+let news: NewsItem[] = [];
+const API_URL = '/api/vk-news'; // локальный прокси
+
+try {
+  const response = await fetch(API_URL);
+  if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+  const posts = await response.json();
+
+  if (Array.isArray(posts)) {
+    news = posts.map(post => ({
+      title: post.text?.slice(0, 60) || 'Без названия',
+      link: post.link,
+      pubDate: post.date 
+        ? new Date(post.date * 1000).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+        : 'Дата не указана',
+      content: post.text?.slice(0, 120) || '',
+      image: post.image,
+    }));
+  }
+} catch (error) {
+  console.error('Ошибка загрузки новостей из VK:', error);
+}
+
+// Применяем Bento-стили для первых 4 новостей (можно настроить)
+const BENTO_LAYOUT = ['large', 'small', 'small', 'wide'];
+const newsWithLayout = news.slice(0, 4).map((item, index) => ({
+  ...item,
+  size: BENTO_LAYOUT[index] || 'small'
+}));
+const hasNews = newsWithLayout.length > 0;
+---
+
+<section id="news" class="news-section">
+  <div class="news-container">
+    <div class="section-header">
+      <span class="badge">События</span>
+      <h2 class="section-title">Новости <span class="accent">Evroskot</span></h2>
+    </div>
+
+    {hasNews ? (
+      <div class="bento-grid">
+        {newsWithLayout.map((item) => (
+          <a href={item.link} target="_blank" rel="noopener noreferrer" class={`news-card ${item.size}`}>
+            {item.image && <img src={item.image} alt="" class="card-bg-image" loading="lazy" />}
+            <div class="card-overlay"></div>
+            <div class="card-content">
+              <span class="date">{item.pubDate}</span>
+              <h3>{item.title}</h3>
+              <p>{item.content}</p>
+            </div>
+            <div class="card-arrow">→</div>
+          </a>
+        ))}
+      </div>
+    ) : (
+      <p style="text-align:center; opacity:0.7;">Новости пока не загружены.</p>
+    )}
+
+    <div class="more-news">
+      <a href="https://vk.com/evroskot" target="_blank" rel="noopener" class="secondary-btn">Наши новости в вконтакте</a>
+    </div>
+  </div>
+</section>
+
+<style>
+  /* Стили без изменений — как в предыдущих версиях */
+  .news-section {
+    padding: 120px 5% 80px;
+    background: var(--dark);
+  }
+  .news-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-header {
+    text-align: center;
+    margin-bottom: 50px;
+  }
+  .badge {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
+    color: #fff;
+  }
+  .section-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    margin: 0;
+  }
+  .accent {
+    color: var(--accent);
+  }
+
+  .bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-auto-rows: 200px;
+    gap: 20px;
+  }
+  .news-card {
+    position: relative;
+    border-radius: 24px;
+    overflow: hidden;
+    background: var(--card-bg);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    border: 1px solid var(--border);
+    transition: all 0.4s ease;
+  }
+  .news-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-5px);
+  }
+  .card-bg-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 1;
+  }
+  .card-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    z-index: 2;
+  }
+  .card-content {
+    position: relative;
+    z-index: 3;
+    padding: 30px;
+  }
+  .date {
+    font-size: 0.7rem;
+    color: var(--accent);
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  h3 {
+    font-size: 1.2rem;
+    margin: 10px 0;
+    line-height: 1.3;
+    color: #fff;
+  }
+  p {
+    font-size: 0.85rem;
+    opacity: 0.7;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    color: #fff;
+  }
+  .card-arrow {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 1.3rem;
+    opacity: 0;
+    transform: translateX(-10px);
+    transition: 0.3s;
+    color: var(--accent);
+    z-index: 4;
+  }
+  .news-card:hover .card-arrow {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  .large {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .wide {
+    grid-column: span 2;
+  }
+
+  .more-news {
+    text-align: center;
+    margin-top: 40px;
+  }
+  .secondary-btn {
+    display: inline-block;
+    border: 1px solid rgba(255,255,255,0.3);
+    padding: 0.8rem 2rem;
+    border-radius: 8px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    transition: border-color 0.3s;
+  }
+  .secondary-btn:hover {
+    border-color: rgba(255,255,255,0.7);
+  }
+
+  @media (max-width: 900px) {
+    .bento-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .large, .wide {
+      grid-column: span 1;
+      grid-row: span 1;
+    }
+  }
+  @media (max-width: 600px) {
+    .bento-grid {
+      grid-template-columns: 1fr;
+      grid-auto-rows: auto;
+    }
+    .news-card {
+      min-height: 220px;
+    }
+  }
+</style>
