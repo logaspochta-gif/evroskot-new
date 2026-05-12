@@ -1,565 +1,187 @@
 ---
+// src/components/Hero.astro
 ---
-<>
-  <section class="hero snap-section" id="hero">
-
-    <!-- NAVBAR -->
-    <nav class="navbar" id="navbar">
-      <div class="logo">
-        <svg width="160" height="30" viewBox="0 0 160 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <text x="0" y="25" font-family="Poppins" font-weight="900" font-size="24" fill="currentColor">
-            EVRO<tspan fill="#10b981">SKOT</tspan>
-          </text>
-        </svg>
-      </div>
-
-      <button class="burger" id="burger" aria-label="Открыть меню">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-
-      <div class="menu" id="menu">
-        <a href="#hero">Главная</a>
-        <a href="#breeds">Породы</a>
-        <a href="#about">О компании</a>
-        <a href="#staldren">Staldren®</a>
-        <a href="/news">Новости</a>
-        <a href="#contact">
-          <button class="btn-contact">Связаться</button>
-        </a>
-      </div>
-    </nav>
-
-    <!-- HERO SLIDER -->
-    <div class="swiper hero-swiper">
-
-      <div class="swiper-wrapper">
-
-        <!-- SLIDE 1 -->
-        <div class="swiper-slide">
-          <div
-            class="slide-bg"
-            style="background-image:url('/images/hero/hero-1.webp')"
-          ></div>
-          <div class="overlay"></div>
-
-          <div class="content">
-            <span class="badge">
-              Лицензированный экспортер № 2011-Ø1
-            </span>
-            <h1>
-              Элитный племенной скот
-              <br />
-              <span class="accent">из Дании</span>
-            </h1>
-            <p>
-              Прямые поставки высокопродуктивных животных
-              в РФ и СНГ с полной ветеринарной поддержкой.
-            </p>
-            <div class="actions">
-              <a href="#contact" class="primary-btn">Запросить прайс</a>
-              <a href="#breeds" class="secondary-btn">Посмотреть породы</a>
-            </div>
+<section class="hero" id="hero">
+  <div class="swiper hero-swiper">
+    <div class="swiper-wrapper">
+      <!-- Слайд 1 -->
+      <div class="swiper-slide">
+        <div class="slide-bg" style="background-image: url('/images/hero/hero-1.webp')"></div>
+        <div class="overlay"></div>
+        <div class="content">
+          <span class="badge animate__animated animate__fadeInUp">Лицензированный экспортер № 2011‑Ø1</span>
+          <h1 class="animate__animated animate__fadeInUp animate__delay-1s">Элитный племенной скот <br/> <span class="accent">из Дании</span></h1>
+          <p class="animate__animated animate__fadeInUp animate__delay-2s">Прямые поставки высокопродуктивных животных в РФ и СНГ с полной ветеринарной поддержкой.</p>
+          <div class="actions animate__animated animate__fadeInUp animate__delay-3s">
+            <a href="#contact" class="primary-btn">Запросить прайс</a>
+            <a href="#breeds" class="secondary-btn">Посмотреть породы</a>
           </div>
         </div>
-
-        <!-- SLIDE 2 -->
-        <div class="swiper-slide">
-          <div
-            class="slide-bg"
-            style="background-image:url('/images/hero/hero-2.webp')"
-          ></div>
-          <div class="overlay"></div>
-
-          <div class="content">
-            <span class="badge">Голштинская порода</span>
-            <h2>
-              Мировой лидер
-              <br />
-              <span class="accent">по удоям молока</span>
-            </h2>
-            <p>
-              Генетика из лучших хозяйств Дании.
-              Продуктивность до 12 000 кг молока за лактацию.
-            </p>
-            <div class="actions">
-              <a href="#contact" class="primary-btn">Запросить подбор</a>
-              <a href="#breeds" class="secondary-btn">Все породы</a>
-            </div>
-          </div>
-        </div>
-
-        <!-- SLIDE 3 -->
-        <div class="swiper-slide">
-          <div
-            class="slide-bg"
-            style="background-image:url('/images/hero/hero-3.webp')"
-          ></div>
-          <div class="overlay"></div>
-
-          <div class="content">
-            <span class="badge">Джерсейская порода</span>
-            <h2>
-              Высокая жирность
-              <br />
-              <span class="accent">и долголетие</span>
-            </h2>
-            <p>
-              Идеальна для сыроварения.
-              Жирность молока до 6%.
-            </p>
-            <div class="actions">
-              <a href="#contact" class="primary-btn">Запросить прайс</a>
-              <a href="#breeds" class="secondary-btn">Смотреть породы</a>
-            </div>
-          </div>
-        </div>
-
       </div>
-
-      <div class="swiper-pagination"></div>
-      <div class="swiper-button-prev"></div>
-      <div class="swiper-button-next"></div>
-
+      <!-- Слайд 2 -->
+      <div class="swiper-slide">
+        <div class="slide-bg" style="background-image: url('/images/hero/hero-2.webp')"></div>
+        <div class="overlay"></div>
+        <div class="content">
+          <span class="badge">Голштинская порода</span>
+          <h2>Мировой лидер <br/> <span class="accent">по удоям молока</span></h2>
+          <p>Генетика из лучших хозяйств Дании. Продуктивность до 12 000 кг молока за лактацию.</p>
+          <div class="actions">
+            <a href="#contact" class="primary-btn">Запросить подбор</a>
+            <a href="#breeds" class="secondary-btn">Все породы</a>
+          </div>
+        </div>
+      </div>
+      <!-- Слайд 3 -->
+      <div class="swiper-slide">
+        <div class="slide-bg" style="background-image: url('/images/hero/hero-3.webp')"></div>
+        <div class="overlay"></div>
+        <div class="content">
+          <span class="badge">Джерсейская порода</span>
+          <h2>Высокая жирность <br/> <span class="accent">и долголетие</span></h2>
+          <p>Идеальна для сыроварения. Жирность молока до 6%.</p>
+          <div class="actions">
+            <a href="#contact" class="primary-btn">Запросить прайс</a>
+            <a href="#breeds" class="secondary-btn">Смотреть породы</a>
+          </div>
+        </div>
+      </div>
     </div>
-  </section>
-</>
+    <div class="swiper-pagination"></div>
+    <div class="swiper-button-prev"></div>
+    <div class="swiper-button-next"></div>
+  </div>
+</section>
 
 <style>
-  /* Переменные, если не заданы глобально */
-  :root {
-    --accent: #10b981;
-    --accent-hover: #059669;
-    --border: rgba(255, 255, 255, 0.1);
-    --white: #ffffff;
-  }
-
-  /* =========================
-     HERO
-  ========================= */
-
   .hero {
     position: relative;
     width: 100%;
-    height: 100svh; /* современный аналог 100vh, учитывает address bar на мобильных */
+    height: 100vh;
     overflow: hidden;
   }
-
   .hero-swiper {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
+    z-index: 0;
   }
-
-  .swiper-slide {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-  }
-
   .slide-bg {
     position: absolute;
     inset: 0;
     background-size: cover;
     background-position: center;
-    transform: scale(1.03);
-    will-change: transform;
-    animation: heroZoom 2.5s ease forwards;
+    animation: srmgani 4s ease forwards;
   }
-
-  @keyframes heroZoom {
-    from {
-      transform: scale(1.05);
-    }
-    to {
-      transform: scale(1);
-    }
+  @keyframes srmgani {
+    0% { transform: scale(1.05); }
+    100% { transform: scale(1.0); }
   }
-
   .overlay {
     position: absolute;
     inset: 0;
-    background:
-      radial-gradient(
-        circle at center,
-        rgba(0, 0, 0, 0.15),
-        rgba(0, 0, 0, 0.82)
-      ),
-      linear-gradient(
-        to bottom,
-        rgba(0, 0, 0, 0.55),
-        rgba(0, 0, 0, 0.75)
-      );
+    background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.4));
     z-index: 1;
   }
-
-  /* =========================
-     NAVBAR
-  ========================= */
-
-  .navbar {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.2rem 5%;
-    transition:
-      background 0.3s ease,
-      padding 0.3s ease;
-    background: rgba(0, 0, 0, 0.15);
-  }
-
-  .navbar.scrolled {
-    background: rgba(0, 0, 0, 0.85);
-    backdrop-filter: blur(10px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-  }
-
-  .logo svg {
-    width: 130px;
-    color: #fff;
-  }
-
-  .menu {
-    display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  .menu a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 0.95rem;
-    position: relative;
-    transition: opacity 0.3s ease;
-  }
-
-  .menu a:hover {
-    opacity: 0.85;
-  }
-
-  .menu a::after {
-    content: '';
-    position: absolute;
-    left: 50%;
-    bottom: -6px;
-    transform: translateX(-50%);
-    width: 0%;
-    height: 2px;
-    background: var(--accent);
-    transition: width 0.3s ease;
-  }
-
-  .menu a:hover::after {
-    width: 60%;
-  }
-
-  .btn-contact {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 0.8rem 1.8rem;
-    border-radius: 10px;
-    cursor: pointer;
-    font-weight: 700;
-    transition:
-      background 0.3s ease,
-      transform 0.3s ease;
-  }
-
-  .btn-contact:hover {
-    background: var(--accent-hover);
-    transform: translateY(-2px);
-  }
-
-  /* =========================
-     BURGER
-  ========================= */
-
-  .burger {
-    display: none;
-    flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    z-index: 1200;
-  }
-
-  .burger span {
-    width: 28px;
-    height: 3px;
-    background: #fff;
-    border-radius: 20px;
-    transition: 0.3s ease;
-  }
-
-  /* =========================
-     CONTENT
-  ========================= */
-
   .content {
     position: absolute;
     z-index: 10;
+    left: 9.5%;
     top: 50%;
-    left: 8%;
     transform: translateY(-50%);
-    width: min(90%, 720px);
+    max-width: 700px;
   }
-
   .badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.55rem 1.2rem;
-    border-radius: 100px;
-    background: rgba(16, 185, 129, 0.12);
-    border: 1px solid rgba(16, 185, 129, 0.4);
-    backdrop-filter: blur(8px);
-    margin-bottom: 1.5rem;
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    padding: 0.5rem 1.2rem;
+    border-radius: 50px;
     font-size: 0.8rem;
-    letter-spacing: 0.5px;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
     color: #fff;
   }
-
-  h1,
-  h2 {
-    margin: 0 0 1.2rem;
-    line-height: 1.05;
+  h1, h2 {
+    font-size: 3.8rem;
+    margin: 0 0 1rem;
+    line-height: 1.1;
     font-weight: 900;
     color: #fff;
-    font-size: clamp(2.4rem, 6vw, 5rem);
   }
-
-  .accent {
-    color: var(--accent);
-  }
-
+  .accent { color: var(--accent); }
   .content p {
-    max-width: 580px;
+    font-size: 1.15rem;
+    opacity: 0.9;
     margin-bottom: 2rem;
-    font-size: clamp(1rem, 2vw, 1.2rem);
-    line-height: 1.7;
-    color: rgba(255, 255, 255, 0.92);
+    max-width: 500px;
   }
-
-  /* =========================
-     BUTTONS
-  ========================= */
-
   .actions {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
   }
-
-  .primary-btn,
-  .secondary-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 190px;
-    padding: 1rem 2rem;
-    border-radius: 12px;
-    text-decoration: none;
-    font-weight: 700;
-    transition:
-      transform 0.3s ease,
-      background 0.3s ease,
-      border 0.3s ease;
-  }
-
   .primary-btn {
     background: var(--accent);
     color: #fff;
+    padding: 0.9rem 2rem;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 700;
+    display: inline-block;
   }
-
-  .primary-btn:hover {
-    background: var(--accent-hover);
-    transform: translateY(-2px);
-  }
-
   .secondary-btn {
     color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255,255,255,0.4);
+    padding: 0.9rem 2rem;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
     backdrop-filter: blur(10px);
   }
 
-  .secondary-btn:hover {
-    border-color: rgba(255, 255, 255, 0.7);
-    transform: translateY(-2px);
-  }
-
-  /* =========================
-     SWIPER
-  ========================= */
-
-  .swiper-button-prev,
-  .swiper-button-next {
-    color: #fff;
-  }
-
-  .swiper-pagination-bullet {
-    background: rgba(255, 255, 255, 0.5);
-    opacity: 1;
-  }
-
-  .swiper-pagination-bullet-active {
-    background: var(--accent);
-  }
-
-  /* =========================
-     MOBILE
-  ========================= */
-
-  @media (max-width: 992px) {
-    .navbar {
-      padding: 1rem 5%;
-    }
-
-    .burger {
-      display: flex;
-    }
-
-    .menu {
-      position: absolute;
-      top: 75px;
-      right: 5%;
-      width: 260px;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 1.5rem;
-      border-radius: 20px;
-      background: rgba(0, 0, 0, 0.92);
-      backdrop-filter: blur(15px);
-      opacity: 0;
-      visibility: hidden;
-      transform: translateY(-10px);
-      transition: 0.3s ease;
-    }
-
-    .menu.active {
-      opacity: 1;
-      visibility: visible;
-      transform: translateY(0);
-    }
-
-    .content {
-      left: 5%;
-      right: 5%;
-      width: 90%;
-    }
-
-    .actions {
-      flex-direction: column;
-      align-items: stretch;
-    }
-
-    .primary-btn,
-    .secondary-btn {
-      width: 100%;
-    }
-  }
-
-  @media (max-width: 640px) {
-    .content {
-      top: 52%;
-    }
-
-    .badge {
-      font-size: 0.7rem;
-    }
-
-    .content p {
-      line-height: 1.6;
-    }
+  @media (max-width: 768px) {
+    h1, h2 { font-size: 2.2rem; }
+    .content { left: 5%; right: 5%; }
   }
 </style>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // =========================
-    // SWIPER
-    // =========================
+    // Swiper
     const heroSwiperEl = document.querySelector('.hero-swiper');
     if (heroSwiperEl && typeof Swiper !== 'undefined') {
       new Swiper(heroSwiperEl, {
         loop: true,
-        speed: 1200,
+        autoplay: { delay: 5000, disableOnInteraction: false },
+        pagination: { el: '.swiper-pagination', clickable: true },
+        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
         effect: 'fade',
-        fadeEffect: {
-          crossFade: true,
-        },
-        autoplay: {
-          delay: 5000,
-          disableOnInteraction: false,
-        },
-        pagination: {
-          el: '.swiper-pagination',
-          clickable: true,
-        },
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
+        fadeEffect: { crossFade: true },
       });
     }
 
-    // =========================
-    // BURGER MENU
-    // =========================
-    const burger = document.getElementById('burger');
-    const menu = document.getElementById('menu');
-    if (burger && menu) {
-      burger.addEventListener('click', () => {
-        menu.classList.toggle('active');
-      });
-      menu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          menu.classList.remove('active');
-        });
-      });
-    }
-
-    // =========================
-    // NAVBAR SCROLL
-    // =========================
-    const navbar = document.getElementById('navbar');
-    function updateNavbar() {
-      if (navbar) {
-        navbar.classList.toggle('scrolled', window.scrollY > 30);
-      }
-    }
-    updateNavbar();
-    window.addEventListener('scroll', updateNavbar, { passive: true });
-
-    // =========================
-    // FULL-SCREEN SCROLL (WHEEL)
-    // =========================
-    const sectionIds = [
-      'hero',
-      'bento-breeds',
-      'about',
-      'steps',
-      'breeds',
-      'advantages',
-      'staldren',
-      'contact',
-    ];
-
-    const sections = sectionIds
-      .map(id => document.getElementById(id) || document.querySelector(`.${id}`))
-      .filter(Boolean) as HTMLElement[];
+    // Полноэкранная прокрутка (колесо, тачпад, тач)
+    const sections = [
+      document.getElementById('hero'),
+      document.getElementById('bento-breeds') || document.querySelector('.bento-section'),
+      document.getElementById('about'),
+      document.getElementById('news'),
+      document.getElementById('steps'),
+      document.getElementById('breeds'),
+      document.getElementById('advantages'),
+      document.getElementById('staldren'),
+      document.getElementById('contact')
+    ].filter(Boolean) as HTMLElement[];
 
     let currentIndex = 0;
     let isScrolling = false;
     const scrollCooldown = 800;
+    const wheelThreshold = 30;      // px для тачпада
+    const touchSwipeThreshold = 50; // px для тач-свайпа
 
     function updateCurrentIndex() {
       const scrollCenter = window.scrollY + window.innerHeight / 2;
@@ -584,17 +206,59 @@
       }, scrollCooldown);
     }
 
-    window.addEventListener(
-      'wheel',
-      e => {
+    // ========== Колесо / тачпад ==========
+    let wheelAccumulator = 0;
+    let wheelTimer: ReturnType<typeof setTimeout> | null = null;
+
+    window.addEventListener('wheel', (e) => {
+      // Блокируем стандартную прокрутку, если мы на главной странице и не идёт анимация
+      if (isScrolling) {
         e.preventDefault();
-        if (isScrolling) return;
+        return;
+      }
+
+      // Отменяем накопление, если событие пришло с большим интервалом
+      if (wheelTimer) clearTimeout(wheelTimer);
+      wheelAccumulator += e.deltaY;
+
+      // Если накопленная дельта превысила порог — переключаем секцию
+      if (Math.abs(wheelAccumulator) >= wheelThreshold) {
+        e.preventDefault();
         updateCurrentIndex();
-        const direction = e.deltaY > 0 ? 1 : -1;
+        const direction = wheelAccumulator > 0 ? 1 : -1;
         scrollToSection(currentIndex + direction);
-      },
-      { passive: false }
-    );
+        wheelAccumulator = 0;
+      } else {
+        // Для обычной мыши с дискретным колесом deltaY велика (100+), поэтому переход случится сразу.
+        // Но для тачпада мы накапливаем движения в течение 200 мс.
+        wheelTimer = setTimeout(() => {
+          wheelAccumulator = 0;
+        }, 200);
+      }
+    }, { passive: false });
+
+    // ========== Сенсорные свайпы ==========
+    let touchStartY = 0;
+
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: false });
+
+    window.addEventListener('touchend', (e) => {
+      if (isScrolling) return;
+
+      const touchEndY = e.changedTouches[0].clientY;
+      const diff = touchStartY - touchEndY;
+
+      if (Math.abs(diff) > touchSwipeThreshold) {
+        e.preventDefault();
+        updateCurrentIndex();
+        const direction = diff > 0 ? 1 : -1;
+        scrollToSection(currentIndex + direction);
+      }
+    }, { passive: false });
 
     window.addEventListener('resize', updateCurrentIndex);
     updateCurrentIndex();

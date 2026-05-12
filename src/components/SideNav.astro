@@ -1,4 +1,5 @@
 ---
+// src/components/SideNav.astro
 ---
 <Fragment>
   <nav class="side-nav" id="sideNav" aria-label="Навигация по секциям">
@@ -6,7 +7,8 @@
       <li><a href="#hero" data-section="hero" class="nav-dot"></a></li>
       <li><a href="#bento-breeds" data-section="bento-breeds" class="nav-dot"></a></li>
       <li><a href="#about" data-section="about" class="nav-dot"></a></li>
-      <li><a href="#steps" data-section="steps" class="nav-dot"></a></li>   <!-- новая точка -->
+      <li><a href="#news" data-section="news" class="nav-dot"></a></li>
+      <li><a href="#steps" data-section="steps" class="nav-dot"></a></li>
       <li><a href="#breeds" data-section="breeds" class="nav-dot"></a></li>
       <li><a href="#advantages" data-section="advantages" class="nav-dot"></a></li>
       <li><a href="#staldren" data-section="staldren" class="nav-dot"></a></li>
@@ -25,7 +27,15 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
+
+  .side-nav.hidden {
+    opacity: 0;
+    transform: translateY(-90%) translateX(12px);
+    pointer-events: none;
+  }
+
   .side-nav ul {
     list-style: none;
     padding: 0;
@@ -34,6 +44,7 @@
     flex-direction: column;
     gap: 16px;
   }
+
   .nav-dot {
     display: block;
     width: 12px;
@@ -44,15 +55,18 @@
     transition: background 0.3s, border-color 0.3s, transform 0.3s;
     cursor: pointer;
   }
+
   .nav-dot:hover {
     background: rgba(255, 255, 255, 0.8);
     transform: scale(1.2);
   }
+
   .nav-dot.active {
     background: var(--accent, #10b981);
     border-color: #fff;
     box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
   }
+
   @media (max-width: 768px) {
     .side-nav {
       right: 10px;
@@ -66,47 +80,99 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
+    const nav = document.getElementById('sideNav');
     const dots = document.querySelectorAll('.nav-dot');
-    const sections: HTMLElement[] = [];
 
-    dots.forEach(dot => {
-      const id = dot.getAttribute('data-section');
-      if (id) {
-        const section = document.getElementById(id);
-        if (section) {
-          sections.push(section);
-        }
-      }
-    });
+    // Собираем секции, соответствующие точкам
+    const sections = Array.from(dots)
+      .map(dot => {
+        const id = dot.getAttribute('data-section');
+        return id ? document.getElementById(id) : null;
+      })
+      .filter(Boolean) as HTMLElement[];
 
-    function updateActiveDot() {
-      const scrollPos = window.scrollY + window.innerHeight / 2;
-      let activeIndex = 0;
-      sections.forEach((section, index) => {
-        if (section && section.offsetTop <= scrollPos) {
-          activeIndex = index;
-        }
-      });
+    let lastScrollY = window.scrollY;
+
+    // Активация точки по индексу
+    function activateDot(index: number) {
       dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === activeIndex);
+        const isActive = i === index;
+        dot.classList.toggle('active', isActive);
+        if (isActive) {
+          dot.setAttribute('aria-current', 'true');
+        } else {
+          dot.removeAttribute('aria-current');
+        }
       });
     }
 
+    // Intersection Observer для точного определения активной секции
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+
+          const index = sections.findIndex(section => section === entry.target);
+          if (index >= 0) {
+            requestAnimationFrame(() => activateDot(index));
+          }
+        });
+      },
+      {
+        threshold: 0.45,
+        rootMargin: '-10% 0px -10% 0px',
+      }
+    );
+
+    sections.forEach(section => observer.observe(section));
+
+    // Прокрутка по клику на точку
     dots.forEach(dot => {
       dot.addEventListener('click', (e) => {
         e.preventDefault();
         const targetId = dot.getAttribute('data-section');
-        if (targetId) {
-          const target = document.getElementById(targetId);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }
+        if (!targetId) return;
+
+        const target = document.getElementById(targetId);
+        if (!target) return;
+
+        target.scrollIntoView({
+          behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+            ? 'auto'
+            : 'smooth',
+          block: 'start',
+        });
       });
     });
 
-    window.addEventListener('scroll', updateActiveDot);
-    window.addEventListener('resize', updateActiveDot);
-    updateActiveDot();
+    // Скрытие меню при активном скролле вниз на мобильных
+    function handleScroll() {
+      if (!nav) return;
+
+      const currentScrollY = window.scrollY;
+
+      if (
+        window.innerWidth <= 640 &&
+        currentScrollY > lastScrollY &&
+        currentScrollY > 120
+      ) {
+        nav.classList.add('hidden');
+      } else {
+        nav.classList.remove('hidden');
+      }
+
+      lastScrollY = currentScrollY;
+    }
+
+    window.addEventListener(
+      'scroll',
+      () => requestAnimationFrame(handleScroll),
+      { passive: true }
+    );
+
+    // Первичная активация
+    if (sections.length > 0) {
+      activateDot(0);
+    }
   });
 </script>

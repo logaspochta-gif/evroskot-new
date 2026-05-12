@@ -8,67 +8,153 @@ interface NewsItem {
   pubDate: string;
   content: string;
   image: string | null;
+  isoDate: string;
+  ownerId: number;
+  postId: number;
 }
 
-// Функция получения превью из вложения (фото или видео)
-function getAttachmentPreview(attachments: any[]): string | null {
-  if (!attachments?.length) return null;
-
-  const first = attachments[0];
-
-  // Фото
-  if (first.photo?.sizes) {
-    const sizes = first.photo.sizes;
-    // Ищем 'x' (1280px) или самый большой доступный
-    return sizes.find((s: any) => s.type === 'x')?.url ||
-           sizes[sizes.length - 1]?.url ||
-           null;
-  }
-
-  // Видео
-  if (first.video?.image) {
-    const images = first.video.image;
-    // Берём самый большой размер (последний элемент)
-    return images[images.length - 1]?.url || null;
-  }
-
-  return null;
-}
-
-const SERVICE_TOKEN = import.meta.env.VK_SERVICE_TOKEN;
+let news: NewsItem[] = [];
+const ACCESS_TOKEN = import.meta.env.VK_ACCESS_TOKEN;
 const GROUP_ID = '99133048';
 const API_VERSION = '5.131';
 
-let news: NewsItem[] = [];
+// --- Ручные заголовки ---
+const manualTitles: Record<number, string> = {
+  // пример: 119: 'Специальный заголовок',
+};
 
-if (!SERVICE_TOKEN) {
-  console.warn('VK_SERVICE_TOKEN не задан');
+// --- getAttachmentPreview (фото, видео, документы, ссылки) ---
+function getAttachmentPreview(attachments: any[]): string | null {
+  if (!attachments?.length) return null;
+  const first = attachments[0];
+
+  // фото
+  if (first.photo?.sizes) {
+    const sizes = first.photo.sizes;
+    return (
+      sizes.find((s: any) => s.type === 'x')?.url ||
+      sizes.find((s: any) => s.type === 'y')?.url ||
+      sizes[sizes.length - 1]?.url ||
+      null
+    );
+  }
+  // видео
+  if (first.video?.image?.length) {
+    const images = first.video.image;
+    return images[images.length - 1]?.url || null;
+  }
+  // документ
+  if (first.doc?.preview?.photo?.sizes) {
+    const sizes = first.doc.preview.photo.sizes;
+    return (
+      sizes.find((s: any) => s.type === 'x')?.url ||
+      sizes[sizes.length - 1]?.url ||
+      null
+    );
+  }
+  // ссылка
+  if (first.link?.photo?.sizes) {
+    const sizes = first.link.photo.sizes;
+    return (
+      sizes.find((s: any) => s.type === 'k')?.url ||
+      sizes.find((s: any) => s.type === 'x')?.url ||
+      sizes[sizes.length - 1]?.url ||
+      null
+    );
+  }
+  return null;
+}
+
+// --- Очистка текста ---
+function cleanVkText(text: string): string {
+  return text
+    .replace(/\[club\d+\|([^\]]+)\]/g, '$1')
+    .replace(/\[id\d+\|([^\]]+)\]/g, '$1')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// --- Автоматический заголовок из вложения ---
+function getAutoTitle(attachments: any[]): string | null {
+  if (!attachments?.length) return null;
+  const first = attachments[0];
+  if (first.video?.title) return first.video.title;
+  if (first.doc?.title) return first.doc.title;
+  if (first.link?.title) return first.link.title;
+  return null;
+}
+
+// --- Генерация заголовка и контента ---
+function prepareTitleAndContent(
+  postId: number,
+  rawText: string,
+  attachments: any[]
+): { title: string; content: string } {
+  // ручной заголовок
+  if (manualTitles[postId]) {
+    const title = manualTitles[postId];
+    const cleaned = cleanVkText(rawText || '');
+    if (!cleaned || cleaned.length <= 60) return { title, content: '' };
+    let content = cleaned;
+    if (content.startsWith(title)) content = content.slice(title.length).trim();
+    if (content.length > 120) content = content.slice(0, 120) + '…';
+    return { title, content };
+  }
+
+  // заголовок из текста
+  const cleaned = cleanVkText(rawText || '');
+  if (cleaned) {
+    const firstSentenceMatch = cleaned.match(/^(.+?[.!?…])\s/);
+    let title: string;
+    let remaining: string;
+    if (firstSentenceMatch) {
+      title = firstSentenceMatch[1];
+      remaining = cleaned.slice(firstSentenceMatch[0].length).trim();
+    } else {
+      title = cleaned.length > 60 ? cleaned.slice(0, 60) + '…' : cleaned;
+      remaining = cleaned.length > 60 ? cleaned.slice(60).trim() : '';
+    }
+    if (remaining.startsWith(title)) remaining = remaining.slice(title.length).trim();
+    if (remaining.length > 120) remaining = remaining.slice(0, 120) + '…';
+    return { title, content: remaining };
+  }
+
+  // автоматический заголовок из вложения
+  const autoTitle = getAutoTitle(attachments);
+  if (autoTitle) {
+    const title = autoTitle.length > 70 ? autoTitle.slice(0, 70) + '…' : autoTitle;
+    return { title, content: '' };
+  }
+
+  return { title: 'Без названия', content: '' };
+}
+
+// --- Загрузка ---
+if (!ACCESS_TOKEN) {
+  console.warn('VK_ACCESS_TOKEN не задан.');
 } else {
   try {
     const ownerId = -Math.abs(parseInt(GROUP_ID));
-    const url = `https://api.vk.com/method/wall.get?owner_id=${ownerId}&count=10&access_token=${SERVICE_TOKEN}&v=${API_VERSION}`;
-    const response = await fetch(url);
-    const data = await response.json();
+    const wallUrl = `https://api.vk.com/method/wall.get?owner_id=${ownerId}&count=4&access_token=${ACCESS_TOKEN}&v=${API_VERSION}`;
+    const wallRes = await fetch(wallUrl);
+    const wallData = await wallRes.json();
+    if (!wallData.response) throw new Error('wall.get error');
 
-    if (!data.response) {
-      const err = data.error?.error_msg || 'Ошибка API VK';
-      throw new Error(err);
-    }
+    news = wallData.response.items.map((post: any) => {
+      const ts = post.date;
+      const dateObj = ts ? new Date(ts * 1000) : null;
+      const { title, content } = prepareTitleAndContent(post.id, post.text || '', post.attachments || []);
 
-    news = data.response.items.map((post: any) => {
-      const image = getAttachmentPreview(post.attachments);
       return {
-        title: post.text?.slice(0, 60) || 'Новость',
+        title,
         link: `https://vk.com/wall${ownerId}_${post.id}`,
-        pubDate: post.date
-          ? new Date(post.date * 1000).toLocaleDateString('ru-RU', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })
-          : 'Дата неизвестна',
-        content: post.text?.slice(0, 120) || '',
-        image,
+        pubDate: dateObj ? dateObj.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' }) : '',
+        content,
+        image: getAttachmentPreview(post.attachments),
+        isoDate: dateObj ? dateObj.toISOString() : '',
+        ownerId,
+        postId: post.id,
       };
     });
   } catch (error) {
@@ -76,74 +162,79 @@ if (!SERVICE_TOKEN) {
   }
 }
 
-// Лэйаут для первых 4 новостей
-const LAYOUT = ['large', 'small', 'small', 'wide'];
-const newsItems = news.slice(0, 4).map((item, idx) => ({
-  ...item,
-  size: LAYOUT[idx] || 'small',
-}));
-const hasNews = newsItems.length > 0;
+const BENTO_LAYOUT = ['large', 'small', 'small', 'wide'];
+const displayNews = news.slice(0, 4).map((item, i) => ({ ...item, size: BENTO_LAYOUT[i] || 'small' }));
+const hasNews = displayNews.length > 0;
 ---
 
 <section id="news" class="news-section">
   <div class="news-container">
     <div class="section-header">
       <span class="badge">События</span>
-      <h2 class="section-title">Новости <span class="accent">Scanova</span></h2>
+      <h2 class="section-title">Новости <span class="accent">Scanova A/S</span></h2>
     </div>
 
     {hasNews ? (
       <div class="bento-grid">
-        {newsItems.map((item) => (
+        {displayNews.map((item) => (
           <a
             href={item.link}
-            target="_blank"
-            rel="noopener noreferrer"
+            data-owner-id={item.ownerId}
+            data-post-id={item.postId}
             class={`news-card ${item.size}`}
           >
             {item.image && (
-              <img
-                src={item.image}
-                alt=""
-                class="card-bg-image"
-                loading="lazy"
-              />
+              <>
+                <div class="card-bg-image" style={`background-image: url(${item.image})`}></div>
+                <div class="card-overlay"></div>
+              </>
             )}
-            <div class="card-overlay"></div>
             <div class="card-content">
-              <span class="date">{item.pubDate}</span>
+              <time class="date" datetime={item.isoDate}>{item.pubDate}</time>
               <h3>{item.title}</h3>
-              <p>{item.content}</p>
+              {item.content && <p>{item.content}</p>}
             </div>
-            <div class="card-arrow">→</div>
+            <span class="card-arrow">→</span>
           </a>
         ))}
       </div>
     ) : (
-      <p class="news-placeholder">Новости пока не загружены.</p>
+      <p class="empty-msg">Новости пока не загружены.</p>
     )}
 
-    <div class="more-news">
-      <a href="https://vk.com/evroskot" target="_blank" rel="noopener" class="secondary-btn">
-        Все новости ВКонтакте
-      </a>
+    <div class="more">
+      <a href="/news-pages" class="secondary-btn">Все новости</a>
     </div>
   </div>
 </section>
 
 <style>
+  /* =========================
+     FULL-SCREEN SECTION
+  ========================= */
   .news-section {
-    padding: 120px 5% 80px;
-    background: var(--dark);
+    position: relative;
+    min-height: 100svh;          /* полная высота экрана */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(80px, 10vw, 140px) 5%;
+    background: radial-gradient(circle at top, rgba(16,185,129,0.08), transparent 35%), #0a0a0a;
+    overflow: hidden;
+    box-sizing: border-box;
   }
+
   .news-container {
+    width: 100%;
     max-width: 1200px;
     margin: 0 auto;
   }
+
   .section-header {
     text-align: center;
     margin-bottom: 50px;
   }
+
   .badge {
     display: inline-block;
     background: rgba(16, 185, 129, 0.15);
@@ -156,68 +247,87 @@ const hasNews = newsItems.length > 0;
     margin-bottom: 1.5rem;
     color: #fff;
   }
+
   .section-title {
     font-size: 2.5rem;
     font-weight: 900;
     margin: 0;
   }
+
   .accent {
-    color: var(--accent, #10b981);
+    color: var(--accent);
   }
+
+  /* =========================
+     BENTO GRID
+  ========================= */
   .bento-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: 200px;
     gap: 20px;
   }
+
   .news-card {
     position: relative;
     border-radius: 24px;
     overflow: hidden;
-    background: var(--card-bg, #1a1a1a);
+    background: var(--card-bg);
+    cursor: pointer;
     text-decoration: none;
+    color: inherit;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    border: 1px solid var(--border, rgba(255,255,255,0.1));
+    border: 1px solid var(--border);
     transition: all 0.4s ease;
   }
+
   .news-card:hover {
-    border-color: var(--accent, #10b981);
+    border-color: var(--accent);
     transform: translateY(-5px);
   }
+
   .card-bg-image {
     position: absolute;
     inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    background-size: cover;
+    background-position: center;
     z-index: 1;
   }
+
   .card-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     z-index: 2;
   }
+
   .card-content {
     position: relative;
     z-index: 3;
     padding: 30px;
   }
+
   .date {
     font-size: 0.7rem;
-    color: var(--accent, #10b981);
+    color: var(--accent);
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
   }
+
   h3 {
     font-size: 1.2rem;
     margin: 10px 0;
     line-height: 1.3;
     color: #fff;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
+
   p {
     font-size: 0.85rem;
     opacity: 0.7;
@@ -228,6 +338,7 @@ const hasNews = newsItems.length > 0;
     overflow: hidden;
     color: #fff;
   }
+
   .card-arrow {
     position: absolute;
     top: 25px;
@@ -236,24 +347,34 @@ const hasNews = newsItems.length > 0;
     opacity: 0;
     transform: translateX(-10px);
     transition: 0.3s;
-    color: var(--accent, #10b981);
+    color: var(--accent);
     z-index: 4;
   }
+
   .news-card:hover .card-arrow {
     opacity: 1;
     transform: translateX(0);
   }
+
   .large {
     grid-column: span 2;
     grid-row: span 2;
   }
+
   .wide {
     grid-column: span 2;
   }
-  .more-news {
+
+  .empty-msg {
+    text-align: center;
+    opacity: 0.7;
+  }
+
+  .more {
     text-align: center;
     margin-top: 40px;
   }
+
   .secondary-btn {
     display: inline-block;
     border: 1px solid rgba(255,255,255,0.3);
@@ -265,23 +386,25 @@ const hasNews = newsItems.length > 0;
     backdrop-filter: blur(10px);
     transition: border-color 0.3s;
   }
+
   .secondary-btn:hover {
     border-color: rgba(255,255,255,0.7);
   }
-  .news-placeholder {
-    text-align: center;
-    opacity: 0.7;
-    color: #fff;
-  }
+
+  /* =========================
+     MOBILE
+  ========================= */
   @media (max-width: 900px) {
     .bento-grid {
       grid-template-columns: repeat(2, 1fr);
     }
-    .large, .wide {
+    .large,
+    .wide {
       grid-column: span 1;
       grid-row: span 1;
     }
   }
+
   @media (max-width: 600px) {
     .bento-grid {
       grid-template-columns: 1fr;

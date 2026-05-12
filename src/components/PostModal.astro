@@ -1,0 +1,159 @@
+---
+// src/components/PostModal.astro
+---
+<div class="modal-overlay" id="postModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="modal-container">
+    <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+    <div class="modal-content" id="modalContent">
+      <div class="modal-spinner"></div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* стили без изменений, как в предыдущей версии */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(8px);
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+  }
+  .modal-container {
+    position: relative;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 40px;
+    max-width: 800px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 2rem;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+    z-index: 10;
+  }
+  .modal-close:hover { opacity: 1; }
+  .modal-content { color: #fff; font-size: 1rem; line-height: 1.6; }
+  .modal-content img { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
+  .modal-content video { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
+  .modal-content .post-date {
+    color: var(--accent);
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .modal-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(255,255,255,0.2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 40px auto;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (max-width: 640px) {
+    .modal-container { padding: 20px; }
+  }
+</style>
+
+<script>
+  async function openPostModal(ownerId: string, postId: string): Promise<void> {
+    const modal = document.getElementById('postModal');
+    const content = document.getElementById('modalContent');
+    if (!modal || !content) return;
+
+    modal.classList.add('open');
+    content.innerHTML = '<div class="modal-spinner"></div>';
+
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+    try {
+      let post: any;
+      if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
+        // Локально: прямой запрос к VK API
+        const token = window.VK_ACCESS_TOKEN_FOR_DEV;
+        const res = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${token}&v=5.131`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.error_msg);
+        post = data.response?.[0];
+      } else {
+        // Продакшн: через безопасный прокси /api/get-post
+        const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
+        if (!res.ok) throw new Error('Ошибка загрузки');
+        post = await res.json();
+      }
+
+      if (!post) throw new Error('Пост не найден');
+
+      let html = '';
+      const date = new Date(post.date * 1000);
+      html += `<div class="post-date">${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</div>`;
+      if (post.text) {
+        html += `<div>${post.text.replace(/\n/g, '<br>')}</div>`;
+      }
+      if (post.attachments?.length) {
+        post.attachments.forEach((att: any) => {
+          if (att.type === 'photo' && att.photo?.sizes) {
+            const img = att.photo.sizes.find((s: any) => s.type === 'x') || att.photo.sizes[att.photo.sizes.length - 1];
+            if (img) html += `<img src="${img.url}" alt="Фото" />`;
+          } else if (att.type === 'video') {
+            html += `<div style="margin:1rem 0;padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;">
+              <p>Видео: <a href="https://vk.com/video${att.video.owner_id}_${att.video.id}" target="_blank" rel="noopener">Смотреть на VK</a></p>
+            </div>`;
+          } else if (att.type === 'doc') {
+            html += `<div style="margin:1rem 0;padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;">
+              <p>Документ: <a href="${att.doc.url}" target="_blank" rel="noopener">${att.doc.title}</a></p>
+            </div>`;
+          }
+        });
+      }
+      content.innerHTML = html;
+    } catch (err) {
+      content.innerHTML = '<p>Не удалось загрузить пост.</p>';
+      console.error(err);
+    }
+  }
+
+  document.getElementById('modalClose')?.addEventListener('click', () => {
+    const modal = document.getElementById('postModal');
+    if (modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  document.getElementById('postModal')?.addEventListener('click', (e) => {
+    const target = e.currentTarget as HTMLElement | null;
+    if (target) {
+      target.classList.remove('open');
+      target.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  window.openPostModal = openPostModal;
+</script>

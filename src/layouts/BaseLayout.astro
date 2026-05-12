@@ -1,66 +1,111 @@
 ---
+import Header from "../components/Header.astro";
+import PostModal from "../components/PostModal.astro";
+
 export interface Props {
   title: string;
   description: string;
 }
 const { title, description } = Astro.props;
 ---
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="ru">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{title}</title>
-  <meta name="description" content={description} />
-  <!-- Шрифт как на PolarisIC -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet" />
-  <!-- Стили для анимаций и слайдера -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
-  <style is:global>
-    :root {
-      --dark: #0a0a0a;
-      --text: #ffffff;
-      --muted: rgba(255, 255, 255, 0.7);
-      --border: rgba(255, 255, 255, 0.1);
-      --card-bg: #141414;
-      --accent: #10b981;
-      --accent-hover: #059669;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: 'Poppins', sans-serif;
-      background: var(--dark);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-    a { color: inherit; text-decoration: none; }
-    .section-title {
-      text-align: center;
-      font-size: 2.5rem;
-      font-weight: 900;
-      margin-bottom: 0.5rem;
-    }
-    .section-subtitle {
-      text-align: center;
-      color: var(--muted);
-      margin-bottom: 3rem;
-      font-size: 1.1rem;
-    }
-    .accent { color: var(--accent); }
-  </style>
-</head>
-<body>
-  <slot />
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
-  <script is:inline>
-    new WOW().init();
-    // Общий код для бургера и плавной прокрутки (уже есть в компонентах)
-  </script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Poppins:wght@400;600;700;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+    />
+    <style is:global>
+      :root {
+        --dark: #0a0a0a;
+        --accent: #10b981;
+        --accent-hover: #059669;
+        --text: #ffffff;
+        --muted: rgba(255, 255, 255, 0.7);
+        --border: rgba(255, 255, 255, 0.1);
+        --card-bg: #141414;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: "Inter", "Poppins", sans-serif;
+        background: var(--dark);
+        color: var(--text);
+        line-height: 1.6;
+        overflow-x: hidden;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 0.5rem;
+      }
+      .section-subtitle {
+        text-align: center;
+        color: var(--muted);
+        margin-bottom: 3rem;
+        font-size: 1.1rem;
+      }
+      .accent {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <Header />
+    <slot />
+    <PostModal />
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"
+    ></script>
+    <script is:inline>
+      new WOW().init();
+    </script>
+    <script is:inline>
+      document.addEventListener("click", function (e) {
+        const link = e.target.closest("a[data-owner-id][data-post-id]");
+        if (link) {
+          e.preventDefault();
+          const ownerId = link.getAttribute("data-owner-id");
+          const postId = link.getAttribute("data-post-id");
+          if (ownerId && postId && typeof window.openPostModal === "function") {
+            window.openPostModal(ownerId, postId);
+          }
+        }
+      });
+    </script>
+    <script
+      is:inline
+      define:vars={{ VK_ACCESS_TOKEN: import.meta.env.VK_ACCESS_TOKEN }}
+    >
+      if (
+        location.hostname === "localhost" ||
+        location.hostname === "127.0.0.1"
+      ) {
+        window.VK_ACCESS_TOKEN_FOR_DEV = import.meta.env.VK_ACCESS_TOKEN;
+      }
+    </script>
+  </body>
 </html>

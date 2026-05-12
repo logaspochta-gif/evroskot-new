@@ -1,0 +1,249 @@
+---
+// src/pages/news-pages.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import NewsList from '../components/NewsList.astro';
+
+export const prerender = false;
+
+// --- Типы ---
+interface VkPhotoSize {
+  type: string;
+  url: string;
+  width?: number;
+  height?: number;
+}
+
+interface VkAttachment {
+  type?: string;
+  photo?: { sizes?: VkPhotoSize[] };
+  video?: {
+    image?: { url: string; width?: number; height?: number }[];
+    title?: string;
+  };
+  doc?: {
+    title?: string;
+    preview?: { photo?: { sizes?: VkPhotoSize[] } };
+  };
+  link?: {
+    title?: string;
+    photo?: { sizes?: VkPhotoSize[] };
+  };
+}
+
+interface VkPost {
+  id: number;
+  date: number;
+  text?: string;
+  attachments?: VkAttachment[];
+}
+
+interface VkWallResponse {
+  response?: { items: VkPost[] };
+  error?: { error_msg?: string };
+}
+
+export interface NewsItem {
+  title: string;
+  link: string;
+  pubDate: string;
+  content: string;
+  image: string | null;
+  isoDate: string;
+  size?: 'small' | 'large' | 'wide';
+  ownerId?: number;
+  postId?: number;
+}
+
+const ACCESS_TOKEN = import.meta.env.VK_ACCESS_TOKEN;
+const GROUP_ID = '99133048';
+const API_VERSION = '5.131';
+const POSTS_LIMIT = 30;
+
+let news: NewsItem[] = [];
+
+// --- Ручные заголовки (приоритетнее автоматических) ---
+const manualTitles: Record<number, string> = {
+  // Пример: 119: 'Специальный заголовок',
+};
+
+// --- Функция извлечения превью (фото, видео, документы, ссылки) ---
+function getAttachmentPreview(attachments: VkAttachment[]): string | null {
+  if (!attachments?.length) return null;
+  const first = attachments[0];
+
+  if (first.photo?.sizes) {
+    const sizes = first.photo.sizes;
+    return (
+      sizes.find((s) => s.type === 'x')?.url ||
+      sizes.find((s) => s.type === 'y')?.url ||
+      sizes[sizes.length - 1]?.url ||
+      null
+    );
+  }
+
+  if (first.video?.image?.length) {
+    const images = first.video.image;
+    return images[images.length - 1]?.url || null;
+  }
+
+  if (first.doc?.preview?.photo?.sizes) {
+    const sizes = first.doc.preview.photo.sizes;
+    return (
+      sizes.find((s) => s.type === 'x')?.url ||
+      sizes[sizes.length - 1]?.url ||
+      null
+    );
+  }
+
+  if (first.link?.photo?.sizes) {
+    const sizes = first.link.photo.sizes;
+    return (
+      sizes.find((s) => s.type === 'k')?.url ||
+      sizes.find((s) => s.type === 'x')?.url ||
+      sizes[sizes.length - 1]?.url ||
+      null
+    );
+  }
+
+  return null;
+}
+
+// --- Очистка текста от служебных конструкций ВК ---
+function cleanVkText(text: string): string {
+  return text
+    .replace(/\[club\d+\|([^\]]+)\]/g, '$1')
+    .replace(/\[id\d+\|([^\]]+)\]/g, '$1')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+// --- Автоматический заголовок из вложения ---
+function getAutoTitle(attachments: VkAttachment[]): string | null {
+  if (!attachments?.length) return null;
+  const first = attachments[0];
+
+  if (first.video?.title) return first.video.title;
+  if (first.doc?.title) return first.doc.title;
+  if (first.link?.title) return first.link.title;
+  return null;
+}
+
+// --- Генерация заголовка и контента ---
+function prepareTitleAndContent(
+  postId: number,
+  rawText: string,
+  attachments: VkAttachment[]
+): { title: string; content: string } {
+  // 1. Ручной заголовок
+  if (manualTitles[postId]) {
+    const title = manualTitles[postId];
+    const cleaned = cleanVkText(rawText || '');
+    if (!cleaned || cleaned.length <= 60) return { title, content: '' };
+    let content = cleaned;
+    if (content.startsWith(title)) content = content.slice(title.length).trim();
+    if (content.length > 120) content = content.slice(0, 120) + '…';
+    return { title, content };
+  }
+
+  // 2. Заголовок из текста
+  const cleaned = cleanVkText(rawText || '');
+  if (cleaned) {
+    const firstSentenceMatch = cleaned.match(/^(.+?[.!?…])\s/);
+    let title: string;
+    let remaining: string;
+    if (firstSentenceMatch) {
+      title = firstSentenceMatch[1];
+      remaining = cleaned.slice(firstSentenceMatch[0].length).trim();
+    } else {
+      title = cleaned.length > 60 ? cleaned.slice(0, 60) + '…' : cleaned;
+      remaining = cleaned.length > 60 ? cleaned.slice(60).trim() : '';
+    }
+    if (remaining.startsWith(title)) remaining = remaining.slice(title.length).trim();
+    if (remaining.length > 120) remaining = remaining.slice(0, 120) + '…';
+    return { title, content: remaining };
+  }
+
+  // 3. Автоматический заголовок из вложения
+  const autoTitle = getAutoTitle(attachments);
+  if (autoTitle) {
+    const title = autoTitle.length > 70 ? autoTitle.slice(0, 70) + '…' : autoTitle;
+    return { title, content: '' };
+  }
+
+  // 4. Если ничего нет
+  return { title: 'Без названия', content: '' };
+}
+
+// --- Загрузка новостей ---
+if (!ACCESS_TOKEN) {
+  console.warn('VK_ACCESS_TOKEN не задан.');
+} else {
+  try {
+    const ownerId = -Math.abs(parseInt(GROUP_ID, 10));
+    const params = new URLSearchParams({
+      owner_id: String(ownerId),
+      count: String(POSTS_LIMIT),
+      access_token: ACCESS_TOKEN,
+      v: API_VERSION,
+    });
+
+    const response = await fetch(`https://api.vk.com/method/wall.get?${params.toString()}`, {
+      headers: { Accept: 'application/json' },
+    });
+
+    if (!response.ok) throw new Error(`VK API HTTP ${response.status}`);
+
+    const data = (await response.json()) as VkWallResponse;
+    if (data.error) throw new Error(data.error.error_msg || 'VK API error');
+
+    const posts = data.response?.items || [];
+
+    news = posts
+      .filter((post) => {
+        const cleaned = cleanVkText(post.text || '');
+        return cleaned.length > 0 || (post.attachments && post.attachments.length > 0);
+      })
+      .map((post): NewsItem => {
+        const { title, content } = prepareTitleAndContent(
+          post.id,
+          post.text || '',
+          post.attachments || []
+        );
+        const dateObj = new Date(post.date * 1000);
+        const ownerId = -Math.abs(parseInt(GROUP_ID));
+
+        return {
+          title,
+          content,
+          link: `https://vk.com/wall${ownerId}_${post.id}`,
+          image: getAttachmentPreview(post.attachments || []),
+          pubDate: dateObj.toLocaleDateString('ru-RU', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric',
+          }),
+          isoDate: dateObj.toISOString(),
+          ownerId: ownerId,
+          postId: post.id,
+        };
+      });
+  } catch (error) {
+    console.error('Ошибка загрузки новостей:', error instanceof Error ? error.message : error);
+    news = [];
+  }
+}
+
+const sizePattern: Array<'large' | 'wide' | 'small'> = ['large', 'small', 'small', 'wide'];
+const newsWithSizes = news.map((item, i) => ({
+  ...item,
+  size: sizePattern[i] || 'small',
+}));
+---
+
+<BaseLayout
+  title="Новости EVROSKOT — Племенной скот из Дании"
+  description="Последние события, поставки и обновления компании EVROSKOT"
+>
+  <NewsList items={newsWithSizes} emptyMessage="Новости пока не загружены. Попробуйте позже." />
+</BaseLayout>
