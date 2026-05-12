@@ -3,7 +3,5 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   output: 'server',
-  adapter: cloudflare({
-    mode: 'directory',       // ← ключевая опция
-  }),
+  adapter: cloudflare(), // без mode/platform
 });
