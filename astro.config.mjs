@@ -5,6 +5,8 @@ export default defineConfig({
   output: 'server',
 
   adapter: cloudflare({
-    platform: 'pages'
+    platformProxy: {
+      enabled: false
+    }
   })
 });
