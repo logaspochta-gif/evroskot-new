@@ -1,7 +1,5 @@
 name = "evroskot"
 
-main = "./dist/server/entry.mjs"
-
 compatibility_date = "2024-11-13"
 compatibility_flags = ["nodejs_compat"]
 
