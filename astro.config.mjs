@@ -3,10 +3,5 @@ import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   output: 'server',
-
-  adapter: cloudflare({
-    platformProxy: {
-      enabled: false
-    }
-  })
+  adapter: cloudflare(),   // стандартный Workers‑режим (v13+)
 });
