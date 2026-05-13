@@ -6,9 +6,9 @@ compatibility_flags = ["nodejs_compat"]
 workers_dev = false
 
 # Route
-[[routes]]
-pattern = "new.evroskot.ru/*"
-zone_name = "evroskot.ru"
+#[[routes]]
+#pattern = "new.evroskot.ru/*"
+#zone_name = "evroskot.ru"
 
 # Static assets
 [assets]
