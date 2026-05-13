@@ -1,10 +1,8 @@
 name = "evroskot-new"
 compatibility_date = "2024-11-13"
-
 [[routes]]
 pattern = "new.evroskot.ru/*"
 zone_name = "evroskot.ru"
-
 [[kv_namespaces]]
 binding = "SESSION"
 id = "1474923ec1d348cda14126bd3f9d6d10"
