@@ -4,8 +4,13 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
 
+  image: {
+    service: {
+      entrypoint: 'astro/assets/services/noop'
+    }
+  },
+
   adapter: cloudflare({
-    imageService: 'passthrough', // ИСПРАВЛЕНИЕ: принудительно отключает генерацию биндинга картинок ASSETS
     platformProxy: {
       enabled: false
     }
