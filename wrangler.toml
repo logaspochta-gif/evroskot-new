@@ -1,17 +1,28 @@
 name = "evroskot"
-compatibility_date = "2024-11-13"
 
-# Маршрут для поддомена – оставьте new.evroskot.ru, пока тестируете
+main = "./dist/server/entry.mjs"
+
+compatibility_date = "2024-11-13"
+compatibility_flags = ["nodejs_compat"]
+
+workers_dev = false
+
+# Route
 [[routes]]
 pattern = "new.evroskot.ru/*"
 zone_name = "evroskot.ru"
 
-# KV для сессий (уже создан)
+# Static assets
+[assets]
+directory = "./dist/client"
+binding = "ASSETS"
+
+# KV Sessions
 [[kv_namespaces]]
 binding = "SESSION"
 id = "1474923ec1d348cda14126bd3f9d6d10"
 
-# Наблюдаемость – как в вашем примере, но без лишних полей
+# Observability
 [observability]
 enabled = false
 head_sampling_rate = 1
