@@ -2,9 +2,9 @@ name = "evroskot-new"
 compatibility_date = "2024-11-13"
 
 # Маршрут для поддомена – оставьте new.evroskot.ru, пока тестируете
-# [[routes]]
-# pattern = "new.evroskot.ru/*"
-# zone_name = "evroskot.ru"
+ [[routes]]
+ pattern = "new.evroskot.ru/*"
+ zone_name = "evroskot.ru"
 
 # KV для сессий (уже создан)
 [[kv_namespaces]]
