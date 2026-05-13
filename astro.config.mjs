@@ -5,6 +5,7 @@ export default defineConfig({
   output: 'server',
 
   adapter: cloudflare({
+    imageService: 'passthrough', // ИСПРАВЛЕНИЕ: принудительно отключает генерацию биндинга картинок ASSETS
     platformProxy: {
       enabled: false
     }
