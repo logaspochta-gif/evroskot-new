@@ -1,11 +1,13 @@
-name = "evroskot"
+name = "evroskot-new"
+main = "dist/server/worker.js"
+compatibility_date = "2025-11-13"
 
-main = "./dist/server/entry.mjs"
+[vars]
+VK_ACCESS_TOKEN = "" # подставится из секретов
 
-compatibility_date = "2026-05-13"
-
-[assets]
-directory = "./dist/client"
+[[routes]]
+pattern = "evroskot.ru/*"
+zone_name = "evroskot.ru"
 
 [[kv_namespaces]]
 binding = "SESSION"
