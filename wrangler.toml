@@ -1,11 +1,17 @@
 name = "evroskot"
-
 compatibility_date = "2026-05-12"
-
 pages_build_output_dir = "./dist/client"
 
 [vars]
 NODE_VERSION = "22"
+
+# Исправление пустого объекта триггеров
+[triggers]
+crons = []
+
+# Исправление конфликта с именем ASSETS
+[images]
+binding = "IMAGE_PROD"
 
 [[kv_namespaces]]
 binding = "SESSION"
