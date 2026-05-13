@@ -1,4 +1,4 @@
-name = "evroskot-new"
+name = "evroskot"
 compatibility_date = "2024-11-13"
 
 # Маршрут для поддомена – оставьте new.evroskot.ru, пока тестируете
