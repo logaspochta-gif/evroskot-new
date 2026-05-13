@@ -1,13 +1,11 @@
 name = "evroskot"
-compatibility_date = "2026-05-12"
-pages_build_output_dir = "./dist/client"
 
-[vars]
-NODE_VERSION = "22"
+main = "./dist/server/entry.mjs"
 
-# Исправление пустого объекта триггеров
-[triggers]
-crons = []
+compatibility_date = "2026-05-13"
+
+[assets]
+directory = "./dist/client"
 
 [[kv_namespaces]]
 binding = "SESSION"

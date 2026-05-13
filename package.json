@@ -19,5 +19,8 @@
     "googleapis": "^171.4.0",
     "resend": "^6.12.3",
     "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "wrangler": "^4.90.1"
   }
 }
