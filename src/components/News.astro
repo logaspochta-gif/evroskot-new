@@ -16,7 +16,8 @@ interface NewsItem {
 let news: NewsItem[] = [];
 
 // Получаем секреты через locals
-const ACCESS_TOKEN = Astro.locals?.runtime?.env?.VK_ACCESS_TOKEN;
+import { env } from 'cloudflare:workers';
+const ACCESS_TOKEN = env.VK_ACCESS_TOKEN
 const GROUP_ID = '99133048';
 const API_VERSION = '5.131';
 const POSTS_LIMIT = 4;

@@ -1,10 +1,9 @@
 // src/pages/api/contact.ts
+import { env } from 'cloudflare:workers';
+
 export const prerender = false;
 
-export async function POST({ request, locals }: { request: Request; locals: any }) {
-  // Доступ к переменным окружения (секретам) воркера
-  const env = locals.runtime?.env || {};
-
+export async function POST({ request }: { request: Request }) {
   const data = await request.json();
   const { name, email, message } = data;
 

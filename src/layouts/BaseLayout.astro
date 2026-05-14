@@ -1,6 +1,7 @@
 ---
 import Header from "../components/Header.astro";
 import PostModal from "../components/PostModal.astro";
+import { env } from 'cloudflare:workers';
 
 export interface Props {
   title: string;
@@ -76,10 +77,8 @@ const { title, description } = Astro.props;
     <Header />
     <slot />
     <PostModal />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"
-    ></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"
-    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
     <script is:inline>
       new WOW().init();
     </script>
@@ -96,15 +95,12 @@ const { title, description } = Astro.props;
         }
       });
     </script>
-    <script
-      is:inline
-      define:vars={{ VK_ACCESS_TOKEN: import.meta.env.VK_ACCESS_TOKEN }}
-    >
+    <script is:inline define:vars={{ VK_ACCESS_TOKEN: env.VK_ACCESS_TOKEN }}>
       if (
         location.hostname === "localhost" ||
         location.hostname === "127.0.0.1"
       ) {
-        window.VK_ACCESS_TOKEN_FOR_DEV = import.meta.env.VK_ACCESS_TOKEN;
+        window.VK_ACCESS_TOKEN_FOR_DEV = VK_ACCESS_TOKEN;
       }
     </script>
   </body>
