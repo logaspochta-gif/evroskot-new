@@ -54,7 +54,7 @@ export interface NewsItem {
   postId?: number;
 }
 
-const ACCESS_TOKEN = import.meta.env.VK_ACCESS_TOKEN;
+const ACCESS_TOKEN = Astro.locals?.runtime?.env?.VK_ACCESS_TOKEN;
 const GROUP_ID = '99133048';
 const API_VERSION = '5.131';
 const POSTS_LIMIT = 30;
