@@ -14,58 +14,45 @@ interface NewsItem {
 }
 
 let news: NewsItem[] = [];
+
+// Получаем секреты через locals
 const ACCESS_TOKEN = Astro.locals?.runtime?.env?.VK_ACCESS_TOKEN;
 const GROUP_ID = '99133048';
 const API_VERSION = '5.131';
+const POSTS_LIMIT = 4;
 
-// --- Ручные заголовки ---
-const manualTitles: Record<number, string> = {
-  // пример: 119: 'Специальный заголовок',
-};
+// Ручные заголовки (если нужно)
+const manualTitles: Record<number, string> = {};
 
-// --- getAttachmentPreview (фото, видео, документы, ссылки) ---
+// Вспомогательные функции
 function getAttachmentPreview(attachments: any[]): string | null {
   if (!attachments?.length) return null;
   const first = attachments[0];
 
-  // фото
   if (first.photo?.sizes) {
     const sizes = first.photo.sizes;
-    return (
-      sizes.find((s: any) => s.type === 'x')?.url ||
-      sizes.find((s: any) => s.type === 'y')?.url ||
-      sizes[sizes.length - 1]?.url ||
-      null
-    );
+    return sizes.find((s: any) => s.type === 'x')?.url ||
+           sizes.find((s: any) => s.type === 'y')?.url ||
+           sizes[sizes.length - 1]?.url || null;
   }
-  // видео
   if (first.video?.image?.length) {
     const images = first.video.image;
     return images[images.length - 1]?.url || null;
   }
-  // документ
   if (first.doc?.preview?.photo?.sizes) {
     const sizes = first.doc.preview.photo.sizes;
-    return (
-      sizes.find((s: any) => s.type === 'x')?.url ||
-      sizes[sizes.length - 1]?.url ||
-      null
-    );
+    return sizes.find((s: any) => s.type === 'x')?.url ||
+           sizes[sizes.length - 1]?.url || null;
   }
-  // ссылка
   if (first.link?.photo?.sizes) {
     const sizes = first.link.photo.sizes;
-    return (
-      sizes.find((s: any) => s.type === 'k')?.url ||
-      sizes.find((s: any) => s.type === 'x')?.url ||
-      sizes[sizes.length - 1]?.url ||
-      null
-    );
+    return sizes.find((s: any) => s.type === 'k')?.url ||
+           sizes.find((s: any) => s.type === 'x')?.url ||
+           sizes[sizes.length - 1]?.url || null;
   }
   return null;
 }
 
-// --- Очистка текста ---
 function cleanVkText(text: string): string {
   return text
     .replace(/\[club\d+\|([^\]]+)\]/g, '$1')
@@ -75,7 +62,6 @@ function cleanVkText(text: string): string {
     .trim();
 }
 
-// --- Автоматический заголовок из вложения ---
 function getAutoTitle(attachments: any[]): string | null {
   if (!attachments?.length) return null;
   const first = attachments[0];
@@ -85,13 +71,7 @@ function getAutoTitle(attachments: any[]): string | null {
   return null;
 }
 
-// --- Генерация заголовка и контента ---
-function prepareTitleAndContent(
-  postId: number,
-  rawText: string,
-  attachments: any[]
-): { title: string; content: string } {
-  // ручной заголовок
+function prepareTitleAndContent(postId: number, rawText: string, attachments: any[]) {
   if (manualTitles[postId]) {
     const title = manualTitles[postId];
     const cleaned = cleanVkText(rawText || '');
@@ -102,7 +82,6 @@ function prepareTitleAndContent(
     return { title, content };
   }
 
-  // заголовок из текста
   const cleaned = cleanVkText(rawText || '');
   if (cleaned) {
     const firstSentenceMatch = cleaned.match(/^(.+?[.!?…])\s/);
@@ -120,7 +99,6 @@ function prepareTitleAndContent(
     return { title, content: remaining };
   }
 
-  // автоматический заголовок из вложения
   const autoTitle = getAutoTitle(attachments);
   if (autoTitle) {
     const title = autoTitle.length > 70 ? autoTitle.slice(0, 70) + '…' : autoTitle;
@@ -130,13 +108,12 @@ function prepareTitleAndContent(
   return { title: 'Без названия', content: '' };
 }
 
-// --- Загрузка ---
 if (!ACCESS_TOKEN) {
   console.warn('VK_ACCESS_TOKEN не задан.');
 } else {
   try {
     const ownerId = -Math.abs(parseInt(GROUP_ID));
-    const wallUrl = `https://api.vk.com/method/wall.get?owner_id=${ownerId}&count=4&access_token=${ACCESS_TOKEN}&v=${API_VERSION}`;
+    const wallUrl = `https://api.vk.com/method/wall.get?owner_id=${ownerId}&count=${POSTS_LIMIT}&access_token=${ACCESS_TOKEN}&v=${API_VERSION}`;
     const wallRes = await fetch(wallUrl);
     const wallData = await wallRes.json();
     if (!wallData.response) throw new Error('wall.get error');
