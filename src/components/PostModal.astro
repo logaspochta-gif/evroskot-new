@@ -34,11 +34,12 @@
     border: 1px solid var(--border);
     border-radius: 24px;
     padding: 40px;
-    max-width: 800px;
-    width: 90%;
-    max-height: 85vh;
+    max-width: 95vw;
+    width: 100%;
+    max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    margin: 20px;
   }
   .modal-close {
     position: absolute;
@@ -74,7 +75,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Стили для единой карусели */
+  /* Единая карусель */
   .media-carousel {
     margin: 1.5rem 0;
     border-radius: 12px;
@@ -84,7 +85,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #000; /* фон для видео, чтобы не было пустот */
+    background: #000;
   }
   .media-carousel img {
     width: 100%;
@@ -92,12 +93,14 @@
     display: block;
     border-radius: 0;
     margin: 0;
+    max-height: 70vh;
+    object-fit: contain;
   }
-  /* Адаптивный контейнер для видео */
   .video-wrapper {
     position: relative;
     width: 100%;
     padding-bottom: 56.25%; /* 16:9 */
+    background: #000;
   }
   .video-wrapper iframe {
     position: absolute;
@@ -116,17 +119,30 @@
   }
 
   @media (max-width: 640px) {
-    .modal-container { padding: 20px; }
+    .modal-container { padding: 20px; margin: 10px; }
   }
 </style>
 
 <script>
+  let currentSwiper: any = null;
+
+  function destroySwiper() {
+    if (currentSwiper) {
+      currentSwiper.destroy(true, true);
+      currentSwiper = null;
+    }
+  }
+
   async function openPostModal(ownerId: string, postId: string): Promise<void> {
     const modal = document.getElementById('postModal');
     const content = document.getElementById('modalContent');
     if (!modal || !content) return;
 
+    // Уничтожаем предыдущий Swiper
+    destroySwiper();
+
     modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
     content.innerHTML = '<div class="modal-spinner"></div>';
 
     const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
@@ -155,10 +171,9 @@
         html += `<div>${post.text.replace(/\n/g, '<br>')}</div>`;
       }
 
-      // Собираем все медиа-вложения (фото и видео)
       const mediaItems = post.attachments?.filter((att: any) => att.type === 'photo' || att.type === 'video') || [];
       
-      // Обработка других вложений (документы)
+      // Документы
       const docs = post.attachments?.filter((att: any) => att.type === 'doc') || [];
       for (const att of docs) {
         const doc = att.doc;
@@ -167,18 +182,18 @@
         </div>`;
       }
 
-      // Создаём единую карусель для фото и видео
       if (mediaItems.length > 0) {
         const slides = mediaItems.map((att: any) => {
           if (att.type === 'photo') {
             const img = att.photo.sizes.find((s: any) => s.type === 'x') || att.photo.sizes[att.photo.sizes.length - 1];
             return `<div class="swiper-slide"><img src="${img.url}" alt="Фото" /></div>`;
           } else {
-            // video
             const video = att.video;
+            // `video_ext` + параметр `disable_related_videos` убирает рекомендации
+            const iframeSrc = `https://vk.com/video_ext.php?oid=${video.owner_id}&id=${video.id}&hash=${video.access_key || ''}&disable_related_videos=1&js_api=1`;
             return `<div class="swiper-slide">
               <div class="video-wrapper">
-                <iframe src="https://vk.com/video_ext.php?oid=${video.owner_id}&id=${video.id}&hash=${video.access_key || ''}" allow="encrypted-media; fullscreen; picture-in-picture;" allowfullscreen></iframe>
+                <iframe src="${iframeSrc}" allow="encrypted-media; fullscreen; picture-in-picture;" allowfullscreen referrerpolicy="no-referrer"></iframe>
               </div>
             </div>`;
           }
@@ -198,9 +213,10 @@
 
       // Инициализируем карусель, если есть медиа
       if (mediaItems.length > 0 && typeof Swiper !== 'undefined') {
-        new Swiper('.media-swiper', {
+        currentSwiper = new Swiper('.media-swiper', {
           loop: mediaItems.length > 1,
           autoHeight: true,
+          watchOverflow: true,
           pagination: { el: '.swiper-pagination', clickable: true },
           navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
         });
@@ -211,19 +227,23 @@
     }
   }
 
+  // Закрытие по крестику
   document.getElementById('modalClose')?.addEventListener('click', () => {
     const modal = document.getElementById('postModal');
     if (modal) {
       modal.classList.remove('open');
       modal.setAttribute('aria-hidden', 'true');
+      destroySwiper();
     }
   });
 
+  // Закрытие по клику на оверлей (фон)
   document.getElementById('postModal')?.addEventListener('click', (e) => {
-    const target = e.currentTarget as HTMLElement | null;
-    if (target) {
-      target.classList.remove('open');
-      target.setAttribute('aria-hidden', 'true');
+    const modal = e.currentTarget as HTMLElement;
+    if (e.target === modal) {
+      modal.classList.remove('open');
+      modal.setAttribute('aria-hidden', 'true');
+      destroySwiper();
     }
   });
 
