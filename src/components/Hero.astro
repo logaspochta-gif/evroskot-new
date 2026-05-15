@@ -54,12 +54,18 @@
 </section>
 
 <style>
+  /* Базовые переменные для адаптивности */
+  :root {
+    --hero-font-scale: 1; /* будет переопределено в медиа-запросах */
+  }
+
   .hero {
     position: relative;
     width: 100%;
-    height: 100vh;
-    overflow: hidden;
+    height: 100svh;                /* используем svh для учета адресной строки на мобильных */
+    overflow: hidden;              /* без внутренней прокрутки */
   }
+
   .hero-swiper {
     position: absolute;
     top: 0;
@@ -68,6 +74,7 @@
     height: 100%;
     z-index: 0;
   }
+
   .slide-bg {
     position: absolute;
     inset: 0;
@@ -75,77 +82,112 @@
     background-position: center;
     animation: srmgani 4s ease forwards;
   }
+
   @keyframes srmgani {
     0% { transform: scale(1.05); }
     100% { transform: scale(1.0); }
   }
+
   .overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.4));
     z-index: 1;
   }
+
+  /* Контент теперь масштабируется относительно высоты экрана */
   .content {
     position: absolute;
     z-index: 10;
-    left: 9.5%;
+    left: max(5%, 2rem);
+    right: max(5%, 2rem);
     top: 50%;
     transform: translateY(-50%);
-    max-width: 700px;
+    max-width: clamp(320px, 90vw, 900px);
+    margin: 0 auto;
   }
+
   .badge {
     display: inline-block;
     background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.5);
-    padding: 0.5rem 1.2rem;
+    padding: clamp(0.3rem, 1vh, 0.6rem) clamp(0.6rem, 2vh, 1.2rem);
     border-radius: 50px;
-    font-size: 0.8rem;
+    font-size: clamp(0.6rem, 2vh, 0.9rem);
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    margin-bottom: 1.5rem;
+    margin-bottom: clamp(0.8rem, 2vh, 1.5rem);
     color: #fff;
   }
+
   h1, h2 {
-    font-size: 3.8rem;
-    margin: 0 0 1rem;
+    font-size: clamp(2rem, 8vh, 5rem);  /* привязка к высоте экрана */
+    margin: 0 0 clamp(0.5rem, 1.5vh, 1rem);
     line-height: 1.1;
     font-weight: 900;
     color: #fff;
   }
+
   .accent { color: var(--accent); }
+
   .content p {
-    font-size: 1.15rem;
+    font-size: clamp(0.9rem, 3vh, 1.3rem);
     opacity: 0.9;
-    margin-bottom: 2rem;
-    max-width: 500px;
+    margin-bottom: clamp(1rem, 3vh, 2rem);
+    max-width: 550px;
   }
+
   .actions {
     display: flex;
-    gap: 1rem;
+    gap: clamp(0.5rem, 1.5vh, 1rem);
     flex-wrap: wrap;
   }
+
   .primary-btn {
     background: var(--accent);
     color: #fff;
-    padding: 0.9rem 2rem;
+    padding: clamp(0.6rem, 1.8vh, 1rem) clamp(1.2rem, 3.5vh, 2rem);
     text-decoration: none;
     border-radius: 8px;
     font-weight: 700;
     display: inline-block;
+    font-size: clamp(0.8rem, 2.5vh, 1rem);
   }
+
   .secondary-btn {
     color: #fff;
     border: 1px solid rgba(255,255,255,0.4);
-    padding: 0.9rem 2rem;
+    padding: clamp(0.6rem, 1.8vh, 1rem) clamp(1.2rem, 3.5vh, 2rem);
     text-decoration: none;
     border-radius: 8px;
     font-weight: 600;
     backdrop-filter: blur(10px);
+    font-size: clamp(0.8rem, 2.5vh, 1rem);
   }
 
+  /* Адаптив для очень маленьких экранов (горизонтальные смартфоны) */
+  @media (max-height: 500px) {
+    h1, h2 {
+      font-size: clamp(1.2rem, 4vh, 2rem);
+    }
+    .content p {
+      font-size: clamp(0.7rem, 2vh, 0.9rem);
+      margin-bottom: 0.8rem;
+    }
+    .badge {
+      margin-bottom: 0.5rem;
+    }
+    .actions {
+      gap: 0.4rem;
+    }
+  }
+
+  /* Старый медиа-запрос оставляем как резерв для старых браузеров */
   @media (max-width: 768px) {
-    h1, h2 { font-size: 2.2rem; }
-    .content { left: 5%; right: 5%; }
+    .content {
+      left: 5%;
+      right: 5%;
+    }
   }
 </style>
 
@@ -211,17 +253,14 @@
     let wheelTimer: ReturnType<typeof setTimeout> | null = null;
 
     window.addEventListener('wheel', (e) => {
-      // Блокируем стандартную прокрутку, если мы на главной странице и не идёт анимация
       if (isScrolling) {
         e.preventDefault();
         return;
       }
 
-      // Отменяем накопление, если событие пришло с большим интервалом
       if (wheelTimer) clearTimeout(wheelTimer);
       wheelAccumulator += e.deltaY;
 
-      // Если накопленная дельта превысила порог — переключаем секцию
       if (Math.abs(wheelAccumulator) >= wheelThreshold) {
         e.preventDefault();
         updateCurrentIndex();
@@ -229,8 +268,6 @@
         scrollToSection(currentIndex + direction);
         wheelAccumulator = 0;
       } else {
-        // Для обычной мыши с дискретным колесом deltaY велика (100+), поэтому переход случится сразу.
-        // Но для тачпада мы накапливаем движения в течение 200 мс.
         wheelTimer = setTimeout(() => {
           wheelAccumulator = 0;
         }, 200);
