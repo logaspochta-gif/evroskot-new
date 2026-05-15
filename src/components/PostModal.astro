@@ -11,7 +11,6 @@
 </div>
 
 <style>
-  /* стили без изменений, как в предыдущей версии */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -57,8 +56,6 @@
   }
   .modal-close:hover { opacity: 1; }
   .modal-content { color: #fff; font-size: 1rem; line-height: 1.6; }
-  .modal-content img { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
-  .modal-content video { max-width: 100%; border-radius: 12px; margin: 1rem 0; }
   .modal-content .post-date {
     color: var(--accent);
     font-weight: 700;
@@ -76,6 +73,48 @@
     margin: 40px auto;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Стили для единой карусели */
+  .media-carousel {
+    margin: 1.5rem 0;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .media-carousel .swiper-slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000; /* фон для видео, чтобы не было пустот */
+  }
+  .media-carousel img {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 0;
+    margin: 0;
+  }
+  /* Адаптивный контейнер для видео */
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%; /* 16:9 */
+  }
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 12px;
+  }
+  .swiper-button-next, .swiper-button-prev {
+    color: var(--accent);
+  }
+  .swiper-pagination-bullet-active {
+    background: var(--accent);
+  }
+
   @media (max-width: 640px) {
     .modal-container { padding: 20px; }
   }
@@ -95,14 +134,12 @@
     try {
       let post: any;
       if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
-        // Локально: прямой запрос к VK API
         const token = window.VK_ACCESS_TOKEN_FOR_DEV;
         const res = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${token}&v=5.131`);
         const data = await res.json();
         if (data.error) throw new Error(data.error.error_msg);
         post = data.response?.[0];
       } else {
-        // Продакшн: через безопасный прокси /api/get-post
         const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
         if (!res.ok) throw new Error('Ошибка загрузки');
         post = await res.json();
@@ -113,26 +150,61 @@
       let html = '';
       const date = new Date(post.date * 1000);
       html += `<div class="post-date">${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</div>`;
+      
       if (post.text) {
         html += `<div>${post.text.replace(/\n/g, '<br>')}</div>`;
       }
-      if (post.attachments?.length) {
-        post.attachments.forEach((att: any) => {
-          if (att.type === 'photo' && att.photo?.sizes) {
+
+      // Собираем все медиа-вложения (фото и видео)
+      const mediaItems = post.attachments?.filter((att: any) => att.type === 'photo' || att.type === 'video') || [];
+      
+      // Обработка других вложений (документы)
+      const docs = post.attachments?.filter((att: any) => att.type === 'doc') || [];
+      for (const att of docs) {
+        const doc = att.doc;
+        html += `<div style="margin:1rem 0;padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;">
+          <p>Документ: <a href="${doc.url}" target="_blank" rel="noopener">${doc.title}</a></p>
+        </div>`;
+      }
+
+      // Создаём единую карусель для фото и видео
+      if (mediaItems.length > 0) {
+        const slides = mediaItems.map((att: any) => {
+          if (att.type === 'photo') {
             const img = att.photo.sizes.find((s: any) => s.type === 'x') || att.photo.sizes[att.photo.sizes.length - 1];
-            if (img) html += `<img src="${img.url}" alt="Фото" />`;
-          } else if (att.type === 'video') {
-            html += `<div style="margin:1rem 0;padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;">
-              <p>Видео: <a href="https://vk.com/video${att.video.owner_id}_${att.video.id}" target="_blank" rel="noopener">Смотреть на VK</a></p>
-            </div>`;
-          } else if (att.type === 'doc') {
-            html += `<div style="margin:1rem 0;padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;">
-              <p>Документ: <a href="${att.doc.url}" target="_blank" rel="noopener">${att.doc.title}</a></p>
+            return `<div class="swiper-slide"><img src="${img.url}" alt="Фото" /></div>`;
+          } else {
+            // video
+            const video = att.video;
+            return `<div class="swiper-slide">
+              <div class="video-wrapper">
+                <iframe src="https://vk.com/video_ext.php?oid=${video.owner_id}&id=${video.id}&hash=${video.access_key || ''}" allow="encrypted-media; fullscreen; picture-in-picture;" allowfullscreen></iframe>
+              </div>
             </div>`;
           }
+        }).join('');
+
+        html += `<div class="media-carousel">
+          <div class="swiper media-swiper">
+            <div class="swiper-wrapper">${slides}</div>
+            <div class="swiper-pagination"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-button-prev"></div>
+          </div>
+        </div>`;
+      }
+
+      content.innerHTML = html;
+
+      // Инициализируем карусель, если есть медиа
+      if (mediaItems.length > 0 && typeof Swiper !== 'undefined') {
+        new Swiper('.media-swiper', {
+          loop: mediaItems.length > 1,
+          autoHeight: true,
+          pagination: { el: '.swiper-pagination', clickable: true },
+          navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
         });
       }
-      content.innerHTML = html;
     } catch (err) {
       content.innerHTML = '<p>Не удалось загрузить пост.</p>';
       console.error(err);
