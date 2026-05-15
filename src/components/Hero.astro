@@ -1,18 +1,33 @@
 ---
 // src/components/Hero.astro
 ---
+
 <section class="hero" id="hero">
   <div class="swiper hero-swiper">
     <div class="swiper-wrapper">
       <!-- Слайд 1 -->
       <div class="swiper-slide">
-        <div class="slide-bg" style="background-image: url('/images/hero/hero-1.webp')"></div>
+        <div
+          class="slide-bg"
+          style="background-image: url('/images/hero/hero-1.webp')"
+        >
+        </div>
         <div class="overlay"></div>
         <div class="content">
-          <span class="badge animate__animated animate__fadeInUp">Лицензированный экспортер № 2011‑Ø1</span>
-          <h1 class="animate__animated animate__fadeInUp animate__delay-1s">Элитный племенной скот <br/> <span class="accent">из Дании</span></h1>
-          <p class="animate__animated animate__fadeInUp animate__delay-2s">Прямые поставки высокопродуктивных животных в РФ и СНГ с полной ветеринарной поддержкой.</p>
-          <div class="actions animate__animated animate__fadeInUp animate__delay-3s">
+          <span class="badge animate__animated animate__fadeInUp"
+            >Лицензированный экспортер № 2011‑Ø1</span
+          >
+          <h1 class="animate__animated animate__fadeInUp animate__delay-1s">
+            Элитный племенной скот <br />
+            <span class="accent">из Дании</span>
+          </h1>
+          <p class="animate__animated animate__fadeInUp animate__delay-2s">
+            Прямые поставки высокопродуктивных животных в РФ и СНГ с полной
+            ветеринарной поддержкой.
+          </p>
+          <div
+            class="actions animate__animated animate__fadeInUp animate__delay-3s"
+          >
             <a href="#contact" class="primary-btn">Запросить прайс</a>
             <a href="#breeds" class="secondary-btn">Посмотреть породы</a>
           </div>
@@ -20,12 +35,22 @@
       </div>
       <!-- Слайд 2 -->
       <div class="swiper-slide">
-        <div class="slide-bg" style="background-image: url('/images/hero/hero-2.webp')"></div>
+        <div
+          class="slide-bg"
+          style="background-image: url('/images/hero/hero-2.webp')"
+        >
+        </div>
         <div class="overlay"></div>
         <div class="content">
           <span class="badge">Голштинская порода</span>
-          <h2>Мировой лидер <br/> <span class="accent">по удоям молока</span></h2>
-          <p>Генетика из лучших хозяйств Дании. Продуктивность до 12 000 кг молока за лактацию.</p>
+          <h2>
+            Мировой лидер <br />
+            <span class="accent">по удоям молока</span>
+          </h2>
+          <p>
+            Генетика из лучших хозяйств Дании. Продуктивность до 12 000 кг
+            молока за лактацию.
+          </p>
           <div class="actions">
             <a href="#contact" class="primary-btn">Запросить подбор</a>
             <a href="#breeds" class="secondary-btn">Все породы</a>
@@ -34,11 +59,18 @@
       </div>
       <!-- Слайд 3 -->
       <div class="swiper-slide">
-        <div class="slide-bg" style="background-image: url('/images/hero/hero-3.webp')"></div>
+        <div
+          class="slide-bg"
+          style="background-image: url('/images/hero/hero-3.webp')"
+        >
+        </div>
         <div class="overlay"></div>
         <div class="content">
           <span class="badge">Джерсейская порода</span>
-          <h2>Высокая жирность <br/> <span class="accent">и долголетие</span></h2>
+          <h2>
+            Высокая жирность <br />
+            <span class="accent">и долголетие</span>
+          </h2>
           <p>Идеальна для сыроварения. Жирность молока до 6%.</p>
           <div class="actions">
             <a href="#contact" class="primary-btn">Запросить прайс</a>
@@ -62,8 +94,8 @@
   .hero {
     position: relative;
     width: 100%;
-    height: 100svh;                /* используем svh для учета адресной строки на мобильных */
-    overflow: hidden;              /* без внутренней прокрутки */
+    height: 100svh; /* используем svh для учета адресной строки на мобильных */
+    overflow: hidden; /* без внутренней прокрутки */
   }
 
   .hero-swiper {
@@ -84,14 +116,22 @@
   }
 
   @keyframes srmgani {
-    0% { transform: scale(1.05); }
-    100% { transform: scale(1.0); }
+    0% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to bottom, rgba(0,0,0,0.75), rgba(0,0,0,0.4));
+    background: linear-gradient(
+      to bottom,
+      rgba(0, 0, 0, 0.75),
+      rgba(0, 0, 0, 0.4)
+    );
     z-index: 1;
   }
 
@@ -100,7 +140,6 @@
     position: absolute;
     z-index: 10;
     left: max(5%, 2rem);
-    right: max(5%, 2rem);
     top: 50%;
     transform: translateY(-50%);
     max-width: clamp(320px, 90vw, 900px);
@@ -120,59 +159,60 @@
     color: #fff;
   }
 
-  h1, h2 {
-    font-size: clamp(2rem, 8vh, 5rem);  /* привязка к высоте экрана */
-    margin: 0 0 clamp(0.5rem, 1.5vh, 1rem);
+  h1,
+  h2 {
+    font-size: clamp(1.8rem, 7vh, 4rem); /* немного меньше, чем раньше */
+    margin: 0 0 clamp(0.4rem, 1.2vh, 0.8rem);
     line-height: 1.1;
     font-weight: 900;
     color: #fff;
   }
-
-  .accent { color: var(--accent); }
-
-  .content p {
-    font-size: clamp(0.9rem, 3vh, 1.3rem);
-    opacity: 0.9;
-    margin-bottom: clamp(1rem, 3vh, 2rem);
-    max-width: 550px;
+  .accent {
+    color: var(--accent);
   }
-
+  .content p {
+    font-size: clamp(0.8rem, 2.5vh, 1.1rem);
+    opacity: 0.9;
+    margin-bottom: clamp(0.8rem, 2.5vh, 1.5rem);
+    max-width: 450px;
+  }
   .actions {
     display: flex;
-    gap: clamp(0.5rem, 1.5vh, 1rem);
+    gap: clamp(0.4rem, 1.2vh, 0.8rem);
     flex-wrap: wrap;
   }
-
+  .primary-btn,
+  .secondary-btn {
+    padding: clamp(0.5rem, 1.5vh, 0.8rem) clamp(1rem, 3vh, 1.6rem);
+    font-size: clamp(0.7rem, 2vh, 0.9rem);
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.2s ease;
+  }
   .primary-btn {
     background: var(--accent);
     color: #fff;
-    padding: clamp(0.6rem, 1.8vh, 1rem) clamp(1.2rem, 3.5vh, 2rem);
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 700;
-    display: inline-block;
-    font-size: clamp(0.8rem, 2.5vh, 1rem);
   }
-
   .secondary-btn {
     color: #fff;
-    border: 1px solid rgba(255,255,255,0.4);
-    padding: clamp(0.6rem, 1.8vh, 1rem) clamp(1.2rem, 3.5vh, 2rem);
-    text-decoration: none;
-    border-radius: 8px;
-    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(10px);
-    font-size: clamp(0.8rem, 2.5vh, 1rem);
+  }
+  .primary-btn:hover,
+  .secondary-btn:hover {
+    transform: translateY(-2px);
   }
 
-  /* Адаптив для очень маленьких экранов (горизонтальные смартфоны) */
+  /* Медиа-запрос для очень низких экранов */
   @media (max-height: 500px) {
-    h1, h2 {
+    h1,
+    h2 {
       font-size: clamp(1.2rem, 4vh, 2rem);
     }
     .content p {
       font-size: clamp(0.7rem, 2vh, 0.9rem);
-      margin-bottom: 0.8rem;
     }
     .badge {
       margin-bottom: 0.5rem;
@@ -181,8 +221,7 @@
       gap: 0.4rem;
     }
   }
-
-  /* Старый медиа-запрос оставляем как резерв для старых браузеров */
+  /* Для мобильных устройств */
   @media (max-width: 768px) {
     .content {
       left: 5%;
@@ -192,37 +231,41 @@
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener("DOMContentLoaded", () => {
     // Swiper
-    const heroSwiperEl = document.querySelector('.hero-swiper');
-    if (heroSwiperEl && typeof Swiper !== 'undefined') {
+    const heroSwiperEl = document.querySelector(".hero-swiper");
+    if (heroSwiperEl && typeof Swiper !== "undefined") {
       new Swiper(heroSwiperEl, {
         loop: true,
         autoplay: { delay: 5000, disableOnInteraction: false },
-        pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
-        effect: 'fade',
+        pagination: { el: ".swiper-pagination", clickable: true },
+        navigation: {
+          nextEl: ".swiper-button-next",
+          prevEl: ".swiper-button-prev",
+        },
+        effect: "fade",
         fadeEffect: { crossFade: true },
       });
     }
 
     // Полноэкранная прокрутка (колесо, тачпад, тач)
     const sections = [
-      document.getElementById('hero'),
-      document.getElementById('bento-breeds') || document.querySelector('.bento-section'),
-      document.getElementById('about'),
-      document.getElementById('news'),
-      document.getElementById('steps'),
-      document.getElementById('breeds'),
-      document.getElementById('advantages'),
-      document.getElementById('staldren'),
-      document.getElementById('contact')
+      document.getElementById("hero"),
+      document.getElementById("bento-breeds") ||
+        document.querySelector(".bento-section"),
+      document.getElementById("about"),
+      document.getElementById("news"),
+      document.getElementById("steps"),
+      document.getElementById("breeds"),
+      document.getElementById("advantages"),
+      document.getElementById("staldren"),
+      document.getElementById("contact"),
     ].filter(Boolean) as HTMLElement[];
 
     let currentIndex = 0;
     let isScrolling = false;
     const scrollCooldown = 800;
-    const wheelThreshold = 30;      // px для тачпада
+    const wheelThreshold = 30; // px для тачпада
     const touchSwipeThreshold = 50; // px для тач-свайпа
 
     function updateCurrentIndex() {
@@ -241,7 +284,7 @@
       const target = sections[index];
       if (!target || isScrolling) return;
       isScrolling = true;
-      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
       setTimeout(() => {
         isScrolling = false;
         updateCurrentIndex();
@@ -252,52 +295,64 @@
     let wheelAccumulator = 0;
     let wheelTimer: ReturnType<typeof setTimeout> | null = null;
 
-    window.addEventListener('wheel', (e) => {
-      if (isScrolling) {
-        e.preventDefault();
-        return;
-      }
+    window.addEventListener(
+      "wheel",
+      (e) => {
+        if (isScrolling) {
+          e.preventDefault();
+          return;
+        }
 
-      if (wheelTimer) clearTimeout(wheelTimer);
-      wheelAccumulator += e.deltaY;
+        if (wheelTimer) clearTimeout(wheelTimer);
+        wheelAccumulator += e.deltaY;
 
-      if (Math.abs(wheelAccumulator) >= wheelThreshold) {
-        e.preventDefault();
-        updateCurrentIndex();
-        const direction = wheelAccumulator > 0 ? 1 : -1;
-        scrollToSection(currentIndex + direction);
-        wheelAccumulator = 0;
-      } else {
-        wheelTimer = setTimeout(() => {
+        if (Math.abs(wheelAccumulator) >= wheelThreshold) {
+          e.preventDefault();
+          updateCurrentIndex();
+          const direction = wheelAccumulator > 0 ? 1 : -1;
+          scrollToSection(currentIndex + direction);
           wheelAccumulator = 0;
-        }, 200);
-      }
-    }, { passive: false });
+        } else {
+          wheelTimer = setTimeout(() => {
+            wheelAccumulator = 0;
+          }, 200);
+        }
+      },
+      { passive: false },
+    );
 
     // ========== Сенсорные свайпы ==========
     let touchStartY = 0;
 
-    window.addEventListener('touchstart', (e) => {
-      if (e.touches.length === 1) {
-        touchStartY = e.touches[0].clientY;
-      }
-    }, { passive: false });
+    window.addEventListener(
+      "touchstart",
+      (e) => {
+        if (e.touches.length === 1) {
+          touchStartY = e.touches[0].clientY;
+        }
+      },
+      { passive: false },
+    );
 
-    window.addEventListener('touchend', (e) => {
-      if (isScrolling) return;
+    window.addEventListener(
+      "touchend",
+      (e) => {
+        if (isScrolling) return;
 
-      const touchEndY = e.changedTouches[0].clientY;
-      const diff = touchStartY - touchEndY;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY - touchEndY;
 
-      if (Math.abs(diff) > touchSwipeThreshold) {
-        e.preventDefault();
-        updateCurrentIndex();
-        const direction = diff > 0 ? 1 : -1;
-        scrollToSection(currentIndex + direction);
-      }
-    }, { passive: false });
+        if (Math.abs(diff) > touchSwipeThreshold) {
+          e.preventDefault();
+          updateCurrentIndex();
+          const direction = diff > 0 ? 1 : -1;
+          scrollToSection(currentIndex + direction);
+        }
+      },
+      { passive: false },
+    );
 
-    window.addEventListener('resize', updateCurrentIndex);
+    window.addEventListener("resize", updateCurrentIndex);
     updateCurrentIndex();
   });
 </script>
