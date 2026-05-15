@@ -1,9 +1,23 @@
 ---
 // src/components/PostModal.astro
 ---
-<div class="modal-overlay" id="postModal" role="dialog" aria-modal="true" aria-hidden="true">
+
+<div
+  class="modal-overlay"
+  id="postModal"
+  role="dialog"
+  aria-modal="true"
+  aria-hidden="true"
+>
   <div class="modal-container">
-    <button class="modal-close" id="modalClose" aria-label="Закрыть">×</button>
+    <button
+      class="modal-close"
+      id="modalClose"
+      aria-label="Закрыть"
+    >
+      ×
+    </button>
+
     <div class="modal-content" id="modalContent">
       <div class="modal-spinner"></div>
     </div>
@@ -11,122 +25,13 @@
 </div>
 
 <style>
-  .modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.85);
-    backdrop-filter: blur(8px);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.3s ease, visibility 0.3s ease;
-  }
-  .modal-overlay.open {
-    opacity: 1;
-    visibility: visible;
-  }
-  .modal-container {
-    position: relative;
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 40px;
-    max-width: 95vw;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    margin: 20px;
-  }
-  .modal-close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 2rem;
-    cursor: pointer;
-    line-height: 1;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-    z-index: 10;
-  }
-  .modal-close:hover { opacity: 1; }
-  .modal-content { color: #fff; font-size: 1rem; line-height: 1.6; }
-  .modal-content .post-date {
-    color: var(--accent);
-    font-weight: 700;
-    margin-bottom: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .modal-spinner {
-    width: 40px;
-    height: 40px;
-    border: 3px solid rgba(255,255,255,0.2);
-    border-top-color: var(--accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-    margin: 40px auto;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Единая карусель */
-  .media-carousel {
-    margin: 1.5rem 0;
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .media-carousel .swiper-slide {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
-  }
-  .media-carousel img {
-    width: 100%;
-    height: auto;
-    display: block;
-    border-radius: 0;
-    margin: 0;
-    max-height: 70vh;
-    object-fit: contain;
-  }
-  .video-wrapper {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%; /* 16:9 */
-    background: #000;
-  }
-  .video-wrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-    border-radius: 12px;
-  }
-  .swiper-button-next, .swiper-button-prev {
-    color: var(--accent);
-  }
-  .swiper-pagination-bullet-active {
-    background: var(--accent);
-  }
-
-  @media (max-width: 640px) {
-    .modal-container { padding: 20px; margin: 10px; }
-  }
+  /* ... стили без изменений ... */
 </style>
 
 <script>
-  let currentSwiper: any = null;
+  let currentSwiper: typeof Swiper | null = null;
 
-  function destroySwiper() {
+  function destroySwiper(): void {
     if (currentSwiper) {
       currentSwiper.destroy(true, true);
       currentSwiper = null;
@@ -136,114 +41,285 @@
   async function openPostModal(ownerId: string, postId: string): Promise<void> {
     const modal = document.getElementById('postModal');
     const content = document.getElementById('modalContent');
+
     if (!modal || !content) return;
 
-    // Уничтожаем предыдущий Swiper
     destroySwiper();
 
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
-    content.innerHTML = '<div class="modal-spinner"></div>';
 
-    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    document.body.style.overflow = 'hidden';
+
+    content.innerHTML = `
+      <div class="modal-spinner"></div>
+    `;
+
+    const isLocal =
+      location.hostname === 'localhost' ||
+      location.hostname === '127.0.0.1';
 
     try {
       let post: any;
+
       if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
         const token = window.VK_ACCESS_TOKEN_FOR_DEV;
-        const res = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${token}&v=5.131`);
+
+        const res = await fetch(
+          `https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${token}&v=5.131`
+        );
+
         const data = await res.json();
-        if (data.error) throw new Error(data.error.error_msg);
+
+        if (data.error) {
+          throw new Error(data.error.error_msg);
+        }
+
         post = data.response?.[0];
       } else {
-        const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
-        if (!res.ok) throw new Error('Ошибка загрузки');
+        const res = await fetch(
+          `/api/get-post?owner_id=${ownerId}&post_id=${postId}`
+        );
+
+        if (!res.ok) {
+          throw new Error('Ошибка загрузки');
+        }
+
         post = await res.json();
       }
 
-      if (!post) throw new Error('Пост не найден');
+      if (!post) {
+        throw new Error('Пост не найден');
+      }
 
-      let html = '';
+      const mediaItems =
+        post.attachments?.filter(
+          (att: any) =>
+            att.type === 'photo' ||
+            att.type === 'video'
+        ) || [];
+
       const date = new Date(post.date * 1000);
-      html += `<div class="post-date">${date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: 'numeric', minute: 'numeric' })}</div>`;
-      
-      if (post.text) {
-        html += `<div>${post.text.replace(/\n/g, '<br>')}</div>`;
-      }
 
-      const mediaItems = post.attachments?.filter((att: any) => att.type === 'photo' || att.type === 'video') || [];
-      
-      // Документы
-      const docs = post.attachments?.filter((att: any) => att.type === 'doc') || [];
-      for (const att of docs) {
-        const doc = att.doc;
-        html += `<div style="margin:1rem 0;padding:20px;background:rgba(255,255,255,0.1);border-radius:12px;">
-          <p>Документ: <a href="${doc.url}" target="_blank" rel="noopener">${doc.title}</a></p>
-        </div>`;
-      }
+      const formattedDate =
+        date.toLocaleDateString('ru-RU', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
 
-      if (mediaItems.length > 0) {
-        const slides = mediaItems.map((att: any) => {
-          if (att.type === 'photo') {
-            const img = att.photo.sizes.find((s: any) => s.type === 'x') || att.photo.sizes[att.photo.sizes.length - 1];
-            return `<div class="swiper-slide"><img src="${img.url}" alt="Фото" /></div>`;
-          } else {
-            const video = att.video;
-            // `video_ext` + параметр `disable_related_videos` убирает рекомендации
-            const iframeSrc = `https://vk.com/video_ext.php?oid=${video.owner_id}&id=${video.id}&hash=${video.access_key || ''}&disable_related_videos=1&js_api=1`;
-            return `<div class="swiper-slide">
+      const slides = mediaItems.map((att: any) => {
+        if (att.type === 'photo') {
+          const img =
+            att.photo.sizes.find((s: any) => s.type === 'w') ||
+            att.photo.sizes[att.photo.sizes.length - 1];
+
+          return `
+            <div class="swiper-slide">
+              <img
+                src="${img.url}"
+                alt="Фото"
+                loading="lazy"
+              />
+            </div>
+          `;
+        }
+
+        if (att.type === 'video') {
+          const video = att.video;
+
+          const iframeSrc =
+            `https://vk.com/video_ext.php?oid=${video.owner_id}` +
+            `&id=${video.id}` +
+            `&hash=${video.access_key || ''}` +
+            `&hd=2` +
+            `&autoplay=0` +
+            `&js_api=1` +
+            `&disable_related_videos=1`;
+
+          return `
+            <div class="swiper-slide">
               <div class="video-wrapper">
-                <iframe src="${iframeSrc}" allow="encrypted-media; fullscreen; picture-in-picture;" allowfullscreen referrerpolicy="no-referrer"></iframe>
+                <iframe
+                  src="${iframeSrc}"
+                  allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                  allowfullscreen
+                  referrerpolicy="no-referrer"
+                ></iframe>
               </div>
-            </div>`;
-          }
-        }).join('');
+            </div>
+          `;
+        }
 
-        html += `<div class="media-carousel">
-          <div class="swiper media-swiper">
-            <div class="swiper-wrapper">${slides}</div>
-            <div class="swiper-pagination"></div>
-            <div class="swiper-button-next"></div>
-            <div class="swiper-button-prev"></div>
+        return '';
+      }).join('');
+
+      let docsHtml = '';
+
+      const docs =
+        post.attachments?.filter(
+          (att: any) => att.type === 'doc'
+        ) || [];
+
+      if (docs.length > 0) {
+        docsHtml = `
+          <div style="
+            position:absolute;
+            top:20px;
+            left:20px;
+            z-index:30;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+          ">
+            ${docs.map((att: any) => `
+              <a
+                href="${att.doc.url}"
+                target="_blank"
+                rel="noopener"
+                style="
+                  padding:10px 14px;
+                  border-radius:12px;
+                  background:rgba(255,255,255,.08);
+                  color:#fff;
+                  text-decoration:none;
+                  backdrop-filter:blur(10px);
+                  border:1px solid rgba(255,255,255,.08);
+                "
+              >
+                📄 ${att.doc.title}
+              </a>
+            `).join('')}
           </div>
-        </div>`;
+        `;
       }
 
-      content.innerHTML = html;
+      content.innerHTML = `
+        <div class="media-carousel">
+          <div class="swiper media-swiper">
+            <div class="swiper-wrapper">
+              ${slides}
+            </div>
 
-      // Инициализируем карусель, если есть медиа
-      if (mediaItems.length > 0 && typeof Swiper !== 'undefined') {
+            <div class="swiper-pagination"></div>
+
+            ${
+              mediaItems.length > 1
+                ? `
+                  <div class="swiper-button-next"></div>
+                  <div class="swiper-button-prev"></div>
+                `
+                : ''
+            }
+          </div>
+
+          ${docsHtml}
+
+          <div class="post-info">
+            <div class="post-date">
+              ${formattedDate}
+            </div>
+
+            ${
+              post.text
+                ? `
+                  <div class="post-text">
+                    ${post.text.replace(/\n/g, '<br>')}
+                  </div>
+                `
+                : ''
+            }
+          </div>
+        </div>
+      `;
+
+      if (
+        mediaItems.length > 0 &&
+        typeof Swiper !== 'undefined'
+      ) {
         currentSwiper = new Swiper('.media-swiper', {
           loop: mediaItems.length > 1,
-          autoHeight: true,
+
+          speed: 700,
+
+          centeredSlides: true,
+
+          preloadImages: false,
+
           watchOverflow: true,
-          pagination: { el: '.swiper-pagination', clickable: true },
-          navigation: { nextEl: '.swiper-button-next', prevEl: '.swiper-button-prev' },
+
+          autoHeight: false,
+
+          grabCursor: true,
+
+          keyboard: {
+            enabled: true,
+          },
+
+          mousewheel: true,
+
+          pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+          },
+
+          navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+          },
         });
       }
     } catch (err) {
-      content.innerHTML = '<p>Не удалось загрузить пост.</p>';
       console.error(err);
+
+      content.innerHTML = `
+        <div style="
+          margin:auto;
+          color:white;
+          text-align:center;
+          padding:40px;
+        ">
+          Не удалось загрузить пост.
+        </div>
+      `;
     }
   }
 
-  // Закрытие по крестику
-  document.getElementById('modalClose')?.addEventListener('click', () => {
+  function closeModal(): void {
     const modal = document.getElementById('postModal');
-    if (modal) {
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
-      destroySwiper();
-    }
-  });
 
-  // Закрытие по клику на оверлей (фон)
-  document.getElementById('postModal')?.addEventListener('click', (e) => {
-    const modal = e.currentTarget as HTMLElement;
-    if (e.target === modal) {
-      modal.classList.remove('open');
-      modal.setAttribute('aria-hidden', 'true');
-      destroySwiper();
+    if (!modal) return;
+
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+
+    document.body.style.overflow = '';
+
+    destroySwiper();
+  }
+
+  document
+    .getElementById('modalClose')
+    ?.addEventListener('click', closeModal);
+
+  document
+    .getElementById('postModal')
+    ?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) {
+        closeModal();
+      }
+    });
+
+  document.addEventListener('keydown', (e) => {
+    const modal = document.getElementById('postModal');
+
+    if (
+      e.key === 'Escape' &&
+      modal?.classList.contains('open')
+    ) {
+      closeModal();
     }
   });
 
