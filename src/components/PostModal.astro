@@ -67,6 +67,7 @@
 </div>
 
 <style>
+  /* Базовые стили для модального окна */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -79,21 +80,20 @@
       opacity 0.25s ease,
       visibility 0.25s ease;
   }
+
   .modal-overlay.open {
     opacity: 1;
     visibility: visible;
   }
+
   .modal-container {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    height: 100vh; /* ← фиксированная высота экрана */
     overflow: hidden;
     background: #000;
-    transform: translateY(0);
-    transition:
-      transform 0.25s ease,
-      opacity 0.25s ease;
   }
+
   .modal-content {
     width: 100%;
     height: 100%;
@@ -103,6 +103,8 @@
     align-items: center;
     justify-content: center;
   }
+
+  /* Кнопка закрытия */
   .modal-close {
     position: absolute;
     top: 20px;
@@ -123,10 +125,13 @@
       transform 0.2s ease,
       background 0.2s ease;
   }
+
   .modal-close:hover {
     background: rgba(255, 255, 255, 0.24);
     transform: scale(1.05);
   }
+
+  /* Счётчик слайдов */
   .slide-counter {
     position: absolute;
     top: 24px;
@@ -142,6 +147,8 @@
     font-weight: 600;
     letter-spacing: 0.5px;
   }
+
+  /* Навигационные стрелки */
   .nav-arrows {
     position: absolute;
     inset: 0;
@@ -152,6 +159,7 @@
     padding: 0 20px;
     pointer-events: none;
   }
+
   .nav-arrow {
     width: 52px;
     height: 52px;
@@ -169,10 +177,13 @@
       transform 0.2s ease,
       background 0.2s ease;
   }
+
   .nav-arrow:hover {
     transform: scale(1.06);
     background: rgba(255, 255, 255, 0.26);
   }
+
+  /* Информация о посте */
   .post-info {
     position: absolute;
     left: 0;
@@ -189,6 +200,7 @@
     pointer-events: none;
     color: #fff;
   }
+
   .post-date {
     margin-bottom: 10px;
     color: var(--accent, #10b981);
@@ -197,12 +209,15 @@
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+
   .post-text {
     max-width: 900px;
     font-size: 0.96rem;
     line-height: 1.65;
     opacity: 0.92;
   }
+
+  /* Спиннер загрузки */
   .modal-spinner {
     width: 48px;
     height: 48px;
@@ -211,12 +226,14 @@
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
+
   @keyframes spin {
     to {
       transform: rotate(360deg);
     }
   }
 
+  /* ===== SWIPER (карусель) ===== */
   .media-carousel,
   .media-swiper,
   .media-swiper .swiper-wrapper,
@@ -226,17 +243,24 @@
     min-width: 0;
     min-height: 0;
   }
+
   .media-carousel {
     position: relative;
   }
+
   .media-swiper .swiper-slide {
     position: relative;
     overflow: hidden;
     display: flex;
+    flex-direction: column; /* ← для корректной работы flex: 1 у video-wrapper */
     align-items: center;
     justify-content: center;
     background: #000;
+    padding: 0;
+    margin: 0;
   }
+
+  /* Фото */
   .media-swiper img {
     width: 100%;
     height: 100%;
@@ -246,33 +270,45 @@
     will-change: transform;
     transition: transform 0.25s ease;
   }
+
   .media-swiper .swiper-slide.zoomed img {
     cursor: grab;
   }
+
+  /* Видео */
   .video-wrapper {
-    position: relative;
+    flex: 1; /* ← ключевая строчка: занимает всё доступное пространство */
     width: 100%;
-    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
     overflow: hidden;
-    background: #000;
   }
-  .video-wrapper video {
+
+  .video-wrapper video,
+  .video-wrapper iframe {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    background: #000;
+    border: none;
+    object-fit: contain; /* сохраняет пропорции */
   }
+
+  /* Пагинация Swiper */
   .swiper-pagination {
     bottom: 18px !important;
   }
+
   .swiper-pagination-bullet {
     background: rgba(255, 255, 255, 0.5);
     opacity: 1;
   }
+
   .swiper-pagination-bullet-active {
     background: var(--accent, #10b981);
   }
 
+  /* Адаптивность */
   @media (max-width: 768px) {
     .modal-close {
       width: 42px;
@@ -280,13 +316,16 @@
       top: 14px;
       right: 14px;
     }
+
     .nav-arrow {
       width: 44px;
       height: 44px;
     }
+
     .post-info {
       padding: 70px 20px 22px;
     }
+
     .post-text {
       font-size: 0.88rem;
       line-height: 1.55;
@@ -457,62 +496,69 @@
           </div>`;
           }
 
-          // внутри openPostModal, после получения поста
-if (att.type === "video" && att.video) {
-  const v = att.video;
-  const accessKey = v.access_key || "";
-  let videoUrl = null;
-  let posterUrl = null;
+          if (att.type === "video" && att.video) {
+            const v = att.video;
+            const accessKey = v.access_key || "";
+            let videoUrl = null;
+            let posterUrl = null;
 
-  try {
-    const videoRes = await fetch(
-      `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`
-    );
-    if (videoRes.ok) {
-      const videoData = await videoRes.json();
-      if (videoData.success) {
-        // Новый формат ответа
-        videoUrl = videoData.mp4;   // уже выбранное качество
-        posterUrl = videoData.poster;
-      }
-    }
-  } catch (e) {
-    console.error('Ошибка загрузки видео', e);
-  }
+            try {
+              const videoRes = await fetch(
+                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
+              );
+              if (videoRes.ok) {
+                const videoData = await videoRes.json();
+                if (videoData.success) {
+                  videoUrl = videoData.mp4;
+                  posterUrl = videoData.poster;
+                }
+              }
+            } catch (e) {
+              console.error("Ошибка загрузки видео", e);
+            }
 
-  if (videoUrl) {
-    return `
-      <div class="swiper-slide" data-type="video">
-        <div class="video-wrapper swiper-no-swiping">
-          <video
-            src="${videoUrl}"
-            ${posterUrl ? `poster="${posterUrl}"` : ''}
-            controls
-            autoplay
-            muted
-            playsinline
-            preload="metadata"
-          ></video>
-        </div>
-      </div>
-    `;
-  } else {
-    // fallback на iframe VK
-    const iframeSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${v.access_key || ""}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
-    return `
-      <div class="swiper-slide" data-type="video">
-        <div class="video-wrapper">
-          <iframe
-            src="${iframeSrc}"
-            allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-            allowfullscreen
-            referrerpolicy="no-referrer"
-          ></iframe>
-        </div>
-      </div>
-    `;
-  }
-}
+            if (videoUrl) {
+              return `
+              <div class="swiper-slide" data-type="video">
+                <div class="video-wrapper swiper-no-swiping">
+                  <video
+                    src="${videoUrl}"
+                    ${posterUrl ? `poster="${posterUrl}"` : ""}
+                    controls
+                    autoplay
+                    muted
+                    playsinline
+                    preload="metadata"
+                  ></video>
+                </div>
+              </div>
+            `;
+            } else {
+              // fallback на iframe VK
+              const iframeSrc =
+                `https://vk.com/video_ext.php?oid=${v.owner_id}` +
+                `&id=${v.id}` +
+                `&hash=${v.access_key || ""}` +
+                `&hd=2` +
+                `&autoplay=0` +
+                `&js_api=1` +
+                `&disable_related_videos=1`;
+              return `
+              <div class="swiper-slide" data-type="video">
+                <div class="video-wrapper">
+                  <iframe
+                    src="${iframeSrc}"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    referrerpolicy="no-referrer"
+                  ></iframe>
+                </div>
+              </div>
+            `;
+            }
+          }
+
+          return "";
         }),
       );
 
@@ -567,11 +613,27 @@ if (att.type === "video" && att.video) {
           },
         });
 
-        requestAnimationFrame(() => {
-          currentSwiper?.update();
-          currentSwiper?.updateSize();
-          currentSwiper?.updateSlides();
-        });
+        // Дожидаемся окончания анимации открытия
+        modal.addEventListener(
+          "transitionend",
+          () => {
+            if (currentSwiper) {
+              currentSwiper.update();
+              currentSwiper.updateSize();
+              currentSwiper.updateSlides();
+            }
+          },
+          { once: true },
+        );
+
+        // Запасной таймаут
+        setTimeout(() => {
+          if (currentSwiper) {
+            currentSwiper.update();
+            currentSwiper.updateSize();
+            currentSwiper.updateSlides();
+          }
+        }, 400);
 
         function updateCounter(swiper) {
           if (!counter) return;
