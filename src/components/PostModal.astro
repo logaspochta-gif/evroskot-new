@@ -91,17 +91,11 @@
     height: 100vh;
     overflow: hidden;
     background: #000;
-    transition:
-      transform 0.25s ease,
-      opacity 0.25s ease;
-    will-change: transform, opacity;
   }
 
   .modal-content {
     width: 100%;
     height: 100%;
-    min-width: 0;
-    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -231,7 +225,7 @@
     }
   }
 
-  /* Карусель Swiper */
+  /* Swiper */
   .media-carousel,
   .media-swiper,
   .media-swiper .swiper-wrapper,
@@ -263,16 +257,10 @@
     object-fit: contain;
     user-select: none;
     -webkit-user-drag: none;
-    will-change: transform;
-    transition: transform 0.25s ease;
   }
 
-  .media-swiper .swiper-slide.zoomed img {
-    cursor: grab;
-  }
-
-  /* Контейнер для отложенной вставки видео */
-  .video-deferred {
+  /* Адаптивный контейнер для видео 16:9 */
+  .video-responsive {
     position: relative;
     width: 100%;
     aspect-ratio: 16 / 9;
@@ -281,14 +269,13 @@
     overflow: hidden;
   }
 
-  .video-deferred iframe {
+  .video-responsive iframe {
     position: absolute;
     top: 0;
     left: 0;
     width: 100% !important;
     height: 100% !important;
     border: none;
-    object-fit: contain;
   }
 
   .link-preview,
@@ -378,10 +365,7 @@
 <script lang="js">
   // @ts-nocheck
 
-  /** @type {import('swiper').Swiper | null} */
   let currentSwiper = null;
-  let scale = 1;
-  let zoomInitialized = false;
 
   function destroySwiper() {
     if (currentSwiper) {
@@ -392,87 +376,10 @@
 
   function pauseAllVideos() {
     document.querySelectorAll(".media-swiper video").forEach((v) => {
-      if (v instanceof HTMLVideoElement) {
-        v.pause();
-      }
+      if (v && typeof v.pause === "function") v.pause();
     });
   }
 
-  function resetZoom() {
-    const img = document.querySelector(
-      ".media-swiper .swiper-slide-active img",
-    );
-    if (!img) return;
-    img.style.transform = "scale(1)";
-    const slide = img.closest(".swiper-slide");
-    slide?.classList.remove("zoomed");
-    scale = 1;
-  }
-
-  function initZoom() {
-    if (zoomInitialized) return;
-    zoomInitialized = true;
-
-    const container = document.body;
-    let initialDistance = 0;
-    let initialScale = 1;
-
-    container.addEventListener("dblclick", (e) => {
-      const img = e.target.closest("img");
-      if (!img) return;
-      const slide = img.closest(".swiper-slide");
-      if (!slide) return;
-      if (slide.classList.contains("zoomed")) {
-        img.style.transform = "scale(1)";
-        slide.classList.remove("zoomed");
-        scale = 1;
-      } else {
-        img.style.transform = "scale(2)";
-        slide.classList.add("zoomed");
-        scale = 2;
-      }
-    });
-
-    container.addEventListener(
-      "touchmove",
-      (e) => {
-        if (e.touches.length !== 2) return;
-        e.preventDefault();
-        const img = document.querySelector(
-          ".media-swiper .swiper-slide-active img",
-        );
-        if (!img) return;
-        const currentDistance = Math.hypot(
-          e.touches[0].clientX - e.touches[1].clientX,
-          e.touches[0].clientY - e.touches[1].clientY,
-        );
-        if (!initialDistance) {
-          initialDistance = currentDistance;
-          initialScale = scale;
-          return;
-        }
-        const nextScale = Math.min(
-          Math.max(initialScale * (currentDistance / initialDistance), 1),
-          3,
-        );
-        img.style.transform = `scale(${nextScale})`;
-        scale = nextScale;
-        const slide = img.closest(".swiper-slide");
-        if (nextScale > 1) slide?.classList.add("zoomed");
-        else slide?.classList.remove("zoomed");
-      },
-      { passive: false },
-    );
-
-    container.addEventListener("touchend", () => {
-      initialDistance = 0;
-    });
-  }
-
-  /**
-   * @param {number|string} ownerId
-   * @param {number|string} postId
-   */
   async function openPostModal(ownerId, postId) {
     const modal = document.getElementById("postModal");
     const content = document.getElementById("modalContent");
@@ -510,6 +417,7 @@
       });
 
       const mediaItems = [];
+
       for (const att of post.attachments || []) {
         if (
           att.type === "photo" ||
@@ -521,7 +429,7 @@
         }
       }
 
-      // === СОБИРАЕМ СЛАЙДЫ (видео – только контейнеры-заглушки) ===
+      // Строим слайды
       const slides = mediaItems
         .map((att, idx) => {
           if (att.type === "photo" && att.photo) {
@@ -536,16 +444,25 @@
           if (att.type === "video" && att.video) {
             const v = att.video;
             const accessKey = v.access_key || "";
-            // Готовим «чистый» URL с параметрами размера
-            const cleanSrc =
-              `https://vk.com/video_ext.php?oid=${v.owner_id}` +
+
+            // Используем стандартный плеер vkvideo.ru (как в примере с сайта ВК)
+            const iframeSrc =
+              `https://vkvideo.ru/video_ext.php?oid=${v.owner_id}` +
               `&id=${v.id}` +
               `&hash=${accessKey}` +
-              `&width=1920&height=1080&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+              `&hd=2`;
 
             return `
-              <div class="swiper-slide" data-type="video" data-video-src="${cleanSrc}">
-                <div class="video-deferred"></div>
+              <div class="swiper-slide" data-type="video">
+                <div class="video-responsive">
+                  <iframe
+                    src="${iframeSrc}"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;"
+                    allowfullscreen
+                    referrerpolicy="no-referrer"
+                    style="border: none;"
+                  ></iframe>
+                </div>
               </div>
             `;
           }
@@ -602,7 +519,7 @@
         info.style.display = "block";
       }
 
-      // === SWIPER ===
+      // Swiper
       if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
         currentSwiper = new Swiper(".media-swiper", {
           loop: false,
@@ -625,40 +542,19 @@
             },
             slideChange(swiper) {
               updateCounter(swiper, mediaItems.length);
-              resetZoom();
               pauseAllVideos();
             },
           },
         });
 
-        // --- ЛЕНИВАЯ ВСТАВКА IFRAME ДЛЯ ВИДЕО ---
-        content.querySelectorAll('[data-type="video"]').forEach((slide) => {
-          const videoSrc = slide.getAttribute("data-video-src");
-          const container = slide.querySelector(".video-deferred");
-          if (!videoSrc || !container) return;
-
-          // Используем IntersectionObserver, чтобы вставить iframe, когда слайд станет видимым
-          const observer = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                  // Вставляем iframe только когда контейнер уже видим и имеет размеры
-                  container.innerHTML = `
-                    <iframe
-                      src="${videoSrc}"
-                      allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                      allowfullscreen
-                      referrerpolicy="no-referrer"
-                    ></iframe>
-                  `;
-                  observer.unobserve(container);
-                }
-              });
-            },
-            { threshold: 0.1 },
-          );
-          observer.observe(container);
-        });
+        // После вставки обновляем Swiper, чтобы он пересчитал размеры слайдов
+        setTimeout(() => {
+          if (currentSwiper) {
+            currentSwiper.update();
+            currentSwiper.updateSize();
+            currentSwiper.updateSlides();
+          }
+        }, 200);
 
         function updateCounter(swiper, total) {
           if (!counter) return;
@@ -676,8 +572,6 @@
           currentSwiper?.slideNext();
         });
       }
-
-      initZoom();
     } catch (err) {
       console.error(err);
       content.innerHTML =
@@ -695,8 +589,7 @@
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
     destroySwiper();
-
-    // Очищаем содержимое, чтобы остановить все видео
+    // Очищаем содержимое, чтобы остановить видео
     const content = document.getElementById("modalContent");
     if (content) content.innerHTML = "";
   }
