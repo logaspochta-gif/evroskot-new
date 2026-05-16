@@ -513,9 +513,7 @@
             let posterUrl = null;
 
             try {
-              console.log(
-                `[PostModal] Загрузка видео: oid=${v.owner_id} vid=${v.id}`,
-              );
+              console.log(`[PostModal] Загрузка видео: oid=${v.owner_id} vid=${v.id}`);
               const videoRes = await fetch(
                 `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
               );
@@ -526,10 +524,7 @@
                   posterUrl = videoData.poster;
                   console.log(`[PostModal] Загружено видео: ${videoUrl}`);
                 } else {
-                  console.warn(
-                    "[PostModal] Ошибка загрузки видео:",
-                    videoData.error,
-                  );
+                  console.warn("[PostModal] Ошибка загрузки видео:", videoData.error);
                 }
               }
             } catch (e) {
@@ -657,46 +652,46 @@
           },
         });
 
-        // Принудительное обновление после полной загрузки медиа
-        const allMedia = content.querySelectorAll("img, video, iframe");
-        let loadedCount = 0;
-        function onMediaLoad() {
-          loadedCount++;
-          if (loadedCount === allMedia.length && currentSwiper) {
-            currentSwiper.update();
-            currentSwiper.updateSize();
-            currentSwiper.updateSlides();
-          }
+        // ----- ГАРАНТИРОВАННОЕ ОБНОВЛЕНИЕ РАЗМЕРОВ -----
+        function forceUpdate() {
+          if (!currentSwiper) return;
+          currentSwiper.update();
+          currentSwiper.updateSize();
+          currentSwiper.updateSlides();
         }
-        allMedia.forEach((el) => {
-          if (el.tagName === "IMG") {
-            if (el.complete) onMediaLoad();
-            else el.addEventListener("load", onMediaLoad);
+
+        // 1. ResizeObserver – автоматически обновляет при изменении размеров контейнера
+        const carousel = document.querySelector('.media-carousel');
+        if (carousel) {
+          const resizeObserver = new ResizeObserver(() => {
+            forceUpdate();
+          });
+          resizeObserver.observe(carousel);
+        }
+
+        // 2. После загрузки каждого медиафайла
+        const mediaElements = content.querySelectorAll('img, video, iframe');
+        let loadedCount = 0;
+        mediaElements.forEach((el) => {
+          const onLoad = () => {
+            loadedCount++;
+            if (loadedCount === mediaElements.length) forceUpdate();
+          };
+          if (el.tagName === 'IMG') {
+            if (el.complete) onLoad();
+            else el.addEventListener('load', onLoad);
           } else {
-            el.addEventListener("loadedmetadata", onMediaLoad);
-            setTimeout(onMediaLoad, 1000);
+            el.addEventListener('loadedmetadata', onLoad);
+            setTimeout(onLoad, 1000); // запасной таймаут
           }
         });
 
-        modal.addEventListener(
-          "transitionend",
-          () => {
-            if (currentSwiper) {
-              currentSwiper.update();
-              currentSwiper.updateSize();
-              currentSwiper.updateSlides();
-            }
-          },
-          { once: true },
-        );
-
-        setTimeout(() => {
-          if (currentSwiper) {
-            currentSwiper.update();
-            currentSwiper.updateSize();
-            currentSwiper.updateSlides();
-          }
-        }, 400);
+        // 3. После завершения анимации открытия
+        modal.addEventListener('transitionend', forceUpdate, { once: true });
+        // 4. Дополнительная задержка (на случай, если transition не сработал)
+        setTimeout(forceUpdate, 400);
+        // 5. Ещё одна задержка для полной уверенности
+        setTimeout(forceUpdate, 1000);
 
         function updateCounter(swiper) {
           if (!counter) return;
@@ -730,12 +725,12 @@
   document.getElementById("postModal")?.addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeModal();
   });
-  document
-    .getElementById("navPrev")
-    ?.addEventListener("click", () => currentSwiper?.slidePrev());
-  document
-    .getElementById("navNext")
-    ?.addEventListener("click", () => currentSwiper?.slideNext());
+  document.getElementById("navPrev")?.addEventListener("click", () =>
+    currentSwiper?.slidePrev(),
+  );
+  document.getElementById("navNext")?.addEventListener("click", () =>
+    currentSwiper?.slideNext(),
+  );
 
   document.addEventListener("keydown", (e) => {
     const modal = document.getElementById("postModal");
