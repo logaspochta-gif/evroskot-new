@@ -23,10 +23,7 @@ const { title, description } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Poppins:wght@400;600;700;900&display=swap"
       rel="stylesheet"
     />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-    />
+    <!-- Swiper по‑прежнему нужен для слайдера Hero и карусели -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
@@ -71,17 +68,72 @@ const { title, description } = Astro.props;
       .accent {
         color: var(--accent);
       }
+
+      /* ===== АНИМАЦИИ ПОЯВЛЕНИЯ (ЗАМЕНА WOW.JS) ===== */
+      .anim-fade-up {
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .anim-fade-up.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      .anim-fade-left {
+        opacity: 0;
+        transform: translateX(-30px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .anim-fade-left.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .anim-fade-right {
+        opacity: 0;
+        transform: translateX(30px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .anim-fade-right.visible {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      /* Задержки */
+      .anim-delay-1 { transition-delay: 0.1s; }
+      .anim-delay-2 { transition-delay: 0.2s; }
+      .anim-delay-3 { transition-delay: 0.3s; }
+      .anim-delay-4 { transition-delay: 0.4s; }
+      .anim-delay-5 { transition-delay: 0.5s; }
     </style>
   </head>
   <body>
     <Header />
     <slot />
     <PostModal />
+    <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+    <!-- Intersection Observer для анимаций (замена WOW.js) -->
     <script is:inline>
-      new WOW().init();
+      (function () {
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("visible");
+              }
+            });
+          },
+          { threshold: 0.15 }
+        );
+
+        document
+          .querySelectorAll(".anim-fade-up, .anim-fade-left, .anim-fade-right")
+          .forEach((el) => observer.observe(el));
+      })();
     </script>
+    <!-- Обработчик клика для модального окна -->
     <script is:inline>
       document.addEventListener("click", function (e) {
         const link = e.target.closest("a[data-owner-id][data-post-id]");
@@ -95,6 +147,7 @@ const { title, description } = Astro.props;
         }
       });
     </script>
+    <!-- Локальная передача токена -->
     <script is:inline define:vars={{ VK_ACCESS_TOKEN: env.VK_ACCESS_TOKEN }}>
       if (
         location.hostname === "localhost" ||
