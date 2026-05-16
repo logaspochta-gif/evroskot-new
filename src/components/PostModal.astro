@@ -67,7 +67,9 @@
 </div>
 
 <style>
-  /* Базовые стили для модального окна */
+  /* =========================================
+     OVERLAY & CONTAINER
+  ========================================= */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -89,7 +91,7 @@
   .modal-container {
     position: relative;
     width: 100vw;
-    height: 100vh; /* ← фиксированная высота экрана */
+    height: 100vh;
     overflow: hidden;
     background: #000;
   }
@@ -104,7 +106,9 @@
     justify-content: center;
   }
 
-  /* Кнопка закрытия */
+  /* =========================================
+     CLOSE BUTTON
+  ========================================= */
   .modal-close {
     position: absolute;
     top: 20px;
@@ -131,7 +135,9 @@
     transform: scale(1.05);
   }
 
-  /* Счётчик слайдов */
+  /* =========================================
+     SLIDE COUNTER
+  ========================================= */
   .slide-counter {
     position: absolute;
     top: 24px;
@@ -148,7 +154,9 @@
     letter-spacing: 0.5px;
   }
 
-  /* Навигационные стрелки */
+  /* =========================================
+     NAVIGATION ARROWS
+  ========================================= */
   .nav-arrows {
     position: absolute;
     inset: 0;
@@ -183,7 +191,9 @@
     background: rgba(255, 255, 255, 0.26);
   }
 
-  /* Информация о посте */
+  /* =========================================
+     POST INFO
+  ========================================= */
   .post-info {
     position: absolute;
     left: 0;
@@ -217,7 +227,9 @@
     opacity: 0.92;
   }
 
-  /* Спиннер загрузки */
+  /* =========================================
+     SPINNER
+  ========================================= */
   .modal-spinner {
     width: 48px;
     height: 48px;
@@ -233,7 +245,9 @@
     }
   }
 
-  /* ===== SWIPER (карусель) ===== */
+  /* =========================================
+     SWIPER & MEDIA
+  ========================================= */
   .media-carousel,
   .media-swiper,
   .media-swiper .swiper-wrapper,
@@ -252,7 +266,6 @@
     position: relative;
     overflow: hidden;
     display: flex;
-    flex-direction: column; /* ← для корректной работы flex: 1 у video-wrapper */
     align-items: center;
     justify-content: center;
     background: #000;
@@ -260,7 +273,7 @@
     margin: 0;
   }
 
-  /* Фото */
+  /* Photo */
   .media-swiper img {
     width: 100%;
     height: 100%;
@@ -275,15 +288,14 @@
     cursor: grab;
   }
 
-  /* Видео */
+  /* Video wrapper – абсолютное позиционирование для заполнения */
   .video-wrapper {
-    flex: 1; /* ← ключевая строчка: занимает всё доступное пространство */
+    position: absolute;
+    inset: 0;
     width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #000;
+    height: 100%;
     overflow: hidden;
+    background: #000;
   }
 
   .video-wrapper video,
@@ -291,10 +303,58 @@
     width: 100%;
     height: 100%;
     border: none;
-    object-fit: contain; /* сохраняет пропорции */
+    object-fit: contain;
   }
 
-  /* Пагинация Swiper */
+  /* Link & Document previews */
+  .link-preview,
+  .doc-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    text-align: center;
+    color: #fff;
+    background: #111;
+    width: 100%;
+    height: 100%;
+  }
+
+  .link-preview img,
+  .doc-preview img {
+    max-width: 120px;
+    margin-bottom: 16px;
+  }
+
+  .preview-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+
+  .preview-description {
+    font-size: 0.9rem;
+    opacity: 0.7;
+    margin-bottom: 16px;
+  }
+
+  .preview-button {
+    display: inline-block;
+    padding: 10px 20px;
+    background: var(--accent);
+    color: #fff;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: background 0.2s;
+  }
+
+  .preview-button:hover {
+    background: var(--accent-hover);
+  }
+
+  /* Swiper pagination */
   .swiper-pagination {
     bottom: 18px !important;
   }
@@ -308,7 +368,9 @@
     background: var(--accent, #10b981);
   }
 
-  /* Адаптивность */
+  /* =========================================
+     MOBILE
+  ========================================= */
   @media (max-width: 768px) {
     .modal-close {
       width: 42px;
@@ -440,10 +502,7 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
 
-    content.innerHTML = `
-      <div class="modal-spinner"></div>
-    `;
-
+    content.innerHTML = '<div class="modal-spinner"></div>';
     if (counter) counter.textContent = "";
     if (navArrows) navArrows.style.display = "none";
     if (info) info.style.display = "none";
@@ -471,11 +530,6 @@
 
       if (!post) throw new Error("Пост не найден");
 
-      const mediaItems =
-        post.attachments?.filter(
-          (att) => att.type === "photo" || att.type === "video",
-        ) || [];
-
       const date = new Date(post.date * 1000);
       const formattedDate = date.toLocaleDateString("ru-RU", {
         day: "numeric",
@@ -485,17 +539,34 @@
         minute: "2-digit",
       });
 
+      // Собираем все типы вложений для карусели
+      const mediaItems = [];
+
+      for (const att of post.attachments || []) {
+        if (att.type === "photo") {
+          mediaItems.push(att);
+        } else if (att.type === "video") {
+          mediaItems.push(att);
+        } else if (att.type === "link") {
+          mediaItems.push(att);
+        } else if (att.type === "doc") {
+          mediaItems.push(att);
+        }
+      }
+
       const slides = await Promise.all(
         mediaItems.map(async (att, idx) => {
+          // Фото
           if (att.type === "photo" && att.photo) {
             const img =
               att.photo.sizes.find((s) => s.type === "w") ||
               att.photo.sizes[att.photo.sizes.length - 1];
             return `<div class="swiper-slide" data-type="photo">
-            <img src="${img.url}" alt="Фото ${idx + 1}" loading="lazy" />
-          </div>`;
+              <img src="${img.url}" alt="Фото ${idx + 1}" loading="lazy" />
+            </div>`;
           }
 
+          // Видео
           if (att.type === "video" && att.video) {
             const v = att.video;
             const accessKey = v.access_key || "";
@@ -503,6 +574,9 @@
             let posterUrl = null;
 
             try {
+              console.log(
+                `[PostModal] Загрузка видео: oid=${v.owner_id} vid=${v.id}`,
+              );
               const videoRes = await fetch(
                 `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
               );
@@ -511,51 +585,89 @@
                 if (videoData.success) {
                   videoUrl = videoData.mp4;
                   posterUrl = videoData.poster;
+                  console.log(`[PostModal] Загружено видео: ${videoUrl}`);
+                } else {
+                  console.warn(
+                    "[PostModal] Ошибка загрузки видео:",
+                    videoData.error,
+                  );
                 }
               }
             } catch (e) {
-              console.error("Ошибка загрузки видео", e);
+              console.error("[PostModal] Ошибка сети при загрузке видео", e);
             }
 
             if (videoUrl) {
               return `
-              <div class="swiper-slide" data-type="video">
-                <div class="video-wrapper swiper-no-swiping">
-                  <video
-                    src="${videoUrl}"
-                    ${posterUrl ? `poster="${posterUrl}"` : ""}
-                    controls
-                    autoplay
-                    muted
-                    playsinline
-                    preload="metadata"
-                  ></video>
+                <div class="swiper-slide" data-type="video">
+                  <div class="video-wrapper swiper-no-swiping">
+                    <video
+                      src="${videoUrl}"
+                      ${posterUrl ? `poster="${posterUrl}"` : ""}
+                      controls
+                      autoplay
+                      muted
+                      playsinline
+                      preload="metadata"
+                    ></video>
+                  </div>
                 </div>
-              </div>
-            `;
+              `;
             } else {
-              // fallback на iframe VK
+              // fallback iframe VK
               const iframeSrc =
                 `https://vk.com/video_ext.php?oid=${v.owner_id}` +
                 `&id=${v.id}` +
-                `&hash=${v.access_key || ""}` +
-                `&hd=2` +
-                `&autoplay=0` +
-                `&js_api=1` +
-                `&disable_related_videos=1`;
+                `&hash=${accessKey}` +
+                `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
               return `
-              <div class="swiper-slide" data-type="video">
-                <div class="video-wrapper">
-                  <iframe
-                    src="${iframeSrc}"
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                    allowfullscreen
-                    referrerpolicy="no-referrer"
-                  ></iframe>
+                <div class="swiper-slide" data-type="video">
+                  <div class="video-wrapper">
+                    <iframe
+                      src="${iframeSrc}"
+                      allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                      allowfullscreen
+                      referrerpolicy="no-referrer"
+                    ></iframe>
+                  </div>
+                </div>
+              `;
+            }
+          }
+
+          // Ссылка (link)
+          if (att.type === "link" && att.link) {
+            const link = att.link;
+            const imageHtml = link.photo?.sizes?.length
+              ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />`
+              : "";
+            return `
+              <div class="swiper-slide" data-type="link">
+                <div class="link-preview">
+                  ${imageHtml}
+                  <div class="preview-title">${link.title || "Ссылка"}</div>
+                  ${link.description ? `<div class="preview-description">${link.description}</div>` : ""}
+                  <a href="${link.url}" target="_blank" rel="noopener" class="preview-button">
+                    Открыть
+                  </a>
                 </div>
               </div>
             `;
-            }
+          }
+
+          // Документ (doc)
+          if (att.type === "doc" && att.doc) {
+            const doc = att.doc;
+            return `
+              <div class="swiper-slide" data-type="doc">
+                <div class="doc-preview">
+                  <div class="preview-title">${doc.title || "Документ"}</div>
+                  <a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">
+                    Скачать / Открыть
+                  </a>
+                </div>
+              </div>
+            `;
           }
 
           return "";
@@ -576,15 +688,12 @@
       if (info) {
         info.innerHTML = `
           <div class="post-date">${formattedDate}</div>
-          ${
-            post.text
-              ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>`
-              : ""
-          }
+          ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}
         `;
         info.style.display = "block";
       }
 
+      // Инициализация Swiper
       if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
         currentSwiper = new Swiper(".media-swiper", {
           loop: false,
@@ -613,7 +722,7 @@
           },
         });
 
-        // Дожидаемся окончания анимации открытия
+        // Принудительное обновление после анимации
         modal.addEventListener(
           "transitionend",
           () => {
@@ -626,7 +735,6 @@
           { once: true },
         );
 
-        // Запасной таймаут
         setTimeout(() => {
           if (currentSwiper) {
             currentSwiper.update();
