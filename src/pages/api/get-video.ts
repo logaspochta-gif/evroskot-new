@@ -1,64 +1,138 @@
 // src/pages/api/get-video.ts
-import { env } from 'cloudflare:workers';
+
+import { env } from "cloudflare:workers";
 
 export const prerender = false;
 
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
-  const ownerId = url.searchParams.get('owner_id');
-  const videoId = url.searchParams.get('video_id');
-  const accessKey = url.searchParams.get('access_key');
+
+  const ownerId = url.searchParams.get("owner_id");
+  const videoId = url.searchParams.get("video_id");
+  const accessKey = url.searchParams.get("access_key");
 
   if (!ownerId || !videoId || !accessKey) {
-    return new Response(JSON.stringify({ error: 'owner_id, video_id, access_key required' }), {
-      status: 400,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json(
+      {
+        error: "owner_id, video_id, access_key required",
+      },
+      400,
+    );
   }
 
   const ACCESS_TOKEN = env.VK_ACCESS_TOKEN;
-  const API_VERSION = '5.131';
 
   if (!ACCESS_TOKEN) {
-    return new Response(JSON.stringify({ error: 'Token not configured' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return json(
+      {
+        error: "VK_ACCESS_TOKEN missing",
+      },
+      500,
+    );
   }
 
   try {
-    // Важно: убираем User-Agent, чтобы VK отдал прямые ссылки
     const params = new URLSearchParams({
       videos: `${ownerId}_${videoId}_${accessKey}`,
       access_token: ACCESS_TOKEN,
-      v: API_VERSION,
+      v: "5.131",
     });
-    const res = await fetch(`https://api.vk.com/method/video.get?${params.toString()}`, {
-      headers: { 'User-Agent': '' },
-    });
-    const data = await res.json();
+
+    const response = await fetch(
+      `https://api.vk.com/method/video.get?${params.toString()}`,
+      {
+        headers: {
+          "User-Agent": "",
+        },
+      },
+    );
+
+    const data = await response.json();
 
     if (data.error) {
-      throw new Error(data.error.error_msg || 'VK API error');
+      throw new Error(data.error.error_msg || "VK API error");
     }
 
     const video = data.response?.items?.[0];
+
     if (!video) {
-      return new Response(JSON.stringify({ error: 'Video not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return json(
+        {
+          error: "Video not found",
+        },
+        404,
+      );
     }
 
-    return new Response(JSON.stringify(video), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+    const files = video.files || {};
+
+    const sources = [
+      files.mp4_2160,
+      files.mp4_1440,
+      files.mp4_1080,
+      files.mp4_720,
+      files.mp4_480,
+      files.mp4_360,
+      files.mp4_240,
+    ].filter(Boolean);
+
+    const bestMp4 = sources[0] || null;
+
+    // Явно указываем any для параметров сортировки
+    const poster =
+      video.image?.sort((a: any, b: any) => b.width - a.width)?.[0]?.url || null;
+
+    return json({
+      success: true,
+
+      title: video.title || "",
+
+      duration: video.duration || 0,
+
+      width: video.width || 0,
+      height: video.height || 0,
+
+      poster,
+
+      hls: files.hls || null,
+
+      mp4: bestMp4,
+
+      qualities: {
+        "2160": files.mp4_2160 || null,
+        "1440": files.mp4_1440 || null,
+        "1080": files.mp4_1080 || null,
+        "720": files.mp4_720 || null,
+        "480": files.mp4_480 || null,
+        "360": files.mp4_360 || null,
+        "240": files.mp4_240 || null,
+      },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Internal server error';
-    return new Response(JSON.stringify({ error: message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Internal server error";
+
+    return json(
+      {
+        error: message,
+      },
+      500,
+    );
   }
+}
+
+function json(data: unknown, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*",
+
+      // CACHE
+      "Cache-Control":
+        "public, s-maxage=86400, stale-while-revalidate=604800",
+    },
+  });
 }
