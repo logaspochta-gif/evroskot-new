@@ -10,31 +10,58 @@
   aria-hidden="true"
 >
   <div class="modal-container">
+    <!-- CLOSE -->
     <button class="modal-close" id="modalClose" aria-label="Закрыть">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M18 6L6 18M6 6l12 12" />
+      <svg
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M18 6L6 18M6 6l12 12"></path>
       </svg>
     </button>
 
+    <!-- COUNTER -->
     <div class="slide-counter" id="slideCounter"></div>
 
+    <!-- CONTENT -->
     <div class="modal-content" id="modalContent">
       <div class="modal-spinner"></div>
     </div>
 
+    <!-- NAVIGATION -->
     <div class="nav-arrows" id="navArrows" style="display:none">
       <button class="nav-arrow nav-prev" id="navPrev" aria-label="Предыдущий">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="15 18 9 12 15 6" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
+
       <button class="nav-arrow nav-next" id="navNext" aria-label="Следующий">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <polyline points="9 18 15 12 9 6" />
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
     </div>
 
+    <!-- POST INFO -->
     <div class="post-info" id="postInfo" style="display:none"></div>
   </div>
 </div>
@@ -48,12 +75,16 @@
     backdrop-filter: blur(18px);
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s, visibility 0.25s;
+    transition:
+      opacity 0.25s ease,
+      visibility 0.25s ease;
   }
+
   .modal-overlay.open {
     opacity: 1;
     visibility: visible;
   }
+
   .modal-container {
     position: relative;
     width: 100vw;
@@ -61,13 +92,17 @@
     overflow: hidden;
     background: #000;
   }
+
   .modal-content {
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
+
   .modal-close {
     position: absolute;
     top: 20px;
@@ -84,12 +119,16 @@
     justify-content: center;
     cursor: pointer;
     backdrop-filter: blur(10px);
-    transition: transform 0.2s, background 0.2s;
+    transition:
+      transform 0.2s ease,
+      background 0.2s ease;
   }
+
   .modal-close:hover {
     background: rgba(255, 255, 255, 0.24);
     transform: scale(1.05);
   }
+
   .slide-counter {
     position: absolute;
     top: 24px;
@@ -105,6 +144,7 @@
     font-weight: 600;
     letter-spacing: 0.5px;
   }
+
   .nav-arrows {
     position: absolute;
     inset: 0;
@@ -115,6 +155,7 @@
     padding: 0 20px;
     pointer-events: none;
   }
+
   .nav-arrow {
     width: 52px;
     height: 52px;
@@ -128,12 +169,16 @@
     justify-content: center;
     cursor: pointer;
     pointer-events: auto;
-    transition: transform 0.2s, background 0.2s;
+    transition:
+      transform 0.2s ease,
+      background 0.2s ease;
   }
+
   .nav-arrow:hover {
     transform: scale(1.06);
     background: rgba(255, 255, 255, 0.26);
   }
+
   .post-info {
     position: absolute;
     left: 0;
@@ -150,6 +195,7 @@
     pointer-events: none;
     color: #fff;
   }
+
   .post-date {
     margin-bottom: 10px;
     color: var(--accent, #10b981);
@@ -158,85 +204,101 @@
     text-transform: uppercase;
     letter-spacing: 1px;
   }
+
   .post-text {
     max-width: 900px;
     font-size: 0.96rem;
     line-height: 1.65;
     opacity: 0.92;
   }
+
   .modal-spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid rgba(255, 255, 255, 0.15);
+    border: 4px solid rgba(255, 255, 255, 0.14);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
+
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 
-  /* Swiper только для фото */
-  .photo-swiper {
+  /* Swiper – единая карусель для фото и видео */
+  .media-carousel,
+  .media-swiper,
+  .media-swiper .swiper-wrapper,
+  .media-swiper .swiper-slide {
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
   }
-  .photo-swiper .swiper-slide {
+
+  .media-carousel {
+    position: relative;
+  }
+
+  .media-swiper .swiper-slide {
+    position: relative;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #000;
-    overflow: hidden;
+    padding: 0;
+    margin: 0;
   }
-  .photo-swiper img {
-    max-width: 100%;
-    max-height: 100%;
+
+  .media-swiper img {
+    width: 100%;
+    height: 100%;
     object-fit: contain;
     user-select: none;
     -webkit-user-drag: none;
+    will-change: transform;
+    transition: transform 0.25s ease;
   }
+
+  .media-swiper .swiper-slide.zoomed img {
+    cursor: grab;
+  }
+
+  /* Адаптивный контейнер для видео 16:9 */
+  .video-responsive {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    max-height: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    background: #000;
+  }
+
+  .video-responsive iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    border: none;
+    object-fit: contain;
+  }
+
   .swiper-pagination {
-    bottom: 20px !important;
+    bottom: 18px !important;
   }
+
   .swiper-pagination-bullet {
     background: rgba(255, 255, 255, 0.5);
     opacity: 1;
   }
+
   .swiper-pagination-bullet-active {
     background: var(--accent, #10b981);
-  }
-
-  /* Полноэкранный видео-слой */
-  .video-fullscreen {
-    position: absolute;
-    inset: 0;
-    z-index: 70;
-    background: #000;
-  }
-  .video-fullscreen iframe {
-    width: 100%;
-    height: 100%;
-    border: none;
-  }
-
-  /* Кнопка просмотра видео */
-  .video-play-btn {
-    position: absolute;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 50;
-    padding: 12px 24px;
-    background: var(--accent, #10b981);
-    color: #fff;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    border: none;
-    transition: background 0.2s;
-  }
-  .video-play-btn:hover {
-    background: var(--accent-hover, #059669);
   }
 
   @media (max-width: 768px) {
@@ -246,13 +308,16 @@
       top: 14px;
       right: 14px;
     }
+
     .nav-arrow {
       width: 44px;
       height: 44px;
     }
+
     .post-info {
       padding: 70px 20px 22px;
     }
+
     .post-text {
       font-size: 0.88rem;
       line-height: 1.55;
@@ -261,167 +326,360 @@
 </style>
 
 <script lang="js">
-  let photoSwiper = null;
+  // @ts-nocheck
+
+  let currentSwiper = null;
 
   function destroySwiper() {
-    if (photoSwiper) {
-      photoSwiper.destroy(true, true);
-      photoSwiper = null;
+    if (currentSwiper) {
+      currentSwiper.destroy(true, true);
+      currentSwiper = null;
     }
   }
 
   function pauseAllVideos() {
-    document.querySelectorAll('.video-fullscreen iframe').forEach(el => {
-      // Просто удаляем слой, останавливая видео
-      el.remove();
+    document.querySelectorAll(".media-swiper video").forEach((v) => {
+      if (v && typeof v.pause === "function") v.pause();
     });
   }
 
   async function openPostModal(ownerId, postId) {
-    const modal = document.getElementById('postModal');
-    const content = document.getElementById('modalContent');
-    const counter = document.getElementById('slideCounter');
-    const navArrows = document.getElementById('navArrows');
-    const info = document.getElementById('postInfo');
+    const modal = document.getElementById("postModal");
+    const content = document.getElementById("modalContent");
+    const counter = document.getElementById("slideCounter");
+    const navArrows = document.getElementById("navArrows");
+    const info = document.getElementById("postInfo");
 
     if (!modal || !content) return;
 
     destroySwiper();
-    modal.classList.add('open');
-    modal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+    document.body.style.overflow = "hidden";
 
     content.innerHTML = '<div class="modal-spinner"></div>';
-    if (counter) counter.textContent = '';
-    if (navArrows) navArrows.style.display = 'none';
-    if (info) info.style.display = 'none';
+    if (counter) counter.textContent = "";
+    if (navArrows) navArrows.style.display = "none";
+    if (info) info.style.display = "none";
+
+    const isLocal =
+      location.hostname === "localhost" || location.hostname === "127.0.0.1";
 
     try {
-      const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
-      if (!res.ok) throw new Error('Ошибка загрузки');
-      const post = await res.json();
-      if (!post) throw new Error('Пост не найден');
+      let post = null;
 
-      const photos = post.attachments?.filter(a => a.type === 'photo') || [];
-      const videos = post.attachments?.filter(a => a.type === 'video') || [];
+      if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
+        const res = await fetch(
+          `https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${window.VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`,
+        );
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.error_msg);
+        post = data.response?.[0] ?? null;
+      } else {
+        const res = await fetch(
+          `/api/get-post?owner_id=${ownerId}&post_id=${postId}`,
+        );
+        if (!res.ok) throw new Error("Ошибка загрузки");
+        post = await res.json();
+      }
+
+      if (!post) throw new Error("Пост не найден");
+
       const date = new Date(post.date * 1000);
-      const formattedDate = date.toLocaleDateString('ru-RU', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
+      const formattedDate = date.toLocaleDateString("ru-RU", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
       });
 
-      // === ТОЛЬКО ФОТО (Swiper) ===
-      if (photos.length > 0) {
-        const slides = photos.map((att, i) => {
-          const img = att.photo.sizes.find(s => s.type === 'x') || att.photo.sizes[att.photo.sizes.length - 1];
-          return `<div class="swiper-slide"><img src="${img.url}" alt="Фото ${i + 1}" loading="lazy" /></div>`;
-        }).join('');
+      const mediaItems = [];
 
-        content.innerHTML = `
-          <div class="swiper photo-swiper">
-            <div class="swiper-wrapper">${slides}</div>
-            <div class="swiper-pagination"></div>
-          </div>
-        `;
-
-        if (typeof Swiper !== 'undefined') {
-          photoSwiper = new Swiper('.photo-swiper', {
-            loop: false,
-            pagination: { el: '.swiper-pagination', clickable: true },
-            grabCursor: true,
-            keyboard: true,
-          });
+      for (const att of post.attachments || []) {
+        if (
+          att.type === "photo" ||
+          att.type === "video" ||
+          att.type === "link" ||
+          att.type === "doc"
+        ) {
+          mediaItems.push(att);
         }
-
-        if (counter) counter.textContent = `${1} / ${photos.length}`;
-        if (navArrows) navArrows.style.display = photos.length > 1 ? 'flex' : 'none';
-
-        if (photoSwiper) {
-          photoSwiper.on('slideChange', function () {
-            if (counter) counter.textContent = `${this.realIndex + 1} / ${photos.length}`;
-          });
-        }
-
-        document.getElementById('navPrev')?.addEventListener('click', () => photoSwiper?.slidePrev());
-        document.getElementById('navNext')?.addEventListener('click', () => photoSwiper?.slideNext());
       }
 
-      // === ВИДЕО – отдельный полноэкранный слой ===
-      if (videos.length > 0) {
-        // Берем первое видео (можно расширить до всех, добавив плеер)
-        const v = videos[0].video;
-        const videoSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${v.access_key || ''}&hd=2&autoplay=1&js_api=1&disable_related_videos=1`;
+      const slides = await Promise.all(
+        mediaItems.map(async (att, idx) => {
+          if (att.type === "photo" && att.photo) {
+            const img =
+              att.photo.sizes.find((s) => s.type === "w") ||
+              att.photo.sizes[att.photo.sizes.length - 1];
+            return `<div class="swiper-slide" data-type="photo">
+              <img src="${img.url}" alt="Фото ${idx + 1}" loading="lazy" />
+            </div>`;
+          }
 
-        // Если нет фото, сразу показываем видео
-        if (photos.length === 0) {
-          content.innerHTML = `
-            <div class="video-fullscreen">
-              <iframe src="${videoSrc}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
-            </div>
-          `;
-        } else {
-          // Если есть фото, добавляем кнопку поверх
-          const videoBtn = document.createElement('button');
-          videoBtn.className = 'video-play-btn';
-          videoBtn.textContent = '▶ Смотреть видео';
-          videoBtn.addEventListener('click', () => {
-            // Останавливаем Swiper
-            destroySwiper();
-            // Заменяем содержимое на полноэкранный iframe
-            content.innerHTML = `
-              <div class="video-fullscreen">
-                <iframe src="${videoSrc}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>
+          if (att.type === "video" && att.video) {
+            const v = att.video;
+            const accessKey = v.access_key || "";
+
+            // Пытаемся получить нативное видео (mp4) – fallback на iframe VK
+            let videoUrl = null;
+            try {
+              const videoRes = await fetch(
+                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
+              );
+              if (videoRes.ok) {
+                const videoData = await videoRes.json();
+                if (videoData.success) {
+                  videoUrl = videoData.mp4;
+                }
+              }
+            } catch (e) {
+              // промолчим
+            }
+
+            if (videoUrl) {
+              return `
+                <div class="swiper-slide" data-type="video">
+                  <div class="video-wrapper swiper-no-swiping">
+                    <video
+                      src="${videoUrl}"
+                      controls
+                      autoplay
+                      muted
+                      playsinline
+                      preload="metadata"
+                      style="width:100%;height:100%;object-fit:contain;"
+                    ></video>
+                  </div>
+                </div>
+              `;
+            }
+
+            // fallback – адаптивный iframe VK
+            const iframeSrc =
+              `https://vk.com/video_ext.php?oid=${v.owner_id}` +
+              `&id=${v.id}` +
+              `&hash=${accessKey}` +
+              `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+
+            return `
+              <div class="swiper-slide" data-type="video">
+                <div class="video-responsive">
+                  <iframe
+                    src="${iframeSrc}"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    referrerpolicy="no-referrer"
+                  ></iframe>
+                </div>
               </div>
             `;
-          });
-          modal.querySelector('.modal-container').appendChild(videoBtn);
-        }
-      }
+          }
 
-      // === ИНФО (дата и текст) ===
+          if (att.type === "link" && att.link) {
+            const link = att.link;
+            const imageHtml = link.photo?.sizes?.length
+              ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />`
+              : "";
+            return `
+              <div class="swiper-slide" data-type="link">
+                <div class="link-preview">
+                  ${imageHtml}
+                  <div class="preview-title">${link.title || "Ссылка"}</div>
+                  ${link.description ? `<div class="preview-description">${link.description}</div>` : ""}
+                  <a href="${link.url}" target="_blank" rel="noopener" class="preview-button">
+                    Открыть
+                  </a>
+                </div>
+              </div>
+            `;
+          }
+
+          if (att.type === "doc" && att.doc) {
+            const doc = att.doc;
+            return `
+              <div class="swiper-slide" data-type="doc">
+                <div class="doc-preview">
+                  <div class="preview-title">${doc.title || "Документ"}</div>
+                  <a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">
+                    Скачать / Открыть
+                  </a>
+                </div>
+              </div>
+            `;
+          }
+
+          return "";
+        }),
+      );
+
+      content.innerHTML = `
+        <div class="media-carousel">
+          <div class="swiper media-swiper">
+            <div class="swiper-wrapper">
+              ${slides.join("")}
+            </div>
+            <div class="swiper-pagination"></div>
+          </div>
+        </div>
+      `;
+
       if (info) {
         info.innerHTML = `
           <div class="post-date">${formattedDate}</div>
-          ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, '<br>')}</div>` : ''}
+          ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}
         `;
-        info.style.display = 'block';
+        info.style.display = "block";
       }
 
-    } catch (e) {
-      console.error(e);
-      content.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
+      if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
+        currentSwiper = new Swiper(".media-swiper", {
+          loop: false,
+          speed: 350,
+          spaceBetween: 0,
+          centeredSlides: true,
+          autoHeight: false,
+          preloadImages: false,
+          watchOverflow: true,
+          grabCursor: true,
+          keyboard: { enabled: true, onlyInViewport: true },
+          pagination: { el: ".swiper-pagination", clickable: true },
+          navigation: {
+            nextEl: ".nav-next",
+            prevEl: ".nav-prev",
+          },
+          on: {
+            init(swiper) {
+              updateCounter(swiper);
+            },
+            slideChange(swiper) {
+              updateCounter(swiper);
+              pauseAllVideos();
+            },
+          },
+        });
+
+        // Принудительное обновление после полной загрузки медиа
+        const mediaElements = content.querySelectorAll("img, video, iframe");
+        let loadedCount = 0;
+        function onMediaLoad() {
+          loadedCount++;
+          if (loadedCount === mediaElements.length && currentSwiper) {
+            currentSwiper.update();
+            currentSwiper.updateSize();
+            currentSwiper.updateSlides();
+          }
+        }
+        mediaElements.forEach((el) => {
+          if (el.tagName === "IMG") {
+            if (el.complete) onMediaLoad();
+            else el.addEventListener("load", onMediaLoad);
+          } else {
+            el.addEventListener("loadedmetadata", onMediaLoad);
+            setTimeout(onMediaLoad, 1000);
+          }
+        });
+
+        // Дополнительное обновление после анимации открытия
+        modal.addEventListener("transitionend", () => {
+          if (currentSwiper) {
+            currentSwiper.update();
+            currentSwiper.updateSize();
+            currentSwiper.updateSlides();
+          }
+        }, { once: true });
+        setTimeout(() => {
+          if (currentSwiper) {
+            currentSwiper.update();
+            currentSwiper.updateSize();
+            currentSwiper.updateSlides();
+          }
+        }, 400);
+
+        function updateCounter(swiper) {
+          if (!counter) return;
+          counter.textContent = `${swiper.realIndex + 1} / ${mediaItems.length}`;
+        }
+
+        if (navArrows) {
+          navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      content.innerHTML =
+        '<div style="margin:auto; color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост.</div>';
     }
   }
 
   function closeModal() {
-    const modal = document.getElementById('postModal');
+    const modal = document.getElementById("postModal");
     if (!modal) return;
     if (document.activeElement && modal.contains(document.activeElement)) {
       document.activeElement.blur();
     }
-    modal.classList.remove('open');
-    modal.setAttribute('aria-hidden', 'true');
-    document.body.style.overflow = '';
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
     destroySwiper();
-    // Удаляем кнопки видео, если остались
-    const triggers = modal.querySelectorAll('.video-play-btn');
-    triggers.forEach(t => t.remove());
-    // Останавливаем видео (удаляем слой)
-    const fullscreen = modal.querySelector('.video-fullscreen');
-    if (fullscreen) fullscreen.remove();
   }
 
-  document.getElementById('modalClose')?.addEventListener('click', closeModal);
-  document.getElementById('postModal')?.addEventListener('click', e => {
+  document.getElementById("modalClose")?.addEventListener("click", closeModal);
+  document.getElementById("postModal")?.addEventListener("click", (e) => {
     if (e.target === e.currentTarget) closeModal();
   });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && document.getElementById('postModal')?.classList.contains('open')) {
-      closeModal();
+  document.getElementById("navPrev")?.addEventListener("click", () =>
+    currentSwiper?.slidePrev(),
+  );
+  document.getElementById("navNext")?.addEventListener("click", () =>
+    currentSwiper?.slideNext(),
+  );
+
+  document.addEventListener("keydown", (e) => {
+    const modal = document.getElementById("postModal");
+    if (e.key === "Escape" && modal?.classList.contains("open")) closeModal();
+  });
+
+  // Свайп вниз для закрытия
+  let touchStartY = 0;
+  let touchCurrentY = 0;
+  let isSwiping = false;
+
+  document.addEventListener("touchstart", (e) => {
+    const modal = document.getElementById("postModal");
+    if (!modal?.classList.contains("open")) return;
+    if (e.touches.length === 1) {
+      touchStartY = e.touches[0].clientY;
+      isSwiping = true;
     }
+  });
+
+  document.addEventListener("touchmove", (e) => {
+    if (!isSwiping) return;
+    touchCurrentY = e.touches[0].clientY;
+    const diff = touchCurrentY - touchStartY;
+    const container = document.querySelector(".modal-container");
+    if (container && diff > 0) {
+      container.style.transform = `translateY(${diff}px)`;
+      container.style.opacity = 1 - diff / window.innerHeight;
+    }
+  });
+
+  document.addEventListener("touchend", () => {
+    if (!isSwiping) return;
+    isSwiping = false;
+    const diff = touchCurrentY - touchStartY;
+    const container = document.querySelector(".modal-container");
+    if (container && diff > 120) {
+      closeModal();
+    } else if (container) {
+      container.style.transform = "";
+      container.style.opacity = "";
+    }
+    touchStartY = 0;
+    touchCurrentY = 0;
   });
 
   window.openPostModal = openPostModal;
