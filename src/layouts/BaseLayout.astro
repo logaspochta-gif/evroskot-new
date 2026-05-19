@@ -1,4 +1,5 @@
 ---
+// src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
 import PostModal from "../components/PostModal.astro";
 import { env } from 'cloudflare:workers';
@@ -23,7 +24,13 @@ const { title, description } = Astro.props;
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Poppins:wght@400;600;700;900&display=swap"
       rel="stylesheet"
     />
-    <!-- Swiper по‑прежнему нужен для слайдера Hero и карусели -->
+    <!-- Предзагрузка критического изображения Hero -->
+    <link
+      rel="preload"
+      as="image"
+      href="/images/hero/hero-1.webp"
+      fetchpriority="high"
+    />
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
@@ -69,7 +76,7 @@ const { title, description } = Astro.props;
         color: var(--accent);
       }
 
-      /* ===== АНИМАЦИИ ПОЯВЛЕНИЯ (ЗАМЕНА WOW.JS) ===== */
+      /* ===== АНИМАЦИИ ПОЯВЛЕНИЯ ===== */
       .anim-fade-up {
         opacity: 0;
         transform: translateY(30px);
@@ -100,22 +107,39 @@ const { title, description } = Astro.props;
         transform: translateX(0);
       }
 
-      /* Задержки */
       .anim-delay-1 { transition-delay: 0.1s; }
       .anim-delay-2 { transition-delay: 0.2s; }
       .anim-delay-3 { transition-delay: 0.3s; }
       .anim-delay-4 { transition-delay: 0.4s; }
       .anim-delay-5 { transition-delay: 0.5s; }
+
+      /* ===== CSS SCROLL SNAP ===== */
+      html {
+        scroll-snap-type: y mandatory;
+        scroll-behavior: smooth;
+      }
+      section {
+        scroll-snap-align: start;
+      }
+
+      /* Оптимизация рендеринга для секций вне экрана */
+      section:not(.hero) {
+        content-visibility: auto;
+        contain-intrinsic-size: 1000px;
+      }
+      #hero {
+        content-visibility: visible;
+        contain-intrinsic-size: auto;
+      }
     </style>
   </head>
   <body>
     <Header />
     <slot />
     <PostModal />
-    <!-- Swiper JS -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <!-- Intersection Observer для анимаций (замена WOW.js) -->
     <script is:inline>
+      // Intersection Observer для анимаций
       (function () {
         const observer = new IntersectionObserver(
           (entries) => {
@@ -127,14 +151,13 @@ const { title, description } = Astro.props;
           },
           { threshold: 0.15 }
         );
-
         document
           .querySelectorAll(".anim-fade-up, .anim-fade-left, .anim-fade-right")
           .forEach((el) => observer.observe(el));
       })();
     </script>
-    <!-- Обработчик клика для модального окна -->
     <script is:inline>
+      // Обработчик клика для модального окна
       document.addEventListener("click", function (e) {
         const link = e.target.closest("a[data-owner-id][data-post-id]");
         if (link) {
@@ -147,7 +170,6 @@ const { title, description } = Astro.props;
         }
       });
     </script>
-    <!-- Локальная передача токена -->
     <script is:inline define:vars={{ VK_ACCESS_TOKEN: env.VK_ACCESS_TOKEN }}>
       if (
         location.hostname === "localhost" ||
