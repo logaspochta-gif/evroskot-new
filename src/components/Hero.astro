@@ -31,8 +31,7 @@ const slides = [
     badge: "Джерсейская порода",
     title: "Высокая жирность",
     subtitle: "и долголетие",
-    description:
-      "Идеальна для сыроварения. Жирность молока до 6%.",
+    description: "Идеальна для сыроварения. Жирность молока до 6%.",
     primaryBtn: "Запросить прайс",
     secondaryBtn: "Смотреть породы",
   },
@@ -42,34 +41,40 @@ const slides = [
 <section class="hero" id="hero">
   <div class="swiper hero-swiper">
     <div class="swiper-wrapper">
-      {slides.map((slide, index) => (
-        <div class="swiper-slide">
-          <div class="slide-bg">
-            <Image
-              src={slide.img}
-              alt=""
-              width={1920}
-              height={1080}
-              loading={index === 0 ? "eager" : "lazy"}
-              fetchpriority={index === 0 ? "high" : "auto"}
-              class="slide-image"
-            />
-          </div>
-          <div class="overlay"></div>
-          <div class="content">
-            <span class="badge anim-fade-up">{slide.badge}</span>
-            <h1 class="anim-fade-up anim-delay-1">
-              {slide.title} <br />
-              <span class="accent">{slide.subtitle}</span>
-            </h1>
-            <p class="anim-fade-up anim-delay-2">{slide.description}</p>
-            <div class="actions anim-fade-up anim-delay-3">
-              <a href="#contact" class="primary-btn">{slide.primaryBtn}</a>
-              <a href="#breeds" class="secondary-btn">{slide.secondaryBtn}</a>
+      {
+        slides.map((slide, index) => (
+          <div class="swiper-slide">
+            <div class="slide-bg">
+              <Image
+                src={slide.img}
+                alt=""
+                width={1920}
+                height={1080}
+                loading={index === 0 ? "eager" : "lazy"}
+                fetchpriority={index === 0 ? "high" : "auto"}
+                class="slide-image"
+              />
+            </div>
+            <div class="overlay" />
+            <div class="content">
+              <span class="badge anim-fade-up">{slide.badge}</span>
+              <h1 class="anim-fade-up anim-delay-1">
+                {slide.title} <br />
+                <span class="accent">{slide.subtitle}</span>
+              </h1>
+              <p class="anim-fade-up anim-delay-2">{slide.description}</p>
+              <div class="actions anim-fade-up anim-delay-3">
+                <a href="#contact" class="primary-btn">
+                  {slide.primaryBtn}
+                </a>
+                <a href="#breeds" class="secondary-btn">
+                  {slide.secondaryBtn}
+                </a>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      }
     </div>
     <div class="swiper-pagination"></div>
     <div class="swiper-button-prev"></div>
@@ -85,6 +90,8 @@ const slides = [
     height: 100dvh;
     overflow: hidden;
     overscroll-behavior: none;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
   }
 
   .hero-swiper {
@@ -115,8 +122,12 @@ const slides = [
   }
 
   @keyframes heroZoom {
-    0% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% {
+      transform: scale(1.05);
+    }
+    100% {
+      transform: scale(1);
+    }
   }
 
   .overlay {
@@ -149,7 +160,9 @@ const slides = [
     border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
-    transition: background 0.2s, transform 0.2s;
+    transition:
+      background 0.2s,
+      transform 0.2s;
   }
 
   .primary-btn {
@@ -183,15 +196,23 @@ const slides = [
   .anim-fade-up {
     opacity: 0;
     transform: translateY(30px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    transition:
+      opacity 0.8s ease,
+      transform 0.8s ease;
   }
   .anim-fade-up.visible {
     opacity: 1;
     transform: translateY(0);
   }
-  .anim-delay-1 { transition-delay: 0.3s; }
-  .anim-delay-2 { transition-delay: 0.6s; }
-  .anim-delay-3 { transition-delay: 0.9s; }
+  .anim-delay-1 {
+    transition-delay: 0.3s;
+  }
+  .anim-delay-2 {
+    transition-delay: 0.6s;
+  }
+  .anim-delay-3 {
+    transition-delay: 0.9s;
+  }
 </style>
 
 <script>
