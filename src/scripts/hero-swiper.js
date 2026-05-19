@@ -1,16 +1,18 @@
+// src/scripts/hero-swiper.js
 import Swiper from 'swiper';
 import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+// Импорт стилей Swiper (можно также оставить CDN-стили в BaseLayout, тогда эти строки можно удалить)
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
 
-document.addEventListener('DOMContentLoaded', () => {
-  const el = document.querySelector('.hero-swiper');
-  if (!el) return;
+const el = document.querySelector('.hero-swiper');
 
-  const swiper = new Swiper(el, {
+if (el) {
+  new Swiper(el, {
     modules: [Navigation, Pagination, Autoplay],
-    loop: true,
+    loop: false,
+    rewind: true,
     speed: 800,
     autoplay: {
       delay: 5000,
@@ -25,30 +27,4 @@ document.addEventListener('DOMContentLoaded', () => {
       clickable: true,
     },
   });
-
-  // Функция для запуска анимации на активном слайде
-  function animateSlide(slide) {
-    slide.querySelectorAll('.anim-fade-up').forEach((el) => {
-      el.classList.add('animated');
-    });
-  }
-
-  // Анимация первого слайда сразу после инициализации
-  const activeSlide = swiper.slides[swiper.activeIndex];
-  if (activeSlide) animateSlide(activeSlide);
-
-  // Анимация при смене слайда
-  swiper.on('slideChangeTransitionStart', () => {
-    // Удаляем класс со всех слайдов
-    swiper.slides.forEach((slide) => {
-      slide.querySelectorAll('.anim-fade-up').forEach((el) => {
-        el.classList.remove('animated');
-      });
-    });
-    // Даём браузеру мгновение перерисовать, затем анимируем новый слайд
-    requestAnimationFrame(() => {
-      const newActive = swiper.slides[swiper.activeIndex];
-      if (newActive) animateSlide(newActive);
-    });
-  });
-});
+}
