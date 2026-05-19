@@ -52,7 +52,7 @@ const slides = [
               sizes="(max-width: 768px) 100vw, 1920px"
               loading={index === 0 ? "eager" : "lazy"}
               fetchpriority={index === 0 ? "high" : "auto"}
-              decoding={index === 0 ? "sync" : "async"}
+              decoding="async"
               class="slide-image"
             />
           </div>
@@ -89,7 +89,6 @@ const slides = [
     touch-action: pan-y;
   }
 
-  .swiper,
   .hero-swiper,
   .swiper-wrapper,
   .swiper-slide {
@@ -114,17 +113,6 @@ const slides = [
     object-position: center;
   }
 
-  .swiper-slide-active .slide-bg {
-    will-change: transform;
-    transform: translate3d(0, 0, 0);
-    animation: heroZoom 1.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-  }
-
-  @keyframes heroZoom {
-    0% { transform: translate3d(0, 0, 0) scale(1.02); }
-    100% { transform: translate3d(0, -8px, 0) scale(1); }
-  }
-
   .overlay {
     position: absolute;
     inset: 0;
@@ -140,7 +128,36 @@ const slides = [
     transform: translateY(-50%);
     max-width: 700px;
     color: #fff;
-    contain: layout paint style;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.5);
+    padding: 0.4rem 1rem;
+    border-radius: 50px;
+    font-size: clamp(0.7rem, 2vh, 0.9rem);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 1.5rem;
+    color: #fff;
+  }
+
+  h1, h2 {
+    font-size: clamp(2rem, 7vh, 4rem);
+    margin: 0 0 1rem;
+    line-height: 1.1;
+    font-weight: 900;
+    color: #fff;
+  }
+
+  .accent { color: var(--accent); }
+
+  .content p {
+    font-size: clamp(0.9rem, 2.5vh, 1.2rem);
+    opacity: 0.9;
+    margin-bottom: 2rem;
+    max-width: 500px;
   }
 
   .actions {
@@ -151,7 +168,7 @@ const slides = [
 
   .primary-btn,
   .secondary-btn {
-    padding: 0.75rem 1.5rem;
+    padding: 0.8rem 1.8rem;
     border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
@@ -174,16 +191,11 @@ const slides = [
   }
   .secondary-btn:hover { transform: translateY(-2px); }
 
-  .swiper-button-prev,
-  .swiper-button-next,
-  .swiper-pagination {
-    contain: layout style paint;
-  }
-
-  /* ===== АНИМАЦИИ ТЕКСТА ===== */
+  /* Анимации текста */
   .anim-fade-up {
     opacity: 0;
     transform: translate3d(0, 30px, 0);
+    transition: none; /* без transition, работает animation */
   }
 
   .anim-fade-up.animated {
@@ -206,61 +218,12 @@ const slides = [
   .anim-delay-3.animated { animation-delay: 0.9s; }
 
   @media (prefers-reduced-motion: reduce) {
-    .swiper-slide-active .slide-bg,
-    .anim-fade-up {
-      animation: none !important;
-      transition: none !important;
+    .anim-fade-up.animated {
+      animation: none;
       opacity: 1;
       transform: translate3d(0, 0, 0);
     }
   }
 </style>
 
-<script type="module">
-  import Swiper from "swiper";
-  import { Navigation, Pagination, Autoplay } from "swiper/modules";
-
-  const heroSwiperEl = document.querySelector(".hero-swiper");
-
-  if (heroSwiperEl) {
-    new Swiper(heroSwiperEl, {
-      modules: [Navigation, Pagination, Autoplay],
-      loop: true,
-      speed: 800,
-      autoplay: {
-        delay: 5000,
-        disableOnInteraction: false,
-      },
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
-      preloadImages: false,
-      on: {
-        init(swiper) {
-          const activeSlide = swiper.slides[swiper.activeIndex];
-          activeSlide
-            .querySelectorAll(".anim-fade-up")
-            .forEach((el) => el.classList.add("animated"));
-        },
-        slideChangeTransitionStart(swiper) {
-          swiper.slides.forEach((slide) => {
-            slide
-              .querySelectorAll(".anim-fade-up")
-              .forEach((el) => el.classList.remove("animated"));
-          });
-          requestAnimationFrame(() => {
-            const activeSlide = swiper.slides[swiper.activeIndex];
-            activeSlide
-              .querySelectorAll(".anim-fade-up")
-              .forEach((el) => el.classList.add("animated"));
-          });
-        },
-      },
-    });
-  }
-</script>
+<script type="module" src="../scripts/hero-swiper.js"></script>
