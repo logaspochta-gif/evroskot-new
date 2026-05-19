@@ -21,7 +21,25 @@ const slides = [
     primaryBtn: "Запросить прайс",
     secondaryBtn: "Посмотреть породы",
   },
-  // … остальные слайды
+  {
+    img: hero2,
+    badge: "Голштинская порода",
+    title: "Мировой лидер",
+    subtitle: "по удоям молока",
+    description:
+      "Генетика из лучших хозяйств Дании. Продуктивность до 12 000 кг молока за лактацию.",
+    primaryBtn: "Запросить подбор",
+    secondaryBtn: "Все породы",
+  },
+  {
+    img: hero3,
+    badge: "Джерсейская порода",
+    title: "Высокая жирность",
+    subtitle: "и долголетие",
+    description: "Идеальна для сыроварения. Жирность молока до 6%.",
+    primaryBtn: "Запросить прайс",
+    secondaryBtn: "Смотреть породы",
+  },
 ];
 ---
 
@@ -167,26 +185,42 @@ const slides = [
     contain: layout style paint;
   }
 
-  /* Анимации только для активного слайда */
-  .swiper-slide-active .anim-fade-up {
-    animation: fadeUp 0.8s ease forwards;
+  /* ===== АНИМАЦИИ ТЕКСТА ===== */
+  /* Базовое состояние – скрыто */
+  .anim-fade-up {
     opacity: 0;
+    transform: translate3d(0, 30px, 0);
   }
+
+  /* Анимация запускается только когда добавлен класс .animated */
+  .anim-fade-up.animated {
+    animation: fadeUp 0.8s ease forwards;
+  }
+
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(30px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translate3d(0, 30px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
   }
-  .swiper-slide-active .anim-delay-1 { animation-delay: 0.3s; }
-  .swiper-slide-active .anim-delay-2 { animation-delay: 0.6s; }
-  .swiper-slide-active .anim-delay-3 { animation-delay: 0.9s; }
+
+  /* Задержки для последовательного появления */
+  .anim-delay-1 { animation-delay: 0.3s; }
+  .anim-delay-2 { animation-delay: 0.6s; }
+  .anim-delay-3 { animation-delay: 0.9s; }
 
   @media (prefers-reduced-motion: reduce) {
     .swiper-slide-active .slide-bg,
     .anim-fade-up {
       animation: none !important;
       transition: none !important;
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
     }
-    .anim-fade-up { opacity: 1; transform: translateY(0); }
   }
 </style>
 
@@ -211,6 +245,35 @@ const slides = [
         clickable: true,
       },
       preloadImages: false,
+
+      // Запускаем анимацию при инициализации и при смене слайда
+      on: {
+        init(swiper) {
+          // Анимируем первый слайд
+          swiper.slides[swiper.activeIndex]
+            .querySelectorAll(".anim-fade-up")
+            .forEach((el) => {
+              el.classList.add("animated");
+            });
+        },
+        slideChangeTransitionStart(swiper) {
+          // Удаляем класс у всех слайдов, затем добавляем активному
+          swiper.slides.forEach((slide) => {
+            slide
+              .querySelectorAll(".anim-fade-up")
+              .forEach((el) => {
+                el.classList.remove("animated");
+              });
+          });
+          // Принудительный reflow для перезапуска анимации
+          void swiper.slides[swiper.activeIndex].offsetWidth;
+          swiper.slides[swiper.activeIndex]
+            .querySelectorAll(".anim-fade-up")
+            .forEach((el) => {
+              el.classList.add("animated");
+            });
+        },
+      },
     });
   }
 </script>
