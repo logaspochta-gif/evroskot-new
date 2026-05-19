@@ -84,7 +84,7 @@ const slides = [
     height: 100dvh;
     overflow: hidden;
     scroll-snap-align: start;
-    touch-action: pan-y;           /* разрешаем вертикальный скролл */
+    touch-action: pan-y;
   }
 
   .hero-swiper {
@@ -107,7 +107,6 @@ const slides = [
     object-position: center;
   }
 
-  /* GPU-ускорение и анимация только для активного слайда */
   .swiper-slide-active .slide-bg {
     will-change: transform;
     transform: translate3d(0, 0, 0);
@@ -190,7 +189,6 @@ const slides = [
 </style>
 
 <script>
-  // Используем window.onload для уверенности, что Swiper уже загружен
   window.addEventListener('load', () => {
     const heroSwiperEl = document.querySelector('.hero-swiper');
     if (heroSwiperEl && window.Swiper) {
