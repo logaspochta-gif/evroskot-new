@@ -4,6 +4,11 @@ import { Image } from "astro:assets";
 import hero1 from "../assets/images/hero/golpast.jpg";
 import hero2 from "../assets/images/hero/Gol.jpg";
 import hero3 from "../assets/images/hero/Jersey.jpg";
+import Swiper from 'swiper';
+import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
 
 const slides = [
   {
@@ -49,8 +54,10 @@ const slides = [
               alt=""
               width={1920}
               height={1080}
+              sizes="(max-width: 768px) 100vw, 1920px"
               loading={index === 0 ? "eager" : "lazy"}
               fetchpriority={index === 0 ? "high" : "auto"}
+              decoding={index === 0 ? "sync" : "async"}
               class="slide-image"
             />
           </div>
@@ -87,12 +94,18 @@ const slides = [
     touch-action: pan-y;
   }
 
-  .hero-swiper {
-    position: absolute;
-    top: 0;
-    left: 0;
+  /* Обязательные стили Swiper */
+  .swiper,
+  .hero-swiper,
+  .swiper-wrapper,
+  .swiper-slide {
     width: 100%;
     height: 100%;
+  }
+
+  .swiper-slide {
+    position: relative;
+    overflow: hidden;
   }
 
   .slide-bg {
@@ -114,8 +127,8 @@ const slides = [
   }
 
   @keyframes heroZoom {
-    0% { transform: scale(1.05); }
-    100% { transform: scale(1); }
+    0% { transform: translate3d(0, 0, 0) scale(1.02); }
+    100% { transform: translate3d(0, -8px, 0) scale(1); }
   }
 
   .overlay {
@@ -133,6 +146,7 @@ const slides = [
     transform: translateY(-50%);
     max-width: 700px;
     color: #fff;
+    contain: layout paint style;
   }
 
   .actions {
@@ -154,7 +168,6 @@ const slides = [
     background: var(--accent);
     color: #fff;
   }
-
   .primary-btn:hover {
     background: var(--accent-hover);
     transform: translateY(-2px);
@@ -163,9 +176,8 @@ const slides = [
   .secondary-btn {
     color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.08);
   }
-
   .secondary-btn:hover { transform: translateY(-2px); }
 
   .swiper-button-prev,
@@ -176,38 +188,54 @@ const slides = [
 
   .anim-fade-up {
     opacity: 0;
-    transform: translateY(30px);
-    transition: opacity 0.8s ease, transform 0.8s ease;
+    animation: fadeUp 0.8s ease forwards;
   }
   .anim-fade-up.visible {
-    opacity: 1;
-    transform: translateY(0);
+    animation: fadeUp 0.8s ease forwards;
   }
-  .anim-delay-1 { transition-delay: 0.3s; }
-  .anim-delay-2 { transition-delay: 0.6s; }
-  .anim-delay-3 { transition-delay: 0.9s; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .anim-delay-1 { animation-delay: 0.3s; }
+  .anim-delay-2 { animation-delay: 0.6s; }
+  .anim-delay-3 { animation-delay: 0.9s; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .swiper-slide-active .slide-bg,
+    .anim-fade-up {
+      animation: none !important;
+      transition: none !important;
+    }
+    .anim-fade-up { opacity: 1; transform: translateY(0); }
+  }
 </style>
 
-<script>
-  window.addEventListener('load', () => {
-    const heroSwiperEl = document.querySelector('.hero-swiper');
-    if (heroSwiperEl && window.Swiper) {
-      new Swiper(heroSwiperEl, {
-        loop: true,
-        speed: 800,
-        autoplay: { delay: 5000 },
-        pagination: { el: '.swiper-pagination', clickable: true },
-        navigation: {
-          nextEl: '.swiper-button-next',
-          prevEl: '.swiper-button-prev',
-        },
-        effect: 'slide',
-        preloadImages: false,
-        watchSlidesProgress: true,
-        lazy: true,
-      });
-    } else {
-      console.warn('Swiper not loaded or hero-swiper element not found');
-    }
-  });
+<script type="module">
+  import Swiper from 'swiper';
+  import { Navigation, Pagination, Autoplay } from 'swiper/modules';
+
+  function init() {
+    const el = document.querySelector('.hero-swiper');
+    if (!el) return;
+
+    new Swiper(el, {
+      modules: [Navigation, Pagination, Autoplay],
+      loop: true,
+      speed: 800,
+      autoplay: { delay: 5000, disableOnInteraction: false },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+      },
+      pagination: { el: '.swiper-pagination', clickable: true },
+      preloadImages: false,
+    });
+  }
+
+  if (typeof requestIdleCallback === 'function') {
+    requestIdleCallback(init);
+  } else {
+    setTimeout(init, 1);
+  }
 </script>

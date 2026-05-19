@@ -1,4 +1,5 @@
 ---
+// src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
 import PostModal from "../components/PostModal.astro";
 import { env } from 'cloudflare:workers';
@@ -122,6 +123,17 @@ const { title, description } = Astro.props;
         content-visibility: visible;
         contain-intrinsic-size: auto;
       }
+
+      /* ===== ОПТИМИЗАЦИЯ ===== */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -130,6 +142,7 @@ const { title, description } = Astro.props;
     <PostModal />
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
     <script is:inline>
+      // Intersection Observer для анимаций
       (function () {
         const observer = new IntersectionObserver(
           (entries) => {
@@ -147,6 +160,7 @@ const { title, description } = Astro.props;
       })();
     </script>
     <script is:inline>
+      // Обработчик клика для модального окна
       document.addEventListener("click", function (e) {
         const link = e.target.closest("a[data-owner-id][data-post-id]");
         if (link) {
