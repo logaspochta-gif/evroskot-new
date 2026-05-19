@@ -4,11 +4,6 @@ import { Image } from "astro:assets";
 import hero1 from "../assets/images/hero/golpast.jpg";
 import hero2 from "../assets/images/hero/Gol.jpg";
 import hero3 from "../assets/images/hero/Jersey.jpg";
-import Swiper from 'swiper';
-import { Navigation, Pagination, Autoplay } from 'swiper/modules';
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
 
 const slides = [
   {
@@ -186,13 +181,11 @@ const slides = [
   }
 
   /* ===== АНИМАЦИИ ТЕКСТА ===== */
-  /* Базовое состояние – скрыто */
   .anim-fade-up {
     opacity: 0;
     transform: translate3d(0, 30px, 0);
   }
 
-  /* Анимация запускается только когда добавлен класс .animated */
   .anim-fade-up.animated {
     animation: fadeUp 0.8s ease forwards;
   }
@@ -208,10 +201,9 @@ const slides = [
     }
   }
 
-  /* Задержки для последовательного появления */
-  .anim-delay-1 { animation-delay: 0.3s; }
-  .anim-delay-2 { animation-delay: 0.6s; }
-  .anim-delay-3 { animation-delay: 0.9s; }
+  .anim-delay-1.animated { animation-delay: 0.3s; }
+  .anim-delay-2.animated { animation-delay: 0.6s; }
+  .anim-delay-3.animated { animation-delay: 0.9s; }
 
   @media (prefers-reduced-motion: reduce) {
     .swiper-slide-active .slide-bg,
@@ -225,6 +217,9 @@ const slides = [
 </style>
 
 <script type="module">
+  import Swiper from "swiper";
+  import { Navigation, Pagination, Autoplay } from "swiper/modules";
+
   const heroSwiperEl = document.querySelector(".hero-swiper");
 
   if (heroSwiperEl) {
@@ -245,33 +240,25 @@ const slides = [
         clickable: true,
       },
       preloadImages: false,
-
-      // Запускаем анимацию при инициализации и при смене слайда
       on: {
         init(swiper) {
-          // Анимируем первый слайд
-          swiper.slides[swiper.activeIndex]
+          const activeSlide = swiper.slides[swiper.activeIndex];
+          activeSlide
             .querySelectorAll(".anim-fade-up")
-            .forEach((el) => {
-              el.classList.add("animated");
-            });
+            .forEach((el) => el.classList.add("animated"));
         },
         slideChangeTransitionStart(swiper) {
-          // Удаляем класс у всех слайдов, затем добавляем активному
           swiper.slides.forEach((slide) => {
             slide
               .querySelectorAll(".anim-fade-up")
-              .forEach((el) => {
-                el.classList.remove("animated");
-              });
+              .forEach((el) => el.classList.remove("animated"));
           });
-          // Принудительный reflow для перезапуска анимации
-          void swiper.slides[swiper.activeIndex].offsetWidth;
-          swiper.slides[swiper.activeIndex]
-            .querySelectorAll(".anim-fade-up")
-            .forEach((el) => {
-              el.classList.add("animated");
-            });
+          requestAnimationFrame(() => {
+            const activeSlide = swiper.slides[swiper.activeIndex];
+            activeSlide
+              .querySelectorAll(".anim-fade-up")
+              .forEach((el) => el.classList.add("animated"));
+          });
         },
       },
     });
