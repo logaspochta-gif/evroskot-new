@@ -23,40 +23,38 @@ const slides = [
 <section class="hero" id="hero">
   <div class="swiper hero-swiper">
     <div class="swiper-wrapper">
-      {
-        slides.map((slide, index) => (
-          <div class="swiper-slide">
-            <div class="slide-bg">
-              <Image
-                src={slide.img}
-                alt=""
-                width={1920}
-                height={1080}
-                loading={index === 0 ? "eager" : "lazy"}
-                fetchpriority={index === 0 ? "high" : "auto"}
-                class="slide-image"
-              />
-            </div>
-            <div class="overlay" />
-            <div class="content">
-              <span class="badge anim-fade-up">{slide.badge}</span>
-              <h1 class="anim-fade-up anim-delay-1">
-                {slide.title} <br />
-                <span class="accent">{slide.subtitle}</span>
-              </h1>
-              <p class="anim-fade-up anim-delay-2">{slide.description}</p>
-              <div class="actions anim-fade-up anim-delay-3">
-                <a href="#contact" class="primary-btn">
-                  {slide.primaryBtn}
-                </a>
-                <a href="#breeds" class="secondary-btn">
-                  {slide.secondaryBtn}
-                </a>
-              </div>
+      {slides.map((slide, index) => (
+        <div class="swiper-slide">
+          <div class="slide-bg">
+            <Image
+              src={slide.img}
+              alt=""
+              width={1920}
+              height={1080}
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchpriority={index === 0 ? "high" : "auto"}
+              class="slide-image"
+            />
+          </div>
+          <div class="overlay"></div>
+          <div class="content">
+            <span class="badge anim-fade-up">{slide.badge}</span>
+            <h1 class="anim-fade-up anim-delay-1">
+              {slide.title} <br />
+              <span class="accent">{slide.subtitle}</span>
+            </h1>
+            <p class="anim-fade-up anim-delay-2">{slide.description}</p>
+            <div class="actions anim-fade-up anim-delay-3">
+              <a href="#contact" class="primary-btn">
+                {slide.primaryBtn}
+              </a>
+              <a href="#breeds" class="secondary-btn">
+                {slide.secondaryBtn}
+              </a>
             </div>
           </div>
-        ))
-      }
+        </div>
+      ))}
     </div>
     <div class="swiper-pagination"></div>
     <div class="swiper-button-prev"></div>
@@ -126,8 +124,6 @@ const slides = [
     max-width: 700px;
     color: #fff;
   }
-
-  /* … остальные стили (badge, buttons и т.д.) без изменений */
 
   .swiper-button-prev,
   .swiper-button-next,
