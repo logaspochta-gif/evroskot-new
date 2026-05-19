@@ -16,7 +16,26 @@ const slides = [
     primaryBtn: "Запросить прайс",
     secondaryBtn: "Посмотреть породы",
   },
-  // … остальные слайды
+  {
+    img: hero2,
+    badge: "Голштинская порода",
+    title: "Мировой лидер",
+    subtitle: "по удоям молока",
+    description:
+      "Генетика из лучших хозяйств Дании. Продуктивность до 12 000 кг молока за лактацию.",
+    primaryBtn: "Запросить подбор",
+    secondaryBtn: "Все породы",
+  },
+  {
+    img: hero3,
+    badge: "Джерсейская порода",
+    title: "Высокая жирность",
+    subtitle: "и долголетие",
+    description:
+      "Идеальна для сыроварения. Жирность молока до 6%.",
+    primaryBtn: "Запросить прайс",
+    secondaryBtn: "Смотреть породы",
+  },
 ];
 ---
 
@@ -45,12 +64,8 @@ const slides = [
             </h1>
             <p class="anim-fade-up anim-delay-2">{slide.description}</p>
             <div class="actions anim-fade-up anim-delay-3">
-              <a href="#contact" class="primary-btn">
-                {slide.primaryBtn}
-              </a>
-              <a href="#breeds" class="secondary-btn">
-                {slide.secondaryBtn}
-              </a>
+              <a href="#contact" class="primary-btn">{slide.primaryBtn}</a>
+              <a href="#breeds" class="secondary-btn">{slide.secondaryBtn}</a>
             </div>
           </div>
         </div>
@@ -92,7 +107,7 @@ const slides = [
     object-position: center;
   }
 
-  /* GPU-ускорение только для активного слайда */
+  /* GPU-ускорение и анимация только для активного слайда */
   .swiper-slide-active .slide-bg {
     will-change: transform;
     transform: translate3d(0, 0, 0);
@@ -100,12 +115,8 @@ const slides = [
   }
 
   @keyframes heroZoom {
-    0% {
-      transform: scale(1.05);
-    }
-    100% {
-      transform: scale(1);
-    }
+    0% { transform: scale(1.05); }
+    100% { transform: scale(1); }
   }
 
   .overlay {
@@ -125,15 +136,66 @@ const slides = [
     color: #fff;
   }
 
+  /* Стили для кнопок */
+  .actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .primary-btn,
+  .secondary-btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .primary-btn {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .primary-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+  }
+
+  .secondary-btn {
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(10px);
+  }
+
+  .secondary-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* Пагинация и стрелки */
   .swiper-button-prev,
   .swiper-button-next,
   .swiper-pagination {
     contain: layout style paint;
   }
+
+  /* Анимации текста (замедлены) */
+  .anim-fade-up {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .anim-fade-up.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .anim-delay-1 { transition-delay: 0.3s; }
+  .anim-delay-2 { transition-delay: 0.6s; }
+  .anim-delay-3 { transition-delay: 0.9s; }
 </style>
 
 <script>
-  (() => {
+  document.addEventListener("DOMContentLoaded", () => {
     const heroSwiperEl = document.querySelector(".hero-swiper");
     if (heroSwiperEl && typeof Swiper !== "undefined") {
       new Swiper(heroSwiperEl, {
@@ -151,5 +213,5 @@ const slides = [
         lazy: true,
       });
     }
-  })();
+  });
 </script>

@@ -2,7 +2,7 @@
 // src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
 import PostModal from "../components/PostModal.astro";
-import { env } from 'cloudflare:workers';
+import { env } from "cloudflare:workers";
 
 export interface Props {
   title: string;
@@ -80,7 +80,9 @@ const { title, description } = Astro.props;
       .anim-fade-up {
         opacity: 0;
         transform: translateY(30px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
       }
       .anim-fade-up.visible {
         opacity: 1;
@@ -90,7 +92,9 @@ const { title, description } = Astro.props;
       .anim-fade-left {
         opacity: 0;
         transform: translateX(-30px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
       }
       .anim-fade-left.visible {
         opacity: 1;
@@ -100,25 +104,37 @@ const { title, description } = Astro.props;
       .anim-fade-right {
         opacity: 0;
         transform: translateX(30px);
-        transition: opacity 0.6s ease, transform 0.6s ease;
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
       }
       .anim-fade-right.visible {
         opacity: 1;
         transform: translateX(0);
       }
 
-      .anim-delay-1 { transition-delay: 0.1s; }
-      .anim-delay-2 { transition-delay: 0.2s; }
-      .anim-delay-3 { transition-delay: 0.3s; }
-      .anim-delay-4 { transition-delay: 0.4s; }
-      .anim-delay-5 { transition-delay: 0.5s; }
+      .anim-delay-1 {
+        transition-delay: 0.1s;
+      }
+      .anim-delay-2 {
+        transition-delay: 0.2s;
+      }
+      .anim-delay-3 {
+        transition-delay: 0.3s;
+      }
+      .anim-delay-4 {
+        transition-delay: 0.4s;
+      }
+      .anim-delay-5 {
+        transition-delay: 0.5s;
+      }
 
       /* ===== CSS SCROLL SNAP ===== */
       html {
         scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
       }
-      section {
+      section:not(#hero) {
         scroll-snap-align: start;
       }
 
@@ -137,7 +153,8 @@ const { title, description } = Astro.props;
     <Header />
     <slot />
     <PostModal />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"
+    ></script>
     <script is:inline>
       // Intersection Observer для анимаций
       (function () {
@@ -149,7 +166,7 @@ const { title, description } = Astro.props;
               }
             });
           },
-          { threshold: 0.15 }
+          { threshold: 0.15 },
         );
         document
           .querySelectorAll(".anim-fade-up, .anim-fade-left, .anim-fade-right")
