@@ -237,7 +237,7 @@
   .media-swiper .swiper-wrapper,
   .media-swiper .swiper-slide {
     width: 100%;
-    height: 100%;
+    height: 100vh !important;
     min-width: 0;
     min-height: 0;
   }
@@ -271,24 +271,39 @@
     cursor: grab;
   }
 
-  /* Видео-обёртка */
+  /* =========================
+     VIDEO
+  ========================= */
+
   .video-wrapper {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
-    overflow: hidden;
-    background: #000;
+    min-width: 0;
+    min-height: 0;
+
     display: flex;
     align-items: center;
     justify-content: center;
+
+    overflow: hidden;
+    background: #000;
   }
 
   .video-wrapper video,
   .video-wrapper iframe {
-    width: 100%;
-    height: 100%;
+    display: block;
+
+    width: 100vw;
+    height: 100vh;
+
+    max-width: 100%;
+    max-height: 100%;
+
     border: none;
+    background: #000;
+
     object-fit: contain;
   }
 
@@ -562,17 +577,16 @@
             }
 
             if (videoUrl) {
-              // Нативное видео
+              // Нативное видео без autoplay и muted
               return `
                 <div class="swiper-slide" data-type="video">
                   <div class="video-wrapper swiper-no-swiping">
                     <video
                       src="${videoUrl}"
                       controls
-                      autoplay
-                      muted
                       playsinline
                       preload="metadata"
+                      controlsList="nodownload"
                     ></video>
                   </div>
                 </div>
@@ -656,8 +670,6 @@
           loop: false,
           speed: 350,
           spaceBetween: 0,
-          centeredSlides: true,
-          autoHeight: false,
           preloadImages: false,
           watchOverflow: true,
           grabCursor: true,
@@ -679,13 +691,14 @@
           },
         });
 
-        setTimeout(() => {
+        // Принудительно обновляем размеры Swiper после рендеринга
+        requestAnimationFrame(() => {
           if (currentSwiper) {
             currentSwiper.update();
             currentSwiper.updateSize();
             currentSwiper.updateSlides();
           }
-        }, 100);
+        });
 
         function updateCounter(swiper, total) {
           if (!counter) return;
