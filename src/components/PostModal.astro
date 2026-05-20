@@ -233,11 +233,14 @@
 
   /* Swiper */
   .media-carousel,
-  .media-swiper,
+  .media-swiper {
+    width: 100%;
+    height: 100%;
+  }
+
   .media-swiper .swiper-wrapper,
   .media-swiper .swiper-slide {
-    width: 100%;
-    height: 100vh !important;
+    height: 100%;
     min-width: 0;
     min-height: 0;
   }
@@ -271,40 +274,37 @@
     cursor: grab;
   }
 
-  /* =========================
-     VIDEO
-  ========================= */
-
+  /* Видео (исправлено) */
   .video-wrapper {
-    position: absolute;
-    inset: 0;
+    position: relative;
     width: 100%;
     height: 100%;
-    min-width: 0;
-    min-height: 0;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     overflow: hidden;
     background: #000;
   }
 
   .video-wrapper video,
   .video-wrapper iframe {
-    display: block;
-
-    width: 100vw;
-    height: 100vh;
-
+    width: 100%;
+    height: 100%;
     max-width: 100%;
     max-height: 100%;
-
+    display: block;
     border: none;
     background: #000;
-
     object-fit: contain;
+  }
+
+  .video-wrapper iframe {
+    aspect-ratio: 16 / 9;
+  }
+
+  /* Слайды с видео не должны перехватывать жесты */
+  .swiper-slide[data-type="video"] {
+    touch-action: pan-y;
   }
 
   .link-preview,
@@ -560,29 +560,25 @@
           if (att.type === "video" && att.video) {
             const v = att.video;
             const accessKey = v.access_key || "";
-            let videoUrl = null;
+            let videoData = null;
 
             try {
               const videoRes = await fetch(
                 `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
               );
               if (videoRes.ok) {
-                const videoData = await videoRes.json();
-                if (videoData.success) {
-                  videoUrl = videoData.mp4;
-                }
+                videoData = await videoRes.json();
               }
             } catch (e) {
               console.error("Ошибка загрузки видео:", e);
             }
 
-            if (videoUrl) {
-              // Нативное видео без autoplay и muted
+            // Предпочитаем HLS, если доступен
+            if (videoData?.hls) {
               return `
                 <div class="swiper-slide" data-type="video">
-                  <div class="video-wrapper swiper-no-swiping">
+                  <div class="video-wrapper swiper-no-swiping" data-hls="${videoData.hls}">
                     <video
-                      src="${videoUrl}"
                       controls
                       playsinline
                       preload="metadata"
@@ -591,26 +587,42 @@
                   </div>
                 </div>
               `;
-            } else {
-              // Fallback iframe (на случай, если видео не получено)
-              const iframeSrc =
-                `https://vk.com/video_ext.php?oid=${v.owner_id}` +
-                `&id=${v.id}` +
-                `&hash=${accessKey}` +
-                `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+            }
+
+            if (videoData?.mp4) {
               return `
                 <div class="swiper-slide" data-type="video">
-                  <div class="video-wrapper">
-                    <iframe
-                      src="${iframeSrc}"
-                      allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                      allowfullscreen
-                      referrerpolicy="no-referrer"
-                    ></iframe>
+                  <div class="video-wrapper swiper-no-swiping">
+                    <video
+                      src="${videoData.mp4}"
+                      controls
+                      playsinline
+                      preload="metadata"
+                      controlsList="nodownload"
+                    ></video>
                   </div>
                 </div>
               `;
             }
+
+            // Fallback iframe VK
+            const iframeSrc =
+              `https://vk.com/video_ext.php?oid=${v.owner_id}` +
+              `&id=${v.id}` +
+              `&hash=${accessKey}` +
+              `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+            return `
+              <div class="swiper-slide" data-type="video">
+                <div class="video-wrapper">
+                  <iframe
+                    src="${iframeSrc}"
+                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                    allowfullscreen
+                    referrerpolicy="no-referrer"
+                  ></iframe>
+                </div>
+              </div>
+            `;
           }
 
           if (att.type === "link" && att.link) {
@@ -669,16 +681,34 @@
         currentSwiper = new Swiper(".media-swiper", {
           loop: false,
           speed: 350,
-          spaceBetween: 0,
+
+          observer: true,
+          observeParents: true,
+          observeSlideChildren: true,
+          resizeObserver: true,
+
+          noSwiping: true,
+          noSwipingClass: "swiper-no-swiping",
+
           preloadImages: false,
           watchOverflow: true,
           grabCursor: true,
-          keyboard: { enabled: true, onlyInViewport: true },
-          pagination: { el: ".swiper-pagination", clickable: true },
+
+          keyboard: {
+            enabled: true,
+            onlyInViewport: true,
+          },
+
+          pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+          },
+
           navigation: {
             nextEl: ".nav-next",
             prevEl: ".nav-prev",
           },
+
           on: {
             init(swiper) {
               updateCounter(swiper, mediaItems.length);
@@ -690,6 +720,19 @@
             },
           },
         });
+
+        // Активируем HLS для видео, если загружена библиотека hls.js
+        if (typeof Hls !== "undefined") {
+          document.querySelectorAll("[data-hls]").forEach((wrapper) => {
+            const video = wrapper.querySelector("video");
+            const hlsUrl = wrapper.dataset.hls;
+            if (video && hlsUrl) {
+              const hls = new Hls();
+              hls.loadSource(hlsUrl);
+              hls.attachMedia(video);
+            }
+          });
+        }
 
         // Принудительно обновляем размеры Swiper после рендеринга
         requestAnimationFrame(() => {
