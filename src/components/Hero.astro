@@ -40,42 +40,53 @@ const slides = [
 
 <section class="hero" id="hero">
   <div class="slides" id="hero-slides">
-    {slides.map((slide, index) => (
-      <div class="slide" id={`slide-${index}`}>
-        <div class="slide-bg">
-          <Image
-            src={slide.img}
-            alt=""
-            widths={[480, 768, 1280, 1920]}
-            sizes="100vw"
-            format="avif"
-            quality={65}
-            loading={index === 0 ? "eager" : "lazy"}
-            fetchpriority={index === 0 ? "high" : "auto"}
-            decoding={index === 0 ? "sync" : "async"}
-            class="slide-image"
-          />
-        </div>
-        <div class="content">
-          <span class="badge">{slide.badge}</span>
-          <h1>
-            {slide.title} <br />
-            <span class="accent">{slide.subtitle}</span>
-          </h1>
-          <p>{slide.description}</p>
-          <div class="actions">
-            <a href="#contact" class="primary-btn">{slide.primaryBtn}</a>
-            <a href="#breeds" class="secondary-btn">{slide.secondaryBtn}</a>
+    {
+      slides.map((slide, index) => (
+        <div class="slide" id={`slide-${index}`}>
+          <div class="slide-bg">
+            <Image
+              src={slide.img}
+              alt=""
+              widths={[480, 768, 1280, 1920]}
+              sizes="100vw"
+              format="avif"
+              quality={65}
+              loading={index === 0 ? "eager" : "lazy"}
+              fetchpriority={index === 0 ? "high" : "auto"}
+              decoding={index === 0 ? "sync" : "async"}
+              class="slide-image"
+            />
+          </div>
+          <div class="content">
+            <span class="badge">{slide.badge}</span>
+            <h1>
+              {slide.title} <br />
+              <span class="accent">{slide.subtitle}</span>
+            </h1>
+            <p>{slide.description}</p>
+            <div class="actions">
+              <a href="#contact" class="primary-btn">
+                {slide.primaryBtn}
+              </a>
+              <a href="#breeds" class="secondary-btn">
+                {slide.secondaryBtn}
+              </a>
+            </div>
           </div>
         </div>
-      </div>
-    ))}
+      ))
+    }
   </div>
   <div class="dots" id="hero-dots">
-    {slides.map((_, index) => (
-      <button class="dot" data-index={index} aria-label={`Перейти к слайду ${index + 1}`}>
-      </button>
-    ))}
+    {
+      slides.map((_, index) => (
+        <button
+          class="dot"
+          data-index={index}
+          aria-label={`Перейти к слайду ${index + 1}`}
+        ></button>
+      ))
+    }
   </div>
 </section>
 
@@ -111,7 +122,7 @@ const slides = [
   }
 
   .slide::before {
-    content: '';
+    content: "";
     position: absolute;
     inset: 0;
     background: rgba(0, 0, 0, 0.45);
@@ -178,7 +189,9 @@ const slides = [
     opacity: 0;
   }
 
-  .accent { color: var(--accent); }
+  .accent {
+    color: var(--accent);
+  }
 
   .content p {
     font-size: clamp(0.9rem, 2.5vh, 1.2rem);
@@ -203,7 +216,9 @@ const slides = [
     border-radius: 8px;
     font-weight: 700;
     text-decoration: none;
-    transition: background 0.2s, transform 0.2s;
+    transition:
+      background 0.2s,
+      transform 0.2s;
   }
 
   .primary-btn {
@@ -220,7 +235,9 @@ const slides = [
     border: 1px solid rgba(255, 255, 255, 0.4);
     background: rgba(255, 255, 255, 0.08);
   }
-  .secondary-btn:hover { transform: translateY(-2px); }
+  .secondary-btn:hover {
+    transform: translateY(-2px);
+  }
 
   .dots {
     position: absolute;
@@ -239,7 +256,9 @@ const slides = [
     background: rgba(255, 255, 255, 0.5);
     border: none;
     cursor: pointer;
-    transition: background 0.3s, transform 0.2s;
+    transition:
+      background 0.3s,
+      transform 0.2s;
     padding: 0;
     font-size: 0;
   }
@@ -274,10 +293,10 @@ const slides = [
 
 <script>
   (() => {
-    const slidesContainer = document.getElementById('hero-slides');
+    const slidesContainer = document.getElementById("hero-slides");
     if (!slidesContainer) return;
 
-    const dots = document.querySelectorAll('#hero-dots .dot');
+    const dots = document.querySelectorAll("#hero-dots .dot");
     if (dots.length === 0) return;
 
     let currentIndex = 0;
@@ -289,55 +308,45 @@ const slides = [
       if (!slidesContainer) return;
       slidesContainer.scrollTo({
         left: index * slidesContainer.clientWidth,
-        behavior: 'smooth',
+        behavior: "smooth",
       });
     }
 
     function updateDots(index: number) {
       dots.forEach((dot, i) => {
-        dot.classList.toggle('active', i === index);
+        dot.classList.toggle("active", i === index);
       });
     }
 
+    // Запускаем автопрокрутку (без остановки при наведении)
     function startAutoplay() {
       if (interval) clearInterval(interval);
       interval = setInterval(() => {
         currentIndex = (currentIndex + 1) % totalSlides;
         goTo(currentIndex);
         updateDots(currentIndex);
-      }, 5000);
-    }
-
-    function stopAutoplay() {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
+      }, 7000); // 7 секунд
     }
 
     startAutoplay();
 
-    if (slidesContainer) {
-      slidesContainer.addEventListener('mouseenter', stopAutoplay);
-      slidesContainer.addEventListener('mouseleave', startAutoplay);
-    }
-
-    dots.forEach(dot => {
-      dot.addEventListener('click', (e) => {
+    // Клик по точкам – переключение и перезапуск таймера
+    dots.forEach((dot) => {
+      dot.addEventListener("click", (e) => {
         const targetDot = e.currentTarget as HTMLElement;
         const indexStr = targetDot.dataset.index;
         if (indexStr === undefined) return;
         currentIndex = parseInt(indexStr, 10);
         goTo(currentIndex);
         updateDots(currentIndex);
-        stopAutoplay();
-        startAutoplay();
+        startAutoplay(); // перезапуск после ручного переключения
       });
     });
 
+    // Отслеживание скролла (если пользователь прокрутил вручную)
     if (slidesContainer) {
       slidesContainer.addEventListener(
-        'scroll',
+        "scroll",
         () => {
           if (!ticking) {
             requestAnimationFrame(() => {
@@ -349,6 +358,7 @@ const slides = [
               if (newIndex !== currentIndex) {
                 currentIndex = newIndex;
                 updateDots(currentIndex);
+                // Не перезапускаем таймер – он продолжит идти сам
               }
               ticking = false;
             });

@@ -91,11 +91,17 @@
     height: 100vh;
     overflow: hidden;
     background: #000;
+    transition:
+      transform 0.25s ease,
+      opacity 0.25s ease;
+    will-change: transform, opacity;
   }
 
   .modal-content {
     width: 100%;
     height: 100%;
+    min-width: 0;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -257,25 +263,33 @@
     object-fit: contain;
     user-select: none;
     -webkit-user-drag: none;
+    will-change: transform;
+    transition: transform 0.25s ease;
   }
 
-  /* Адаптивный контейнер для видео 16:9 */
-  .video-responsive {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    max-height: 100%;
-    background: #000;
-    overflow: hidden;
+  .media-swiper .swiper-slide.zoomed img {
+    cursor: grab;
   }
 
-  .video-responsive iframe {
+  /* Видео-обёртка */
+  .video-wrapper {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100% !important;
-    height: 100% !important;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .video-wrapper video,
+  .video-wrapper iframe {
+    width: 100%;
+    height: 100%;
     border: none;
+    object-fit: contain;
   }
 
   .link-preview,
@@ -366,6 +380,8 @@
   // @ts-nocheck
 
   let currentSwiper = null;
+  let scale = 1;
+  let zoomInitialized = false;
 
   function destroySwiper() {
     if (currentSwiper) {
@@ -377,6 +393,77 @@
   function pauseAllVideos() {
     document.querySelectorAll(".media-swiper video").forEach((v) => {
       if (v && typeof v.pause === "function") v.pause();
+    });
+  }
+
+  function resetZoom() {
+    const img = document.querySelector(
+      ".media-swiper .swiper-slide-active img",
+    );
+    if (!img) return;
+    img.style.transform = "scale(1)";
+    const slide = img.closest(".swiper-slide");
+    slide?.classList.remove("zoomed");
+    scale = 1;
+  }
+
+  function initZoom() {
+    if (zoomInitialized) return;
+    zoomInitialized = true;
+
+    const container = document.body;
+    let initialDistance = 0;
+    let initialScale = 1;
+
+    container.addEventListener("dblclick", (e) => {
+      const img = e.target.closest("img");
+      if (!img) return;
+      const slide = img.closest(".swiper-slide");
+      if (!slide) return;
+      if (slide.classList.contains("zoomed")) {
+        img.style.transform = "scale(1)";
+        slide.classList.remove("zoomed");
+        scale = 1;
+      } else {
+        img.style.transform = "scale(2)";
+        slide.classList.add("zoomed");
+        scale = 2;
+      }
+    });
+
+    container.addEventListener(
+      "touchmove",
+      (e) => {
+        if (e.touches.length !== 2) return;
+        e.preventDefault();
+        const img = document.querySelector(
+          ".media-swiper .swiper-slide-active img",
+        );
+        if (!img) return;
+        const currentDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY,
+        );
+        if (!initialDistance) {
+          initialDistance = currentDistance;
+          initialScale = scale;
+          return;
+        }
+        const nextScale = Math.min(
+          Math.max(initialScale * (currentDistance / initialDistance), 1),
+          3,
+        );
+        img.style.transform = `scale(${nextScale})`;
+        scale = nextScale;
+        const slide = img.closest(".swiper-slide");
+        if (nextScale > 1) slide?.classList.add("zoomed");
+        else slide?.classList.remove("zoomed");
+      },
+      { passive: false },
+    );
+
+    container.addEventListener("touchend", () => {
+      initialDistance = 0;
     });
   }
 
@@ -399,12 +486,27 @@
     if (navArrows) navArrows.style.display = "none";
     if (info) info.style.display = "none";
 
+    const isLocal =
+      location.hostname === "localhost" || location.hostname === "127.0.0.1";
+
     try {
-      const res = await fetch(
-        `/api/get-post?owner_id=${ownerId}&post_id=${postId}`,
-      );
-      if (!res.ok) throw new Error("Ошибка загрузки");
-      const post = await res.json();
+      let post = null;
+
+      if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
+        const res = await fetch(
+          `https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${window.VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`,
+        );
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.error_msg);
+        post = data.response?.[0] ?? null;
+      } else {
+        const res = await fetch(
+          `/api/get-post?owner_id=${ownerId}&post_id=${postId}`,
+        );
+        if (!res.ok) throw new Error("Ошибка загрузки");
+        post = await res.json();
+      }
+
       if (!post) throw new Error("Пост не найден");
 
       const date = new Date(post.date * 1000);
@@ -429,9 +531,8 @@
         }
       }
 
-      // Строим слайды
-      const slides = mediaItems
-        .map((att, idx) => {
+      const slides = await Promise.all(
+        mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
             const img =
               att.photo.sizes.find((s) => s.type === "w") ||
@@ -444,38 +545,69 @@
           if (att.type === "video" && att.video) {
             const v = att.video;
             const accessKey = v.access_key || "";
+            let videoUrl = null;
 
-            // Используем стандартный плеер vkvideo.ru (как в примере с сайта ВК)
-            const iframeSrc =
-              `https://vkvideo.ru/video_ext.php?oid=${v.owner_id}` +
-              `&id=${v.id}` +
-              `&hash=${accessKey}` +
-              `&hd=2`;
+            try {
+              const videoRes = await fetch(
+                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
+              );
+              if (videoRes.ok) {
+                const videoData = await videoRes.json();
+                if (videoData.success) {
+                  videoUrl = videoData.mp4;
+                }
+              }
+            } catch (e) {
+              console.error("Ошибка загрузки видео:", e);
+            }
 
-            return `
-              <div class="swiper-slide" data-type="video">
-                <div class="video-responsive">
-                  <iframe
-                    src="${iframeSrc}"
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture; screen-wake-lock;"
-                    allowfullscreen
-                    referrerpolicy="no-referrer"
-                    style="border: none;"
-                  ></iframe>
+            if (videoUrl) {
+              // Нативное видео
+              return `
+                <div class="swiper-slide" data-type="video">
+                  <div class="video-wrapper swiper-no-swiping">
+                    <video
+                      src="${videoUrl}"
+                      controls
+                      autoplay
+                      muted
+                      playsinline
+                      preload="metadata"
+                    ></video>
+                  </div>
                 </div>
-              </div>
-            `;
+              `;
+            } else {
+              // Fallback iframe (на случай, если видео не получено)
+              const iframeSrc =
+                `https://vk.com/video_ext.php?oid=${v.owner_id}` +
+                `&id=${v.id}` +
+                `&hash=${accessKey}` +
+                `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+              return `
+                <div class="swiper-slide" data-type="video">
+                  <div class="video-wrapper">
+                    <iframe
+                      src="${iframeSrc}"
+                      allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
+                      allowfullscreen
+                      referrerpolicy="no-referrer"
+                    ></iframe>
+                  </div>
+                </div>
+              `;
+            }
           }
 
           if (att.type === "link" && att.link) {
             const link = att.link;
-            const imgHtml = link.photo?.sizes?.length
+            const imageHtml = link.photo?.sizes?.length
               ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />`
               : "";
             return `
               <div class="swiper-slide" data-type="link">
                 <div class="link-preview">
-                  ${imgHtml}
+                  ${imageHtml}
                   <div class="preview-title">${link.title || "Ссылка"}</div>
                   ${link.description ? `<div class="preview-description">${link.description}</div>` : ""}
                   <a href="${link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
@@ -497,14 +629,14 @@
           }
 
           return "";
-        })
-        .join("");
+        }),
+      );
 
       content.innerHTML = `
         <div class="media-carousel">
           <div class="swiper media-swiper">
             <div class="swiper-wrapper">
-              ${slides}
+              ${slides.join("")}
             </div>
             <div class="swiper-pagination"></div>
           </div>
@@ -519,7 +651,6 @@
         info.style.display = "block";
       }
 
-      // Swiper
       if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
         currentSwiper = new Swiper(".media-swiper", {
           loop: false,
@@ -542,19 +673,19 @@
             },
             slideChange(swiper) {
               updateCounter(swiper, mediaItems.length);
+              resetZoom();
               pauseAllVideos();
             },
           },
         });
 
-        // После вставки обновляем Swiper, чтобы он пересчитал размеры слайдов
         setTimeout(() => {
           if (currentSwiper) {
             currentSwiper.update();
             currentSwiper.updateSize();
             currentSwiper.updateSlides();
           }
-        }, 200);
+        }, 100);
 
         function updateCounter(swiper, total) {
           if (!counter) return;
@@ -572,6 +703,8 @@
           currentSwiper?.slideNext();
         });
       }
+
+      initZoom();
     } catch (err) {
       console.error(err);
       content.innerHTML =
@@ -589,7 +722,6 @@
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
     destroySwiper();
-    // Очищаем содержимое, чтобы остановить видео
     const content = document.getElementById("modalContent");
     if (content) content.innerHTML = "";
   }
