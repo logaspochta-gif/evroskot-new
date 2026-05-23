@@ -167,7 +167,7 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* === Splide – принудительно на весь экран === */
+  /* Splide – базовые размеры */
   .splide,
   .splide__track,
   .splide__list,
@@ -487,7 +487,7 @@
         })
       );
 
-      content.innerHTML = `
+      const finalHTML = `
         <div class="splide">
           <div class="splide__track">
             <ul class="splide__list">
@@ -496,6 +496,8 @@
           </div>
         </div>
       `;
+
+      content.innerHTML = finalHTML;
       log('HTML вставлен');
 
       if (info) {
@@ -506,7 +508,14 @@
         info.style.display = "block";
       }
 
-      // Инициализация Splide без задержек – CSS уже гарантирует 100%
+      // === СБРОС ИНЛАЙН-СТИЛЕЙ ПЕРЕД ИНИЦИАЛИЗАЦИЕЙ ===
+      document.querySelectorAll('.splide, .splide__track, .splide__list, .splide__slide').forEach(el => {
+        el.style.removeProperty('width');
+        el.style.removeProperty('height');
+        el.style.removeProperty('min-width');
+        el.style.removeProperty('min-height');
+      });
+
       if (mediaItems.length > 0) {
         const splide = new Splide('.splide', {
           type: 'slide',
