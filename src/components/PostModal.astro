@@ -219,7 +219,6 @@
     border: none;
     background: #000;
     object-fit: contain; /* сохраняет пропорции, но заполняет контейнер */
-    /* убираем aspect-ratio, чтобы не мешал */
     aspect-ratio: auto;
   }
 
@@ -516,6 +515,42 @@
         el.style.removeProperty('min-width');
         el.style.removeProperty('min-height');
       });
+
+      // === ДИАГНОСТИКА: поиск виновника 304px ===
+      const diagnoseWidth = () => {
+        const slide = document.querySelector('.splide__slide');
+        if (!slide) return log('❌ .splide__slide не найден');
+
+        let el = slide;
+        const chain = [];
+        while (el) {
+          const cs = getComputedStyle(el);
+          chain.push({
+            element: `${el.tagName.toLowerCase()}${el.className ? '.' + el.className.split(' ').join('.') : ''}`,
+            width: cs.width,
+            maxWidth: cs.maxWidth,
+            minWidth: cs.minWidth,
+            overflow: cs.overflow,
+          });
+          if (cs.width === '304px') {
+            console.warn('🔴 Найден виновник 304px:', el);
+            // Попытка показать CSS-правила
+            try {
+              const rules = window.getMatchedCSSRules(el);
+              if (rules) {
+                for (const rule of rules) {
+                  if (rule.style.width || rule.style.maxWidth) {
+                    console.log('   Правило:', rule.cssText);
+                  }
+                }
+              }
+            } catch (e) {}
+          }
+          el = el.parentElement;
+        }
+        console.table(chain);
+      };
+      diagnoseWidth();
 
       if (mediaItems.length > 0) {
         const splide = new Splide('.splide', {
