@@ -1,20 +1,59 @@
 ---
+// src/components/BreedsSlider.astro
 ---
+
 <section class="breeds-section" id="breeds">
   <h2 class="section-title wow animate__fadeInUp">Наши <span class="accent">породы</span></h2>
-  <p class="section-subtitle wow animate__fadeInUp" data-wow-delay="0.2s">Только проверенная датская генетика</p>
-  <div class="swiper breeds-swiper wow animate__fadeInUp" data-wow-delay="0.4s">
-    <div class="swiper-wrapper">
-      <div class="swiper-slide">
-        <div class="breed-card">
-          <div class="img" style="background-image: url('https://images.unsplash.com/photo-1746401671955-60e6e1039904?auto=format&fit=crop&w=600&q=80');"></div>
-          <h3>Голштинская</h3>
-          <p>Мировой лидер по удоям</p>
-        </div>
-      </div>
-      <!-- ещё 7 пород -->
+  <p class="section-subtitle wow animate__fadeInUp" data-wow-delay="0.2s">
+    Только проверенная датская генетика
+  </p>
+
+  <div class="splide breeds-splide wow animate__fadeInUp" data-wow-delay="0.4s">
+    <div class="splide__track">
+      <ul class="splide__list">
+        <li class="splide__slide">
+          <div class="breed-card">
+            <div
+              class="img"
+              style="background-image: url('https://images.unsplash.com/photo-1746401671955-60e6e1039904?auto=format&fit=crop&w=600&q=80');"
+            ></div>
+            <h3>Голштинская</h3>
+            <p>Мировой лидер по удоям</p>
+          </div>
+        </li>
+        <li class="splide__slide">
+          <div class="breed-card">
+            <div
+              class="img"
+              style="background-image: url('https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?auto=format&fit=crop&w=600&q=80');"
+            ></div>
+            <h3>Красная Датская</h3>
+            <p>Неприхотливость и здоровье</p>
+          </div>
+        </li>
+        <li class="splide__slide">
+          <div class="breed-card">
+            <div
+              class="img"
+              style="background-image: url('https://images.unsplash.com/photo-1527153857715-3908f2bfae2e?auto=format&fit=crop&w=600&q=80');"
+            ></div>
+            <h3>Джерсейская</h3>
+            <p>Высокая жирность молока</p>
+          </div>
+        </li>
+        <li class="splide__slide">
+          <div class="breed-card">
+            <div
+              class="img"
+              style="background-image: url('https://images.unsplash.com/photo-1511044568932-338cba0ad803?auto=format&fit=crop&w=600&q=80');"
+            ></div>
+            <h3>Чёрно-пёстрая</h3>
+            <p>Отличная акклиматизация</p>
+          </div>
+        </li>
+      </ul>
     </div>
-    <div class="swiper-pagination"></div>
+    <div class="splide__pagination"></div>
   </div>
 </section>
 
@@ -23,10 +62,12 @@
     padding: 80px 5%;
     background: #000;
   }
-  .breeds-swiper {
+
+  .breeds-splide {
     width: 100%;
     padding-bottom: 50px;
   }
+
   .breed-card {
     background: var(--card-bg);
     border-radius: 20px;
@@ -34,40 +75,71 @@
     border: 1px solid var(--border);
     text-align: center;
     transition: transform 0.3s;
+    height: 100%;
   }
-  .breed-card:hover { transform: translateY(-5px); }
+
+  .breed-card:hover {
+    transform: translateY(-5px);
+  }
+
   .img {
     height: 220px;
     background-size: cover;
     background-position: center;
   }
+
   .breed-card h3 {
     font-size: 1.3rem;
     margin: 1rem 0 0.5rem;
     font-weight: 700;
   }
+
   .breed-card p {
     opacity: 0.7;
     font-size: 0.9rem;
     padding: 0 1rem 1.5rem;
+    margin: 0;
   }
-  /* ... swiper pagination ... */
+
+  .splide__pagination {
+    bottom: 0;
+  }
+
+  .splide__pagination__page {
+    background: rgba(255, 255, 255, 0.5);
+    width: 10px;
+    height: 10px;
+    margin: 0 6px;
+    transition: background 0.3s;
+  }
+
+  .splide__pagination__page.is-active {
+    background: var(--accent, #10b981);
+    transform: scale(1.2);
+  }
 </style>
 
 <script>
+  import Splide from '@splidejs/splide';
+
   document.addEventListener('DOMContentLoaded', () => {
-    const swiperContainer = document.querySelector('.breeds-swiper');
-    if (swiperContainer) {
-      new Swiper(swiperContainer, {
-        slidesPerView: 3,
-        spaceBetween: 24,
-        pagination: { el: '.swiper-pagination', clickable: true },
+    const container = document.querySelector('.breeds-splide');
+    
+    // Проверяем, что элемент является HTMLElement (нужен Splide)
+    if (container instanceof HTMLElement) {
+      new Splide(container, {
+        type: 'slide',
+        rewind: false,
+        perPage: 3,
+        perMove: 1,
+        gap: 24,
+        pagination: true,
+        arrows: false,
         breakpoints: {
-          320: { slidesPerView: 1 },
-          768: { slidesPerView: 2 },
-          1024: { slidesPerView: 3 },
-        }
-      });
+          1024: { perPage: 2 },
+          768: { perPage: 1 },
+        },
+      }).mount();
     }
   });
 </script>
