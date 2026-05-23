@@ -546,6 +546,7 @@
         }
       }
 
+      // Генерируем HTML слайдов (вставлен полностью)
       const slides = await Promise.all(
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
@@ -658,7 +659,7 @@
         }),
       );
 
-      content.innerHTML = `
+      const finalHTML = `
         <div class="media-carousel">
           <div class="swiper media-swiper">
             <div class="swiper-wrapper">
@@ -669,114 +670,110 @@
         </div>
       `;
 
-      if (info) {
-        info.innerHTML = `
-          <div class="post-date">${formattedDate}</div>
-          ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}
-        `;
-        info.style.display = "block";
-      }
+      // Функция, которая вставит HTML и создаст Swiper
+      const initSwiper = () => {
+        content.innerHTML = finalHTML;
 
-      if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
-        currentSwiper = new Swiper(".media-swiper", {
-          loop: false,
-          speed: 350,
-
-          observer: true,
-          observeParents: true,
-          observeSlideChildren: true,
-          resizeObserver: true,
-
-          noSwiping: true,
-          noSwipingClass: "swiper-no-swiping",
-
-          preloadImages: false,
-          watchOverflow: true,
-          grabCursor: true,
-
-          keyboard: {
-            enabled: true,
-            onlyInViewport: true,
-          },
-
-          pagination: {
-            el: ".swiper-pagination",
-            clickable: true,
-          },
-
-          navigation: {
-            nextEl: ".nav-next",
-            prevEl: ".nav-prev",
-          },
-
-          on: {
-            init(swiper) {
-              updateCounter(swiper, mediaItems.length);
-            },
-            slideChange(swiper) {
-              updateCounter(swiper, mediaItems.length);
-              resetZoom();
-              pauseAllVideos();
-            },
-          },
-        });
-
-        // Активируем HLS для видео, если загружена библиотека hls.js
-        if (typeof Hls !== "undefined") {
-          document.querySelectorAll("[data-hls]").forEach((wrapper) => {
-            const video = wrapper.querySelector("video");
-            const hlsUrl = wrapper.dataset.hls;
-            if (video && hlsUrl) {
-              const hls = new Hls();
-              hls.loadSource(hlsUrl);
-              hls.attachMedia(video);
-            }
-          });
+        if (info) {
+          info.innerHTML = `
+            <div class="post-date">${formattedDate}</div>
+            ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}
+          `;
+          info.style.display = "block";
         }
 
-        // -- ИСПРАВЛЕНИЕ: ждём завершения анимации появления --
-        const onTransitionEnd = (e) => {
-          if (e.target === modal && e.propertyName === 'opacity') {
-            modal.removeEventListener('transitionend', onTransitionEnd);
-            requestAnimationFrame(() => {
-              if (currentSwiper) {
-                currentSwiper.updateSize();
-                currentSwiper.update();
+        if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
+          currentSwiper = new Swiper(".media-swiper", {
+            loop: false,
+            speed: 350,
+
+            observer: true,
+            observeParents: true,
+            observeSlideChildren: true,
+            resizeObserver: true,
+
+            noSwiping: true,
+            noSwipingClass: "swiper-no-swiping",
+
+            preloadImages: false,
+            watchOverflow: true,
+            grabCursor: true,
+
+            keyboard: {
+              enabled: true,
+              onlyInViewport: true,
+            },
+
+            pagination: {
+              el: ".swiper-pagination",
+              clickable: true,
+            },
+
+            navigation: {
+              nextEl: ".nav-next",
+              prevEl: ".nav-prev",
+            },
+
+            on: {
+              init(swiper) {
+                updateCounter(swiper, mediaItems.length);
+              },
+              slideChange(swiper) {
+                updateCounter(swiper, mediaItems.length);
+                resetZoom();
+                pauseAllVideos();
+              },
+            },
+          });
+
+          // Активируем HLS для видео, если загружена библиотека hls.js
+          if (typeof Hls !== "undefined") {
+            document.querySelectorAll("[data-hls]").forEach((wrapper) => {
+              const video = wrapper.querySelector("video");
+              const hlsUrl = wrapper.dataset.hls;
+              if (video && hlsUrl) {
+                const hls = new Hls();
+                hls.loadSource(hlsUrl);
+                hls.attachMedia(video);
               }
             });
           }
-        };
-        modal.addEventListener('transitionend', onTransitionEnd);
 
-        // Запасной таймер (на случай, если transition не отработает)
-        setTimeout(() => {
-          modal.removeEventListener('transitionend', onTransitionEnd);
-          requestAnimationFrame(() => {
-            if (currentSwiper) {
-              currentSwiper.updateSize();
-              currentSwiper.update();
-            }
+          function updateCounter(swiper, total) {
+            if (!counter) return;
+            counter.textContent = `${swiper.realIndex + 1} / ${total}`;
+          }
+
+          if (navArrows) {
+            navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
+          }
+
+          document.getElementById("navPrev")?.addEventListener("click", () => {
+            currentSwiper?.slidePrev();
           });
-        }, 400);
-
-        function updateCounter(swiper, total) {
-          if (!counter) return;
-          counter.textContent = `${swiper.realIndex + 1} / ${total}`;
+          document.getElementById("navNext")?.addEventListener("click", () => {
+            currentSwiper?.slideNext();
+          });
         }
 
-        if (navArrows) {
-          navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
+        initZoom();
+      };
+
+      // Ждём завершения анимации открытия, затем инициализируем Swiper
+      const onTransitionEnd = (e) => {
+        if (e.target === modal && e.propertyName === 'opacity') {
+          modal.removeEventListener('transitionend', onTransitionEnd);
+          initSwiper();
         }
+      };
+      modal.addEventListener('transitionend', onTransitionEnd);
 
-        document.getElementById("navPrev")?.addEventListener("click", () => {
-          currentSwiper?.slidePrev();
-        });
-        document.getElementById("navNext")?.addEventListener("click", () => {
-          currentSwiper?.slideNext();
-        });
-      }
+      // Запасной таймер (вдруг transition не сработает)
+      setTimeout(() => {
+        modal.removeEventListener('transitionend', onTransitionEnd);
+        initSwiper();
+      }, 400);
 
-      initZoom();
     } catch (err) {
       console.error(err);
       content.innerHTML =
