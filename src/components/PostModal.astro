@@ -734,14 +734,30 @@
           });
         }
 
-        // Принудительно обновляем размеры Swiper после рендеринга
-        requestAnimationFrame(() => {
-          if (currentSwiper) {
-            currentSwiper.update();
-            currentSwiper.updateSize();
-            currentSwiper.updateSlides();
+        // -- ИСПРАВЛЕНИЕ: ждём завершения анимации появления --
+        const onTransitionEnd = (e) => {
+          if (e.target === modal && e.propertyName === 'opacity') {
+            modal.removeEventListener('transitionend', onTransitionEnd);
+            requestAnimationFrame(() => {
+              if (currentSwiper) {
+                currentSwiper.updateSize();
+                currentSwiper.update();
+              }
+            });
           }
-        });
+        };
+        modal.addEventListener('transitionend', onTransitionEnd);
+
+        // Запасной таймер (на случай, если transition не отработает)
+        setTimeout(() => {
+          modal.removeEventListener('transitionend', onTransitionEnd);
+          requestAnimationFrame(() => {
+            if (currentSwiper) {
+              currentSwiper.updateSize();
+              currentSwiper.update();
+            }
+          });
+        }, 400);
 
         function updateCounter(swiper, total) {
           if (!counter) return;
