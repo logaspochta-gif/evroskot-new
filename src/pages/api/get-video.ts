@@ -1,5 +1,4 @@
-import { getVkToken } from '../../utils/getVkToken';
-// (остальные импорты без изменений)
+// src/pages/api/get-video.ts
 
 export const prerender = false;
 
@@ -59,6 +58,22 @@ function json(data: unknown, status = 200, extraHeaders: Record<string, string> 
   return new Response(JSON.stringify(data), { status, headers });
 }
 
+// ── Получение токена (Cloudflare Workers → env, иначе import.meta.env) ──
+async function getAccessToken(): Promise<string> {
+  // Cloudflare Workers
+  try {
+    const { env } = await import('cloudflare:workers');
+    if (env.VK_ACCESS_TOKEN) return env.VK_ACCESS_TOKEN;
+  } catch {
+    // не Cloudflare – идём дальше
+  }
+  // Локальная разработка (Vite / Astro dev)
+  if (typeof import.meta !== 'undefined' && import.meta.env?.VK_ACCESS_TOKEN) {
+    return import.meta.env.VK_ACCESS_TOKEN;
+  }
+  throw new Error('VK_ACCESS_TOKEN missing');
+}
+
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
 
@@ -83,18 +98,23 @@ export async function GET({ request }: { request: Request }) {
 
   let ACCESS_TOKEN: string;
   try {
-    ACCESS_TOKEN = getVkToken();
-  } catch {
+    ACCESS_TOKEN = await getAccessToken();
+  } catch (error) {
     return json({ error: "VK_ACCESS_TOKEN missing" }, 500);
   }
 
-  const cache = (caches as unknown as { default: Cache }).default;
+  // Edge‑кеш (только в Cloudflare)
+  const cache = typeof caches !== 'undefined'
+    ? (caches as unknown as { default: Cache }).default
+    : null;
   const cacheKey = new Request(request.url, request);
-  const cached = await cache.match(cacheKey);
-  if (cached) {
-    const response = new Response(cached.body, cached);
-    response.headers.set("Access-Control-Allow-Origin", origin || "*");
-    return response;
+  if (cache) {
+    const cached = await cache.match(cacheKey);
+    if (cached) {
+      const response = new Response(cached.body, cached);
+      response.headers.set("Access-Control-Allow-Origin", origin || "*");
+      return response;
+    }
   }
 
   try {
@@ -175,7 +195,9 @@ export async function GET({ request }: { request: Request }) {
       "Access-Control-Allow-Origin": origin || "*",
     });
 
-    await cache.put(cacheKey, res.clone());
+    if (cache) {
+      await cache.put(cacheKey, res.clone());
+    }
 
     return res;
   } catch (error) {
