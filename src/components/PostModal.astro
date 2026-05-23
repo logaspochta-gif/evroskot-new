@@ -167,10 +167,17 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Splide */
-  .splide { width: 100%; height: 100%; }
-  .splide__track { height: 100%; }
-  .splide__list { height: 100%; }
+  /* === Splide – принудительно на весь экран === */
+  .splide,
+  .splide__track,
+  .splide__list,
+  .splide__slide {
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 0;
+    min-height: 0;
+  }
+
   .splide__slide {
     position: relative;
     overflow: hidden;
@@ -179,6 +186,7 @@
     justify-content: center;
     background: #000;
   }
+
   .splide__slide img {
     width: 100%;
     height: 100%;
@@ -186,7 +194,9 @@
     user-select: none;
     will-change: transform;
   }
+
   .splide__slide.zoomed img { cursor: grab; }
+
   .video-wrapper {
     position: relative;
     width: 100%;
@@ -197,6 +207,7 @@
     overflow: hidden;
     background: #000;
   }
+
   .video-wrapper video,
   .video-wrapper iframe {
     width: 100%;
@@ -208,7 +219,9 @@
     background: #000;
     object-fit: contain;
   }
+
   .video-wrapper iframe { aspect-ratio: 16 / 9; }
+
   .link-preview, .doc-preview {
     display: flex;
     flex-direction: column;
@@ -221,6 +234,7 @@
     width: 100%;
     height: 100%;
   }
+
   .preview-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
   .preview-description { font-size: 0.9rem; opacity: 0.7; margin-bottom: 16px; }
   .preview-button {
@@ -234,9 +248,11 @@
     transition: background 0.2s;
   }
   .preview-button:hover { background: var(--accent-hover); }
+
   .splide__pagination { bottom: 18px !important; }
   .splide__pagination__page { background: rgba(255,255,255,0.5); opacity: 1; }
   .splide__pagination__page.is-active { background: var(--accent, #10b981); }
+
   .splide__arrow {
     background: rgba(255,255,255,0.14);
     backdrop-filter: blur(10px);
@@ -246,6 +262,7 @@
     opacity: 1;
   }
   .splide__arrow svg { fill: #fff; width: 20px; height: 20px; }
+
   @media (max-width: 768px) {
     .modal-close { width: 42px; height: 42px; top: 14px; right: 14px; }
     .splide__arrow { width: 44px; height: 44px; }
@@ -262,8 +279,6 @@
   let currentSplide = null;
   let scale = 1;
   let zoomInitialized = false;
-  let initTimeout = null;   // ID таймера инициализации
-  let modalOpen = false;    // флаг, что окно открыто
 
   function log(msg, data) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
@@ -342,13 +357,6 @@
   async function openPostModal(ownerId, postId) {
     log('Открытие модального окна', { ownerId, postId });
 
-    // Сброс таймера и флага
-    if (initTimeout) {
-      clearTimeout(initTimeout);
-      initTimeout = null;
-    }
-    modalOpen = true;
-
     const modal = document.getElementById("postModal");
     const content = document.getElementById("modalContent");
     const counter = document.getElementById("slideCounter");
@@ -362,21 +370,6 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
     log('Класс open добавлен, body зафиксирован');
-
-    // Пытаемся запросить fullscreen
-    let fullscreenRequested = false;
-    if (modal.requestFullscreen) {
-      try {
-        await modal.requestFullscreen();
-        fullscreenRequested = true;
-        log('Fullscreen запрошен успешно');
-      } catch (err) {
-        log('Ошибка fullscreen:', err.message);
-        fullscreenRequested = false;
-      }
-    } else {
-      log('Fullscreen API не поддерживается');
-    }
 
     content.innerHTML = '<div class="modal-spinner"></div>';
     if (counter) counter.textContent = "";
@@ -421,7 +414,6 @@
       }
       log('Медиа-элементов:', mediaItems.length);
 
-      // Генерация слайдов
       const slides = await Promise.all(
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
@@ -495,7 +487,7 @@
         })
       );
 
-      const finalHTML = `
+      content.innerHTML = `
         <div class="splide">
           <div class="splide__track">
             <ul class="splide__list">
@@ -504,8 +496,6 @@
           </div>
         </div>
       `;
-
-      content.innerHTML = finalHTML;
       log('HTML вставлен');
 
       if (info) {
@@ -516,91 +506,53 @@
         info.style.display = "block";
       }
 
-      // Функция, создающая Splide после реального fullscreen (или fallback)
-      const initSplide = () => {
-        // Проверка, что окно всё ещё открыто и контейнер существует
-        if (!modalOpen || !document.querySelector('.splide')) {
-          log('Splide не инициализирован: окно закрыто или нет контейнера');
-          return;
-        }
-        log('Инициализация Splide');
-        if (mediaItems.length > 0) {
-          const splide = new Splide('.splide', {
-            type: 'slide',
-            rewind: false,
-            speed: 350,
-            pagination: true,
-            arrows: false, // используем свои стрелки
-            keyboard: 'global',
-            waitForTransition: true,
-            updateOnMove: true,
-          }).mount();
+      // Инициализация Splide без задержек – CSS уже гарантирует 100%
+      if (mediaItems.length > 0) {
+        const splide = new Splide('.splide', {
+          type: 'slide',
+          rewind: false,
+          speed: 350,
+          pagination: true,
+          arrows: false,
+          keyboard: 'global',
+          waitForTransition: true,
+          updateOnMove: true,
+        }).mount();
 
-          currentSplide = splide;
-          log('Splide смонтирован');
+        currentSplide = splide;
+        log('Splide смонтирован');
 
-          const updateCounter = () => {
-            if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
-          };
-          splide.on('move', updateCounter);
-          updateCounter();
-
-          if (typeof Hls !== "undefined") {
-            document.querySelectorAll("[data-hls]").forEach(wrapper => {
-              const video = wrapper.querySelector("video");
-              const hlsUrl = wrapper.dataset.hls;
-              if (video && hlsUrl) {
-                const hls = new Hls();
-                hls.loadSource(hlsUrl);
-                hls.attachMedia(video);
-              }
-            });
-          }
-
-          document.getElementById("navPrev")?.addEventListener("click", () => splide.go('<'));
-          document.getElementById("navNext")?.addEventListener("click", () => splide.go('>'));
-          if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
-
-          splide.on('move', () => {
-            resetZoom();
-            pauseAllVideos();
-          });
-        } else {
-          log('Нет медиа для Splide');
-        }
-        initZoom();
-      };
-
-      // Ждём реального fullscreen или fallback
-      if (fullscreenRequested) {
-        const onFullscreenChange = () => {
-          if (document.fullscreenElement === modal) {
-            log('Fullscreen активирован');
-            document.removeEventListener('fullscreenchange', onFullscreenChange);
-            if (initTimeout) {
-              clearTimeout(initTimeout);
-              initTimeout = null;
-            }
-            requestAnimationFrame(() => {
-              initSplide();
-            });
-          }
+        const updateCounter = () => {
+          if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
         };
-        document.addEventListener('fullscreenchange', onFullscreenChange);
+        splide.on('move', updateCounter);
+        updateCounter();
 
-        // Запасной таймер (если fullscreen не случился)
-        initTimeout = setTimeout(() => {
-          if (!document.fullscreenElement) {
-            log('Fullscreen не обнаружен по таймауту, запускаем Splide');
-            document.removeEventListener('fullscreenchange', onFullscreenChange);
-            initSplide();
-          }
-          initTimeout = null;
-        }, 800);
+        if (typeof Hls !== "undefined") {
+          document.querySelectorAll("[data-hls]").forEach(wrapper => {
+            const video = wrapper.querySelector("video");
+            const hlsUrl = wrapper.dataset.hls;
+            if (video && hlsUrl) {
+              const hls = new Hls();
+              hls.loadSource(hlsUrl);
+              hls.attachMedia(video);
+            }
+          });
+        }
+
+        document.getElementById("navPrev")?.addEventListener("click", () => splide.go('<'));
+        document.getElementById("navNext")?.addEventListener("click", () => splide.go('>'));
+        if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
+
+        splide.on('move', () => {
+          resetZoom();
+          pauseAllVideos();
+        });
       } else {
-        log('Fullscreen не запрашивался, сразу запускаем Splide');
-        initSplide();
+        log('Нет медиа для Splide');
       }
+
+      initZoom();
     } catch (err) {
       log('Критическая ошибка', err);
       content.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
@@ -609,18 +561,8 @@
 
   function closeModal() {
     log('Закрытие модального окна');
-    modalOpen = false;
-    if (initTimeout) {
-      clearTimeout(initTimeout);
-      initTimeout = null;
-    }
-
     const modal = document.getElementById("postModal");
     if (!modal) return;
-
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    }
 
     if (document.activeElement && modal.contains(document.activeElement)) {
       document.activeElement.blur();
