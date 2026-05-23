@@ -63,7 +63,7 @@
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;          /* 👈 динамическая высота */
     overflow: hidden;
     background: #000;
   }
@@ -73,7 +73,7 @@
     position: absolute;
     inset: 0;
     width: 100vw;
-    height: 100vh;
+    height: 100dvh;          /* 👈 */
     overflow: hidden;
     display: block;
   }
@@ -85,7 +85,7 @@
     position: absolute;
     inset: 0;
     width: 100vw !important;
-    height: 100vh !important;
+    height: 100dvh !important;  /* 👈 */
     max-width: none !important;
     overflow: hidden;
   }
@@ -97,20 +97,17 @@
   }
 
   #postModal .splide__list {
-    height: 100vh !important;
+    height: 100dvh !important;  /* 👈 */
   }
 
   #postModal .splide__slide {
     position: relative;
     width: 100vw !important;
-    height: 100vh !important;
+    height: 100dvh !important;  /* 👈 */
     min-width: 100vw !important;
     max-width: none !important;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
+    display: block;            /* не flex, чтобы не сжимало высоту */
     overflow: hidden;
     background: #000;
   }
@@ -129,33 +126,43 @@
   }
 
   /* =========================
-     VIDEO
+     VIDEO (без iframe!)
   ========================= */
   .video-wrapper {
+    position: relative;
     width: 100%;
     height: 100%;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
     overflow: hidden;
     background: #000;
   }
 
-  .video-wrapper iframe,
   .video-wrapper video {
+    position: absolute;
+    inset: 0;
     width: 100% !important;
     height: 100% !important;
     min-width: 100% !important;
     min-height: 100% !important;
-
-    flex: 1 1 auto;
-
+    max-width: 100% !important;
+    max-height: 100% !important;
     border: none;
     display: block;
-
     object-fit: contain;
+    aspect-ratio: auto !important;
+  }
+
+  /* Сообщение о недоступности видео */
+  .video-unavailable {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    padding: 40px;
+    text-align: center;
+    height: 100%;
+    width: 100%;
+    background: #111;
   }
 
   /* =========================
@@ -425,8 +432,8 @@
     destroySplide();
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
-    document.body.style.overflow = "hidden";
-    log('Класс open добавлен, body зафиксирован');
+    document.documentElement.style.overflow = "hidden";   // 👈 правильный способ
+    log('Класс open добавлен, html overflow скрыт');
 
     content.innerHTML = '<div class="modal-spinner"></div>';
     if (counter) counter.textContent = "";
@@ -475,7 +482,7 @@
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
             const img = att.photo.sizes.find(s => s.type === "w") || att.photo.sizes[att.photo.sizes.length - 1];
-            return `<li class="splide__slide" data-type="photo">
+            return `<li class="splide__slide ${idx === 0 ? 'is-active' : ''}" data-type="photo">
               <img src="${img.url}" alt="Фото ${idx + 1}" loading="lazy" />
             </li>`;
           }
@@ -489,11 +496,16 @@
               const videoRes = await fetch(
                 `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`
               );
-              if (videoRes.ok) videoData = await videoRes.json();
-            } catch (e) { log('Ошибка загрузки видео', e); }
+              if (videoRes.ok) {
+                videoData = await videoRes.json();
+              }
+            } catch (e) {
+              log('Ошибка загрузки видео:', e);
+            }
 
+            // Если есть HLS или MP4 – рендерим нативное видео
             if (videoData?.hls) {
-              return `<li class="splide__slide" data-type="video">
+              return `<li class="splide__slide ${idx === 0 ? 'is-active' : ''}" data-type="video">
                 <div class="video-wrapper" data-hls="${videoData.hls}">
                   <video controls playsinline preload="metadata" controlsList="nodownload"></video>
                 </div>
@@ -501,17 +513,19 @@
             }
 
             if (videoData?.mp4) {
-              return `<li class="splide__slide" data-type="video">
+              return `<li class="splide__slide ${idx === 0 ? 'is-active' : ''}" data-type="video">
                 <div class="video-wrapper">
                   <video src="${videoData.mp4}" controls playsinline preload="metadata" controlsList="nodownload"></video>
                 </div>
               </li>`;
             }
 
-            const iframeSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
-            return `<li class="splide__slide" data-type="video">
-              <div class="video-wrapper">
-                <iframe src="${iframeSrc}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
+            // Нет ни HLS, ни MP4 – сообщение о недоступности
+            return `<li class="splide__slide ${idx === 0 ? 'is-active' : ''}" data-type="video">
+              <div class="video-wrapper video-unavailable">
+                <div class="video-message">
+                  Видео недоступно для встроенного просмотра
+                </div>
               </div>
             </li>`;
           }
@@ -519,8 +533,9 @@
           if (att.type === "link" && att.link) {
             const link = att.link;
             const imageHtml = link.photo?.sizes?.length
-              ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />` : "";
-            return `<li class="splide__slide" data-type="link">
+              ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />`
+              : "";
+            return `<li class="splide__slide ${idx === 0 ? 'is-active' : ''}" data-type="link">
               <div class="link-preview">
                 ${imageHtml}
                 <div class="preview-title">${link.title || "Ссылка"}</div>
@@ -532,7 +547,7 @@
 
           if (att.type === "doc" && att.doc) {
             const doc = att.doc;
-            return `<li class="splide__slide" data-type="doc">
+            return `<li class="splide__slide ${idx === 0 ? 'is-active' : ''}" data-type="doc">
               <div class="doc-preview">
                 <div class="preview-title">${doc.title || "Документ"}</div>
                 <a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
@@ -565,7 +580,7 @@
         info.style.display = "block";
       }
 
-      // === ИНИЦИАЛИЗАЦИЯ SPLIDE (исправленная) ===
+      // === ИНИЦИАЛИЗАЦИЯ SPLIDE ===
       if (mediaItems.length > 0) {
         const splideElement = content.querySelector('.splide');
         if (!splideElement) {
@@ -578,7 +593,7 @@
           perPage: 1,
           perMove: 1,
           width: '100vw',
-          height: '100vh',
+          height: '100dvh',    // 👈
           gap: 0,
           pagination: true,
           arrows: false,
@@ -592,35 +607,21 @@
         currentSplide = splide;
         log('Splide смонтирован');
 
-        // Принудительный сброс размеров Splide и вложенных iframe/video
-        requestAnimationFrame(() => {
-          const slides = document.querySelectorAll('#postModal .splide__slide');
-          slides.forEach(slide => {
-            slide.style.width = '100vw';
-            slide.style.height = '100vh';
-            slide.style.maxWidth = 'none';
-            slide.style.minWidth = '100vw';
-            slide.style.minHeight = '100vh';
-          });
-
-          document.querySelectorAll('#postModal .video-wrapper iframe, #postModal .video-wrapper video').forEach(media => {
-            media.style.width = '100%';
-            media.style.height = '100%';
-            media.style.minHeight = '100%';
-            media.style.flex = '1 1 auto';
-          });
-
-          if (currentSplide) {
-            currentSplide.refresh();
-          }
-        });
-
+        // Счётчик
         const updateCounter = () => {
           if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
         };
         splide.on('move', updateCounter);
         updateCounter();
 
+        // Навигация – через onclick, чтобы не накапливались обработчики
+        const prevBtn = document.getElementById("navPrev");
+        const nextBtn = document.getElementById("navNext");
+        if (prevBtn) prevBtn.onclick = () => splide.go('<');
+        if (nextBtn) nextBtn.onclick = () => splide.go('>');
+        if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
+
+        // HLS
         if (typeof Hls !== "undefined") {
           document.querySelectorAll("[data-hls]").forEach(wrapper => {
             const video = wrapper.querySelector("video");
@@ -632,10 +633,6 @@
             }
           });
         }
-
-        document.getElementById("navPrev")?.addEventListener("click", () => splide.go('<'));
-        document.getElementById("navNext")?.addEventListener("click", () => splide.go('>'));
-        if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
 
         splide.on('move', () => {
           resetZoom();
@@ -662,7 +659,7 @@
     }
     modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
-    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";   // 👈 восстанавливаем скролл
     destroySplide();
     document.getElementById("modalContent").innerHTML = "";
   }
