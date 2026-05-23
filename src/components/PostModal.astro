@@ -58,7 +58,7 @@
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100dvh;   /* динамическая высота, устойчивая к мобильным тулбарам */
+    height: 100dvh;   /* динамическая высота */
     overflow: hidden;
     background: #000;
   }
@@ -100,7 +100,7 @@
     will-change: transform;
   }
 
-  /* Видео – без iframe */
+  /* Видео‑обёртка (для video и для iframe) */
   .video-wrapper {
     position: relative;
     width: 100%;
@@ -108,7 +108,10 @@
     overflow: hidden;
     background: #000;
   }
-  .video-wrapper video {
+
+  /* Общие стили для video и iframe */
+  .video-wrapper video,
+  .video-wrapper iframe {
     position: absolute;
     inset: 0;
     width: 100% !important;
@@ -122,6 +125,8 @@
     object-fit: contain;
     aspect-ratio: auto !important;
   }
+
+  /* Сообщение о недоступности (на случай, если и iframe не нужен) */
   .video-unavailable {
     display: flex;
     align-items: center;
@@ -359,6 +364,7 @@
 
     try {
       let post = null;
+
       if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
         log('Локальный запрос к VK API');
         const res = await fetch(
@@ -429,12 +435,11 @@
               </div>`;
             }
 
-            // Видео недоступно – показываем сообщение
+            // Fallback iframe VK
+            const iframeSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
             return `<div class="slide ${idx === 0 ? 'active' : ''}" data-type="video">
-              <div class="video-wrapper video-unavailable">
-                <div class="video-message">
-                  Видео недоступно для встроенного просмотра
-                </div>
+              <div class="video-wrapper">
+                <iframe src="${iframeSrc}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
               </div>
             </div>`;
           }
