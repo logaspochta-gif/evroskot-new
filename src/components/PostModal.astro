@@ -101,15 +101,13 @@
   }
 
   #postModal .splide__slide {
+    position: relative;            /* ← ВОТ ЭТО КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ */
     width: 100vw !important;
     height: 100vh !important;
     min-width: 100vw !important;
     max-width: none !important;
 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
+    display: block;                /* убрали flex */
     overflow: hidden;
     background: #000;
   }
