@@ -2,7 +2,6 @@
 // src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
 import PostModal from "../components/PostModal.astro";
-import { getVkToken } from '../utils/getVkToken';
 
 export interface Props {
   title: string;
@@ -11,11 +10,22 @@ export interface Props {
 
 const { title, description } = Astro.props;
 
+// Проверяем, локальная ли среда (на сервере)
+const isLocal = Astro.url.hostname === 'localhost' || Astro.url.hostname === '127.0.0.1';
 let devToken = '';
-try {
-  devToken = getVkToken();
-} catch {
-  // токен не найден – передавать не будем
+
+// Если локально и есть переменная окружения, получаем токен
+if (isLocal) {
+  try {
+    // Пробуем Cloudflare Workers env (на случай запуска через Wrangler)
+    const { env } = await import('cloudflare:workers');
+    if (env.VK_ACCESS_TOKEN) devToken = env.VK_ACCESS_TOKEN;
+  } catch {
+    // Локально без Cloudflare — берём из import.meta.env (Astro / Vite)
+    if (import.meta.env?.VK_ACCESS_TOKEN) {
+      devToken = import.meta.env.VK_ACCESS_TOKEN;
+    }
+  }
 }
 ---
 
@@ -36,7 +46,6 @@ try {
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
     />
-    <!-- Подключаем JS библиотек -->
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
     <style is:global>
@@ -117,7 +126,7 @@ try {
       .anim-delay-4 { transition-delay: 0.4s; }
       .anim-delay-5 { transition-delay: 0.5s; }
 
-      /* Скролл‑снап */
+      /* Скролл-снап */
       html {
         scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
@@ -151,18 +160,14 @@ try {
     <slot />
     <PostModal />
 
-    <!-- Dev‑токен (только для localhost) -->
-    {
-  devToken ? (
-    <script is:inline>
-      {`if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-        window.VK_ACCESS_TOKEN_FOR_DEV = "${devToken}";
-      }`}
-    </script>
-  ) : null
-}
+    <!-- Передаём токен ТОЛЬКО на локальной машине -->
+        {isLocal && devToken ? (
+      <script is:inline>
+        window.VK_ACCESS_TOKEN_FOR_DEV = "{devToken}";
+      </script>
+    ) : null}
 
-    <!-- Анимации и обработчик кликов -->
+    <!-- Анимации и перехват кликов -->
     <script is:inline>
       (function () {
         const observer = new IntersectionObserver(
