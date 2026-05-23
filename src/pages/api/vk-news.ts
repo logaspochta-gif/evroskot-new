@@ -23,14 +23,11 @@ function json(data: unknown, status = 200, extraHeaders: Record<string, string> 
   return new Response(JSON.stringify(data), { status, headers });
 }
 
-// ── Получение токена (Cloudflare Workers → env, иначе import.meta.env) ──
 async function getAccessToken(): Promise<string> {
   try {
     const { env } = await import('cloudflare:workers');
     if (env.VK_ACCESS_TOKEN) return env.VK_ACCESS_TOKEN;
-  } catch {
-    // не Cloudflare – идём дальше
-  }
+  } catch {}
   if (typeof import.meta !== 'undefined' && import.meta.env?.VK_ACCESS_TOKEN) {
     return import.meta.env.VK_ACCESS_TOKEN;
   }
@@ -42,7 +39,7 @@ export async function fetchNewsFromVk(): Promise<VkPost[]> {
 
   const GROUP_ID = '99133048';
   const API_VERSION = '5.131';
-  const POSTS_LIMIT = 12;
+  const POSTS_LIMIT = 30;   // ← увеличен с 12 до 30
 
   const ownerId = -Math.abs(parseInt(GROUP_ID));
   const params = new URLSearchParams({
