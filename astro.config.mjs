@@ -1,14 +1,14 @@
 // astro.config.mjs
 import { defineConfig } from 'astro/config';
 import favicons from 'astro-favicons';
-import cloudflare from '@astrojs/cloudflare'; // если используете Cloudflare
+import cloudflare from '@astrojs/cloudflare';
 
 export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
   integrations: [
     favicons({
-      masterPicture: './src/favicon.svg', // путь к вашему исходному SVG
+      masterPicture: './public/favicon.svg',   // ← файл должен лежать в public/
       appName: 'Scanova A/S',
       appShortName: 'Scanova A/S',
       appDescription: 'Поставка племенного крупнорогатого скота из Европы',
@@ -16,7 +16,6 @@ export default defineConfig({
       theme_color: '#10b981',
       display: 'standalone',
       orientation: 'portrait',
-      // ... другие опции при необходимости
     }),
   ],
 });
