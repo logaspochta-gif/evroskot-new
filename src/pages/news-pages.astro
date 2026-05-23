@@ -2,11 +2,23 @@
 // src/pages/news-pages.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
 import NewsList from '../components/NewsList.astro';
-import type { NewsItem } from '../components/NewsList.astro';
+import { fetchNewsFromVk } from '../pages/api/vk-news'; // прямой вызов, без HTTP
 
 export const prerender = false;
 
-// ─── Типы (оставлены здесь для обработки) ───
+// ─── Типы ───
+export interface NewsItem {
+  title: string;
+  link: string;
+  pubDate: string;
+  content: string;
+  image: string | null;
+  isoDate: string;
+  size?: 'small' | 'large' | 'wide';
+  ownerId?: number;
+  postId?: number;
+}
+
 interface VkPhotoSize {
   type: string;
   url: string;
@@ -29,13 +41,6 @@ interface VkAttachment {
     title?: string;
     photo?: { sizes?: VkPhotoSize[] };
   };
-}
-
-interface VkPost {
-  id: number;
-  date: number;
-  text?: string;
-  attachments?: VkAttachment[];
 }
 
 // ─── Утилиты ───
@@ -106,6 +111,7 @@ function prepareTitleAndContent(
 ): { title: string; content: string } {
   const manualTitles: Record<number, string> = {};
 
+  // 1. Ручной заголовок
   if (manualTitles[postId]) {
     const title = manualTitles[postId];
     const cleaned = cleanVkText(rawText || '');
@@ -116,6 +122,7 @@ function prepareTitleAndContent(
     return { title, content };
   }
 
+  // 2. Заголовок из текста
   const cleaned = cleanVkText(rawText || '');
   if (cleaned) {
     const firstSentenceMatch = cleaned.match(/^(.+?[.!?…])\s/);
@@ -133,27 +140,22 @@ function prepareTitleAndContent(
     return { title, content: remaining };
   }
 
+  // 3. Автоматический заголовок из вложения
   const autoTitle = getAutoTitle(attachments);
   if (autoTitle) {
     const title = autoTitle.length > 70 ? autoTitle.slice(0, 70) + '…' : autoTitle;
     return { title, content: '' };
   }
 
+  // 4. Если ничего нет
   return { title: 'Без названия', content: '' };
 }
 
-// ─── Получение данных через наше API ───
+// ─── Загрузка данных (прямой вызов функции) ───
 let news: NewsItem[] = [];
 
 try {
-  const baseUrl = Astro.url.origin; // текущий хост (SSR)
-  const response = await fetch(`${baseUrl}/api/vk-news`);
-
-  if (!response.ok) {
-    throw new Error(`News API error: ${response.status}`);
-  }
-
-  const posts: VkPost[] = await response.json();
+  const posts = await fetchNewsFromVk();
 
   news = posts
     .filter((post) => {
@@ -170,7 +172,7 @@ try {
         post.attachments || []
       );
       const dateObj = new Date(post.date * 1000);
-      const ownerId = -Math.abs(parseInt('99133048')); // GROUP_ID
+      const ownerId = -Math.abs(parseInt('99133048'));
 
       return {
         title,
@@ -192,12 +194,7 @@ try {
   news = [];
 }
 
-const sizePattern: Array<'large' | 'wide' | 'small'> = [
-  'large',
-  'small',
-  'small',
-  'wide',
-];
+const sizePattern: Array<'large' | 'wide' | 'small'> = ['large', 'small', 'small', 'wide'];
 const newsWithSizes = news.map((item, i) => ({
   ...item,
   size: sizePattern[i] || 'small',
@@ -208,8 +205,5 @@ const newsWithSizes = news.map((item, i) => ({
   title="Новости Scanova A/S — Племенной скот из Дании"
   description="Последние события, поставки и обновления компании Scanova A/S"
 >
-  <NewsList
-    items={newsWithSizes}
-    emptyMessage="Новости пока не загружены. Попробуйте позже."
-  />
+  <NewsList items={newsWithSizes} emptyMessage="Новости пока не загружены. Попробуйте позже." />
 </BaseLayout>
