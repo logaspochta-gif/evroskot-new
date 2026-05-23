@@ -101,13 +101,13 @@
   }
 
   #postModal .splide__slide {
-    position: relative;            /* важно для позиционирования вложенных элементов */
+    position: relative;
     width: 100vw !important;
     height: 100vh !important;
     min-width: 100vw !important;
     max-width: none !important;
 
-    display: flex;                 /* вернули flex */
+    display: flex;
     align-items: center;
     justify-content: center;
 
@@ -145,8 +145,10 @@
 
   .video-wrapper iframe,
   .video-wrapper video {
-    width: 100%;
-    height: 100%;
+    width: 100% !important;
+    height: 100% !important;
+    min-width: 100% !important;
+    min-height: 100% !important;
 
     flex: 1 1 auto;
 
@@ -563,9 +565,15 @@
         info.style.display = "block";
       }
 
-      // === ИНИЦИАЛИЗАЦИЯ SPLIDE ===
+      // === ИНИЦИАЛИЗАЦИЯ SPLIDE (исправленная) ===
       if (mediaItems.length > 0) {
-        const splide = new Splide('.splide', {
+        const splideElement = content.querySelector('.splide');
+        if (!splideElement) {
+          log('❌ .splide не найден внутри modalContent');
+          return;
+        }
+
+        const splide = new Splide(splideElement, {
           type: 'slide',
           perPage: 1,
           perMove: 1,
@@ -581,16 +589,31 @@
           waitForTransition: true,
         }).mount();
 
-        // СБРОС ИНЛАЙН-СТИЛЕЙ, которые мог установить Splide
-        document.querySelectorAll('.splide, .splide__track, .splide__list, .splide__slide').forEach(el => {
-          el.style.width = '100vw';
-          el.style.height = '100vh';
-          el.style.maxWidth = 'none';
-          el.style.minWidth = '100vw';
-        });
-
         currentSplide = splide;
-        log('Splide смонтирован и размеры сброшены');
+        log('Splide смонтирован');
+
+        // Принудительный сброс размеров Splide и вложенных iframe/video
+        requestAnimationFrame(() => {
+          const slides = document.querySelectorAll('#postModal .splide__slide');
+          slides.forEach(slide => {
+            slide.style.width = '100vw';
+            slide.style.height = '100vh';
+            slide.style.maxWidth = 'none';
+            slide.style.minWidth = '100vw';
+            slide.style.minHeight = '100vh';
+          });
+
+          document.querySelectorAll('#postModal .video-wrapper iframe, #postModal .video-wrapper video').forEach(media => {
+            media.style.width = '100%';
+            media.style.height = '100%';
+            media.style.minHeight = '100%';
+            media.style.flex = '1 1 auto';
+          });
+
+          if (currentSplide) {
+            currentSplide.refresh();
+          }
+        });
 
         const updateCounter = () => {
           if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
