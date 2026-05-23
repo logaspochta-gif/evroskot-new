@@ -21,6 +21,7 @@
     "rss-parser": "^3.13.0"
   },
   "devDependencies": {
+    "knip": "^6.14.2",
     "wrangler": "^4.90.1"
   }
 }

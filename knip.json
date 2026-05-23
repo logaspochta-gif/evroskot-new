@@ -1,0 +1,5 @@
+{
+  "entry": ["src/pages/**/*.astro"],
+  "project": ["src/**/*.{astro,ts,js}"],
+  "ignoreDependencies": ["@astrojs/*"]
+}
