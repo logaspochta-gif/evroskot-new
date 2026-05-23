@@ -40,7 +40,6 @@
 </div>
 
 <style>
-  /* Все стили оставлены без изменений (из последней версии) */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -256,11 +255,15 @@
 </style>
 
 <script>
+  // @ts-nocheck
   import Splide from '@splidejs/splide';
+  declare var Hls: any;
 
   let currentSplide = null;
   let scale = 1;
   let zoomInitialized = false;
+  let initTimeout = null;   // ID таймера инициализации
+  let modalOpen = false;    // флаг, что окно открыто
 
   function log(msg, data) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
@@ -338,6 +341,14 @@
 
   async function openPostModal(ownerId, postId) {
     log('Открытие модального окна', { ownerId, postId });
+
+    // Сброс таймера и флага
+    if (initTimeout) {
+      clearTimeout(initTimeout);
+      initTimeout = null;
+    }
+    modalOpen = true;
+
     const modal = document.getElementById("postModal");
     const content = document.getElementById("modalContent");
     const counter = document.getElementById("slideCounter");
@@ -410,7 +421,7 @@
       }
       log('Медиа-элементов:', mediaItems.length);
 
-      // Генерация слайдов (без изменений)
+      // Генерация слайдов
       const slides = await Promise.all(
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
@@ -505,8 +516,13 @@
         info.style.display = "block";
       }
 
-      // Функция, создающая Splide после реального fullscreen
+      // Функция, создающая Splide после реального fullscreen (или fallback)
       const initSplide = () => {
+        // Проверка, что окно всё ещё открыто и контейнер существует
+        if (!modalOpen || !document.querySelector('.splide')) {
+          log('Splide не инициализирован: окно закрыто или нет контейнера');
+          return;
+        }
         log('Инициализация Splide');
         if (mediaItems.length > 0) {
           const splide = new Splide('.splide', {
@@ -514,7 +530,7 @@
             rewind: false,
             speed: 350,
             pagination: true,
-            arrows: false, // свои стрелки
+            arrows: false, // используем свои стрелки
             keyboard: 'global',
             waitForTransition: true,
             updateOnMove: true,
@@ -561,21 +577,25 @@
           if (document.fullscreenElement === modal) {
             log('Fullscreen активирован');
             document.removeEventListener('fullscreenchange', onFullscreenChange);
+            if (initTimeout) {
+              clearTimeout(initTimeout);
+              initTimeout = null;
+            }
             requestAnimationFrame(() => {
-              requestAnimationFrame(() => {
-                initSplide();
-              });
+              initSplide();
             });
           }
         };
         document.addEventListener('fullscreenchange', onFullscreenChange);
-        // Запасной вариант на случай, если fullscreen не сработал (мобильные)
-        setTimeout(() => {
+
+        // Запасной таймер (если fullscreen не случился)
+        initTimeout = setTimeout(() => {
           if (!document.fullscreenElement) {
-            log('Fullscreen не обнаружен, запускаем Splide без него');
+            log('Fullscreen не обнаружен по таймауту, запускаем Splide');
             document.removeEventListener('fullscreenchange', onFullscreenChange);
             initSplide();
           }
+          initTimeout = null;
         }, 800);
       } else {
         log('Fullscreen не запрашивался, сразу запускаем Splide');
@@ -589,6 +609,12 @@
 
   function closeModal() {
     log('Закрытие модального окна');
+    modalOpen = false;
+    if (initTimeout) {
+      clearTimeout(initTimeout);
+      initTimeout = null;
+    }
+
     const modal = document.getElementById("postModal");
     if (!modal) return;
 
