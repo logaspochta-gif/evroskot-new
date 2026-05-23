@@ -2,13 +2,21 @@
 // src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
 import PostModal from "../components/PostModal.astro";
-import { env } from "cloudflare:workers";
+import { getVkToken } from '../utils/getVkToken';
 
 export interface Props {
   title: string;
   description: string;
 }
+
 const { title, description } = Astro.props;
+
+let devToken = '';
+try {
+  devToken = getVkToken();
+} catch {
+  // токен не найден – передавать не будем
+}
 ---
 
 <!doctype html>
@@ -28,6 +36,9 @@ const { title, description } = Astro.props;
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
     />
+    <!-- Подключаем JS библиотек -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
     <style is:global>
       :root {
         --dark: #0a0a0a;
@@ -69,13 +80,11 @@ const { title, description } = Astro.props;
         color: var(--accent);
       }
 
-      /* ===== АНИМАЦИИ ПОЯВЛЕНИЯ ===== */
+      /* Анимации появления */
       .anim-fade-up {
         opacity: 0;
         transform: translateY(30px);
-        transition:
-          opacity 0.6s ease,
-          transform 0.6s ease;
+        transition: opacity 0.6s ease, transform 0.6s ease;
       }
       .anim-fade-up.visible {
         opacity: 1;
@@ -85,9 +94,7 @@ const { title, description } = Astro.props;
       .anim-fade-left {
         opacity: 0;
         transform: translateX(-30px);
-        transition:
-          opacity 0.6s ease,
-          transform 0.6s ease;
+        transition: opacity 0.6s ease, transform 0.6s ease;
       }
       .anim-fade-left.visible {
         opacity: 1;
@@ -97,32 +104,20 @@ const { title, description } = Astro.props;
       .anim-fade-right {
         opacity: 0;
         transform: translateX(30px);
-        transition:
-          opacity 0.6s ease,
-          transform 0.6s ease;
+        transition: opacity 0.6s ease, transform 0.6s ease;
       }
       .anim-fade-right.visible {
         opacity: 1;
         transform: translateX(0);
       }
 
-      .anim-delay-1 {
-        transition-delay: 0.1s;
-      }
-      .anim-delay-2 {
-        transition-delay: 0.2s;
-      }
-      .anim-delay-3 {
-        transition-delay: 0.3s;
-      }
-      .anim-delay-4 {
-        transition-delay: 0.4s;
-      }
-      .anim-delay-5 {
-        transition-delay: 0.5s;
-      }
+      .anim-delay-1 { transition-delay: 0.1s; }
+      .anim-delay-2 { transition-delay: 0.2s; }
+      .anim-delay-3 { transition-delay: 0.3s; }
+      .anim-delay-4 { transition-delay: 0.4s; }
+      .anim-delay-5 { transition-delay: 0.5s; }
 
-      /* ===== CSS SCROLL SNAP ===== */
+      /* Скролл‑снап */
       html {
         scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
@@ -140,7 +135,6 @@ const { title, description } = Astro.props;
         contain-intrinsic-size: auto;
       }
 
-      /* ===== ОПТИМИЗАЦИЯ ===== */
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -156,8 +150,20 @@ const { title, description } = Astro.props;
     <Header />
     <slot />
     <PostModal />
+
+    <!-- Dev‑токен (только для localhost) -->
+    {
+  devToken ? (
     <script is:inline>
-      // Intersection Observer для анимаций
+      {`if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+        window.VK_ACCESS_TOKEN_FOR_DEV = "${devToken}";
+      }`}
+    </script>
+  ) : null
+}
+
+    <!-- Анимации и обработчик кликов -->
+    <script is:inline>
       (function () {
         const observer = new IntersectionObserver(
           (entries) => {
@@ -175,7 +181,6 @@ const { title, description } = Astro.props;
       })();
     </script>
     <script is:inline>
-      // Обработчик клика для модального окна
       document.addEventListener("click", function (e) {
         const link = e.target.closest("a[data-owner-id][data-post-id]");
         if (link) {
@@ -187,14 +192,6 @@ const { title, description } = Astro.props;
           }
         }
       });
-    </script>
-    <script is:inline define:vars={{ VK_ACCESS_TOKEN: env.VK_ACCESS_TOKEN }}>
-      if (
-        location.hostname === "localhost" ||
-        location.hostname === "127.0.0.1"
-      ) {
-        window.VK_ACCESS_TOKEN_FOR_DEV = VK_ACCESS_TOKEN;
-      }
     </script>
   </body>
 </html>

@@ -1,17 +1,14 @@
-// src/pages/api/get-video.ts
-import { env } from "cloudflare:workers";
+import { getVkToken } from '../../utils/getVkToken';
+// (остальные импорты без изменений)
 
 export const prerender = false;
 
-// ── Объявления, специфичные для Cloudflare Workers ──
 declare global {
-  // Поле cf для запросов fetch
   interface RequestInit {
     cf?: Record<string, unknown>;
   }
 }
 
-// ── Типизация ответа VK API ──
 interface VKVideoImage {
   url: string;
   width: number;
@@ -47,13 +44,11 @@ interface VKResponse {
   };
 }
 
-// ── Разрешённые источники (защита от hot‑linking) ──
 const ALLOWED_ORIGINS = [
   "https://new.evroskot.ru",
   "https://evroskot.ru",
 ];
 
-// ── Helper для формирования JSON‑ответа ──
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json;charset=UTF-8",
@@ -67,7 +62,6 @@ function json(data: unknown, status = 200, extraHeaders: Record<string, string> 
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
 
-  // ── CORS‑защита ──
   const origin = request.headers.get("Origin");
   if (origin && !ALLOWED_ORIGINS.includes(origin)) {
     return json({ error: "Origin not allowed" }, 403);
@@ -77,7 +71,6 @@ export async function GET({ request }: { request: Request }) {
   const videoId = url.searchParams.get("video_id");
   const accessKey = url.searchParams.get("access_key");
 
-  // ── Валидация входных данных ──
   if (
     !ownerId ||
     !videoId ||
@@ -88,19 +81,17 @@ export async function GET({ request }: { request: Request }) {
     return json({ error: "Invalid parameters" }, 400);
   }
 
-  const ACCESS_TOKEN = env.VK_ACCESS_TOKEN;
-  if (!ACCESS_TOKEN) {
+  let ACCESS_TOKEN: string;
+  try {
+    ACCESS_TOKEN = getVkToken();
+  } catch {
     return json({ error: "VK_ACCESS_TOKEN missing" }, 500);
   }
 
-  // ── Edge‑кеш (caches.default) ──
-  // В среде Workers глобальный объект `caches` имеет свойство `default`, но типы этого не знают.
-  // Используем приведение для доступа.
   const cache = (caches as unknown as { default: Cache }).default;
   const cacheKey = new Request(request.url, request);
   const cached = await cache.match(cacheKey);
   if (cached) {
-    // Убедимся, что CORS‑заголовки корректны при выдаче из кеша
     const response = new Response(cached.body, cached);
     response.headers.set("Access-Control-Allow-Origin", origin || "*");
     return response;
@@ -115,15 +106,13 @@ export async function GET({ request }: { request: Request }) {
 
     const vkUrl = `https://api.vk.com/method/video.get?${params.toString()}`;
 
-    // ── AbortController для предотвращения зависаний ──
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
 
     const response = await fetch(vkUrl, {
       signal: controller.signal,
-      // Cloudflare‑специфичные параметры кеширования
       cf: {
-        cacheTtl: 86400,       // 1 сутки
+        cacheTtl: 86400,
         cacheEverything: true,
       },
       headers: {
@@ -146,7 +135,6 @@ export async function GET({ request }: { request: Request }) {
 
     const files = video.files || {};
 
-    // Собираем источники от лучшего к худшему
     const sources = [
       files.mp4_2160,
       files.mp4_1440,
@@ -159,7 +147,6 @@ export async function GET({ request }: { request: Request }) {
 
     const bestMp4 = sources[0] || null;
 
-    // Без мутации исходного массива
     const poster =
       video.image
         ?.toSorted((a, b) => b.width - a.width)?.[0]?.url ?? null;
@@ -188,7 +175,6 @@ export async function GET({ request }: { request: Request }) {
       "Access-Control-Allow-Origin": origin || "*",
     });
 
-    // Кладём ответ в Edge‑кеш на сутки
     await cache.put(cacheKey, res.clone());
 
     return res;
