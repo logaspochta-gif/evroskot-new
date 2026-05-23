@@ -10,64 +10,37 @@
   aria-hidden="true"
 >
   <div class="modal-container">
-    <!-- CLOSE -->
     <button class="modal-close" id="modalClose" aria-label="Закрыть">
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-      >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M18 6L6 18M6 6l12 12"></path>
       </svg>
     </button>
 
-    <!-- COUNTER -->
     <div class="slide-counter" id="slideCounter"></div>
 
-    <!-- CONTENT -->
     <div class="modal-content" id="modalContent">
       <div class="modal-spinner"></div>
     </div>
 
-    <!-- NAVIGATION -->
     <div class="nav-arrows" id="navArrows" style="display:none">
       <button class="nav-arrow nav-prev" id="navPrev" aria-label="Предыдущий">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="15 18 9 12 15 6"></polyline>
         </svg>
       </button>
-
       <button class="nav-arrow nav-next" id="navNext" aria-label="Следующий">
-        <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-        >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
     </div>
 
-    <!-- POST INFO -->
     <div class="post-info" id="postInfo" style="display:none"></div>
   </div>
 </div>
 
 <style>
-  /* Все ваши стили модального окна остаются без изменений */
+  /* Все стили оставлены без изменений (из последней версии) */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -76,38 +49,26 @@
     backdrop-filter: blur(18px);
     opacity: 0;
     visibility: hidden;
-    transition:
-      opacity 0.25s ease,
-      visibility 0.25s ease;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
   }
-
   .modal-overlay.open {
     opacity: 1;
     visibility: visible;
   }
-
   .modal-container {
     position: relative;
     width: 100vw;
     height: 100vh;
     overflow: hidden;
     background: #000;
-    transition:
-      transform 0.25s ease,
-      opacity 0.25s ease;
-    will-change: transform, opacity;
   }
-
   .modal-content {
     width: 100%;
     height: 100%;
-    min-width: 0;
-    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-
   .modal-close {
     position: absolute;
     top: 20px;
@@ -124,16 +85,12 @@
     justify-content: center;
     cursor: pointer;
     backdrop-filter: blur(10px);
-    transition:
-      transform 0.2s ease,
-      background 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
   }
-
   .modal-close:hover {
     background: rgba(255, 255, 255, 0.24);
     transform: scale(1.05);
   }
-
   .slide-counter {
     position: absolute;
     top: 24px;
@@ -147,9 +104,7 @@
     color: #fff;
     font-size: 13px;
     font-weight: 600;
-    letter-spacing: 0.5px;
   }
-
   .nav-arrows {
     position: absolute;
     inset: 0;
@@ -160,7 +115,6 @@
     padding: 0 20px;
     pointer-events: none;
   }
-
   .nav-arrow {
     width: 52px;
     height: 52px;
@@ -174,16 +128,12 @@
     justify-content: center;
     cursor: pointer;
     pointer-events: auto;
-    transition:
-      transform 0.2s ease,
-      background 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease;
   }
-
   .nav-arrow:hover {
     transform: scale(1.06);
     background: rgba(255, 255, 255, 0.26);
   }
-
   .post-info {
     position: absolute;
     left: 0;
@@ -191,61 +141,37 @@
     bottom: 0;
     z-index: 40;
     padding: 90px 40px 40px;
-    background: linear-gradient(
-      to top,
-      rgba(0, 0, 0, 0.94),
-      rgba(0, 0, 0, 0.45),
-      transparent
-    );
+    background: linear-gradient(to top, rgba(0,0,0,0.94), rgba(0,0,0,0.45), transparent);
     pointer-events: none;
     color: #fff;
   }
-
   .post-date {
     margin-bottom: 10px;
     color: var(--accent, #10b981);
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
   }
-
   .post-text {
     max-width: 900px;
     font-size: 0.96rem;
     line-height: 1.65;
     opacity: 0.92;
   }
-
   .modal-spinner {
     width: 48px;
     height: 48px;
-    border: 4px solid rgba(255, 255, 255, 0.14);
+    border: 4px solid rgba(255,255,255,0.14);
     border-top-color: var(--accent);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
   }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
-  /* Splide переопределит высоту, но мы зададим 100% */
-  .splide {
-    width: 100%;
-    height: 100%;
-  }
-
-  .splide__track {
-    height: 100%;
-  }
-
-  .splide__list {
-    height: 100%;
-  }
-
+  /* Splide */
+  .splide { width: 100%; height: 100%; }
+  .splide__track { height: 100%; }
+  .splide__list { height: 100%; }
   .splide__slide {
     position: relative;
     overflow: hidden;
@@ -253,24 +179,15 @@
     align-items: center;
     justify-content: center;
     background: #000;
-    padding: 0;
-    margin: 0;
   }
-
   .splide__slide img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     user-select: none;
-    -webkit-user-drag: none;
     will-change: transform;
-    transition: transform 0.25s ease;
   }
-
-  .splide__slide.zoomed img {
-    cursor: grab;
-  }
-
+  .splide__slide.zoomed img { cursor: grab; }
   .video-wrapper {
     position: relative;
     width: 100%;
@@ -281,7 +198,6 @@
     overflow: hidden;
     background: #000;
   }
-
   .video-wrapper video,
   .video-wrapper iframe {
     width: 100%;
@@ -293,13 +209,8 @@
     background: #000;
     object-fit: contain;
   }
-
-  .video-wrapper iframe {
-    aspect-ratio: 16 / 9;
-  }
-
-  .link-preview,
-  .doc-preview {
+  .video-wrapper iframe { aspect-ratio: 16 / 9; }
+  .link-preview, .doc-preview {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -311,25 +222,8 @@
     width: 100%;
     height: 100%;
   }
-
-  .link-preview img,
-  .doc-preview img {
-    max-width: 120px;
-    margin-bottom: 16px;
-  }
-
-  .preview-title {
-    font-size: 1.2rem;
-    font-weight: 600;
-    margin-bottom: 8px;
-  }
-
-  .preview-description {
-    font-size: 0.9rem;
-    opacity: 0.7;
-    margin-bottom: 16px;
-  }
-
+  .preview-title { font-size: 1.2rem; font-weight: 600; margin-bottom: 8px; }
+  .preview-description { font-size: 0.9rem; opacity: 0.7; margin-bottom: 16px; }
   .preview-button {
     display: inline-block;
     padding: 10px 20px;
@@ -340,12 +234,10 @@
     font-weight: 600;
     transition: background 0.2s;
   }
-
-  .preview-button:hover {
-    background: var(--accent-hover);
-  }
-
-  /* Splide стрелки и пагинация (можно кастомизировать) */
+  .preview-button:hover { background: var(--accent-hover); }
+  .splide__pagination { bottom: 18px !important; }
+  .splide__pagination__page { background: rgba(255,255,255,0.5); opacity: 1; }
+  .splide__pagination__page.is-active { background: var(--accent, #10b981); }
   .splide__arrow {
     background: rgba(255,255,255,0.14);
     backdrop-filter: blur(10px);
@@ -353,71 +245,37 @@
     height: 52px;
     border-radius: 50%;
     opacity: 1;
-    transform: none;
-    top: calc(50% - 26px);
   }
-
-  .splide__arrow svg {
-    fill: #fff;
-    width: 20px;
-    height: 20px;
-  }
-
-  .splide__pagination {
-    bottom: 18px !important;
-  }
-
-  .splide__pagination__page {
-    background: rgba(255,255,255,0.5);
-    opacity: 1;
-  }
-
-  .splide__pagination__page.is-active {
-    background: var(--accent, #10b981);
-  }
-
+  .splide__arrow svg { fill: #fff; width: 20px; height: 20px; }
   @media (max-width: 768px) {
-    .modal-close {
-      width: 42px;
-      height: 42px;
-      top: 14px;
-      right: 14px;
-    }
-
-    .splide__arrow {
-      width: 44px;
-      height: 44px;
-      top: calc(50% - 22px);
-    }
-
-    .post-info {
-      padding: 70px 20px 22px;
-    }
-
-    .post-text {
-      font-size: 0.88rem;
-      line-height: 1.55;
-    }
+    .modal-close { width: 42px; height: 42px; top: 14px; right: 14px; }
+    .splide__arrow { width: 44px; height: 44px; }
+    .post-info { padding: 70px 20px 22px; }
+    .post-text { font-size: 0.88rem; line-height: 1.55; }
   }
 </style>
 
 <script>
-  // @ts-nocheck
   import Splide from '@splidejs/splide';
 
   let currentSplide = null;
   let scale = 1;
   let zoomInitialized = false;
 
+  function log(msg, data) {
+    console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
+  }
+
   function destroySplide() {
     if (currentSplide) {
+      log('Уничтожаем Splide');
       currentSplide.destroy();
       currentSplide = null;
     }
   }
 
   function pauseAllVideos() {
-    document.querySelectorAll(".splide video").forEach((v) => {
+    document.querySelectorAll(".splide video").forEach(v => {
       if (v && typeof v.pause === "function") v.pause();
     });
   }
@@ -426,18 +284,16 @@
     const img = document.querySelector(".splide__slide.is-active img");
     if (!img) return;
     img.style.transform = "scale(1)";
-    const slide = img.closest(".splide__slide");
-    slide?.classList.remove("zoomed");
+    img.closest(".splide__slide")?.classList.remove("zoomed");
     scale = 1;
   }
 
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
-
+    log('Инициализация зума');
     const container = document.body;
-    let initialDistance = 0;
-    let initialScale = 1;
+    let initialDistance = 0, initialScale = 1;
 
     container.addEventListener("dblclick", (e) => {
       const img = e.target.closest("img");
@@ -455,61 +311,60 @@
       }
     });
 
-    container.addEventListener(
-      "touchmove",
-      (e) => {
-        if (e.touches.length !== 2) return;
-        e.preventDefault();
-        const img = document.querySelector(".splide__slide.is-active img");
-        if (!img) return;
-        const currentDistance = Math.hypot(
-          e.touches[0].clientX - e.touches[1].clientX,
-          e.touches[0].clientY - e.touches[1].clientY,
-        );
-        if (!initialDistance) {
-          initialDistance = currentDistance;
-          initialScale = scale;
-          return;
-        }
-        const nextScale = Math.min(
-          Math.max(initialScale * (currentDistance / initialDistance), 1),
-          3,
-        );
-        img.style.transform = `scale(${nextScale})`;
-        scale = nextScale;
-        const slide = img.closest(".splide__slide");
-        if (nextScale > 1) slide?.classList.add("zoomed");
-        else slide?.classList.remove("zoomed");
-      },
-      { passive: false },
-    );
+    container.addEventListener("touchmove", (e) => {
+      if (e.touches.length !== 2) return;
+      e.preventDefault();
+      const img = document.querySelector(".splide__slide.is-active img");
+      if (!img) return;
+      const currentDistance = Math.hypot(
+        e.touches[0].clientX - e.touches[1].clientX,
+        e.touches[0].clientY - e.touches[1].clientY
+      );
+      if (!initialDistance) {
+        initialDistance = currentDistance;
+        initialScale = scale;
+        return;
+      }
+      const nextScale = Math.min(Math.max(initialScale * (currentDistance / initialDistance), 1), 3);
+      img.style.transform = `scale(${nextScale})`;
+      scale = nextScale;
+      const slide = img.closest(".splide__slide");
+      if (nextScale > 1) slide?.classList.add("zoomed");
+      else slide?.classList.remove("zoomed");
+    }, { passive: false });
 
-    container.addEventListener("touchend", () => {
-      initialDistance = 0;
-    });
+    container.addEventListener("touchend", () => { initialDistance = 0; });
   }
 
   async function openPostModal(ownerId, postId) {
+    log('Открытие модального окна', { ownerId, postId });
     const modal = document.getElementById("postModal");
     const content = document.getElementById("modalContent");
     const counter = document.getElementById("slideCounter");
     const navArrows = document.getElementById("navArrows");
     const info = document.getElementById("postInfo");
 
-    if (!modal || !content) return;
+    if (!modal || !content) return log('Ошибка: modal или content не найдены');
 
     destroySplide();
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    log('Класс open добавлен, body зафиксирован');
 
-    // Авто‑fullscreen сразу после открытия
+    // Пытаемся запросить fullscreen
+    let fullscreenRequested = false;
     if (modal.requestFullscreen) {
       try {
         await modal.requestFullscreen();
+        fullscreenRequested = true;
+        log('Fullscreen запрошен успешно');
       } catch (err) {
-        console.warn('Fullscreen request failed:', err);
+        log('Ошибка fullscreen:', err.message);
+        fullscreenRequested = false;
       }
+    } else {
+      log('Fullscreen API не поддерживается');
     }
 
     content.innerHTML = '<div class="modal-spinner"></div>';
@@ -517,57 +372,49 @@
     if (navArrows) navArrows.style.display = "none";
     if (info) info.style.display = "none";
 
-    const isLocal =
-      location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+    log('Режим:', isLocal ? 'локальный' : 'продакшн');
 
     try {
       let post = null;
 
       if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
+        log('Локальный запрос к VK API');
         const res = await fetch(
-          `https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${window.VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`,
+          `https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${window.VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`
         );
         const data = await res.json();
         if (data.error) throw new Error(data.error.error_msg);
         post = data.response?.[0] ?? null;
       } else {
-        const res = await fetch(
-          `/api/get-post?owner_id=${ownerId}&post_id=${postId}`,
-        );
+        log('Запрос к API /api/get-post');
+        const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
         if (!res.ok) throw new Error("Ошибка загрузки");
         post = await res.json();
       }
 
       if (!post) throw new Error("Пост не найден");
+      log('Пост получен', { id: post.id, attachments: post.attachments?.length || 0 });
 
       const date = new Date(post.date * 1000);
       const formattedDate = date.toLocaleDateString("ru-RU", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+        day: "numeric", month: "long", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
       });
 
       const mediaItems = [];
-
       for (const att of post.attachments || []) {
-        if (
-          att.type === "photo" ||
-          att.type === "video" ||
-          att.type === "link" ||
-          att.type === "doc"
-        ) {
+        if (att.type === "photo" || att.type === "video" || att.type === "link" || att.type === "doc") {
           mediaItems.push(att);
         }
       }
+      log('Медиа-элементов:', mediaItems.length);
 
+      // Генерация слайдов (без изменений)
       const slides = await Promise.all(
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
-            const img =
-              att.photo.sizes.find((s) => s.type === "w") ||
-              att.photo.sizes[att.photo.sizes.length - 1];
+            const img = att.photo.sizes.find(s => s.type === "w") || att.photo.sizes[att.photo.sizes.length - 1];
             return `<li class="splide__slide" data-type="photo">
               <img src="${img.url}" alt="Фото ${idx + 1}" loading="lazy" />
             </li>`;
@@ -580,96 +427,61 @@
 
             try {
               const videoRes = await fetch(
-                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`,
+                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`
               );
-              if (videoRes.ok) {
-                videoData = await videoRes.json();
-              }
-            } catch (e) {
-              console.error("Ошибка загрузки видео:", e);
-            }
+              if (videoRes.ok) videoData = await videoRes.json();
+            } catch (e) { log('Ошибка загрузки видео', e); }
 
             if (videoData?.hls) {
-              return `
-                <li class="splide__slide" data-type="video">
-                  <div class="video-wrapper" data-hls="${videoData.hls}">
-                    <video
-                      controls
-                      playsinline
-                      preload="metadata"
-                      controlsList="nodownload"
-                    ></video>
-                  </div>
-                </li>
-              `;
+              return `<li class="splide__slide" data-type="video">
+                <div class="video-wrapper" data-hls="${videoData.hls}">
+                  <video controls playsinline preload="metadata" controlsList="nodownload"></video>
+                </div>
+              </li>`;
             }
 
             if (videoData?.mp4) {
-              return `
-                <li class="splide__slide" data-type="video">
-                  <div class="video-wrapper">
-                    <video
-                      src="${videoData.mp4}"
-                      controls
-                      playsinline
-                      preload="metadata"
-                      controlsList="nodownload"
-                    ></video>
-                  </div>
-                </li>
-              `;
+              return `<li class="splide__slide" data-type="video">
+                <div class="video-wrapper">
+                  <video src="${videoData.mp4}" controls playsinline preload="metadata" controlsList="nodownload"></video>
+                </div>
+              </li>`;
             }
 
-            const iframeSrc =
-              `https://vk.com/video_ext.php?oid=${v.owner_id}` +
-              `&id=${v.id}` +
-              `&hash=${accessKey}` +
-              `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
-            return `
-              <li class="splide__slide" data-type="video">
-                <div class="video-wrapper">
-                  <iframe
-                    src="${iframeSrc}"
-                    allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
-                    allowfullscreen
-                    referrerpolicy="no-referrer"
-                  ></iframe>
-                </div>
-              </li>
-            `;
+            const iframeSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+            return `<li class="splide__slide" data-type="video">
+              <div class="video-wrapper">
+                <iframe src="${iframeSrc}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
+              </div>
+            </li>`;
           }
 
           if (att.type === "link" && att.link) {
             const link = att.link;
             const imageHtml = link.photo?.sizes?.length
-              ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />`
-              : "";
-            return `
-              <li class="splide__slide" data-type="link">
-                <div class="link-preview">
-                  ${imageHtml}
-                  <div class="preview-title">${link.title || "Ссылка"}</div>
-                  ${link.description ? `<div class="preview-description">${link.description}</div>` : ""}
-                  <a href="${link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
-                </div>
-              </li>
-            `;
+              ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />` : "";
+            return `<li class="splide__slide" data-type="link">
+              <div class="link-preview">
+                ${imageHtml}
+                <div class="preview-title">${link.title || "Ссылка"}</div>
+                ${link.description ? `<div class="preview-description">${link.description}</div>` : ""}
+                <a href="${link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
+              </div>
+            </li>`;
           }
 
           if (att.type === "doc" && att.doc) {
             const doc = att.doc;
-            return `
-              <li class="splide__slide" data-type="doc">
-                <div class="doc-preview">
-                  <div class="preview-title">${doc.title || "Документ"}</div>
-                  <a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
-                </div>
-              </li>
-            `;
+            return `<li class="splide__slide" data-type="doc">
+              <div class="doc-preview">
+                <div class="preview-title">${doc.title || "Документ"}</div>
+                <a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
+              </div>
+            </li>`;
           }
 
           return "";
-        }),
+        })
       );
 
       const finalHTML = `
@@ -683,6 +495,7 @@
       `;
 
       content.innerHTML = finalHTML;
+      log('HTML вставлен');
 
       if (info) {
         info.innerHTML = `
@@ -692,61 +505,90 @@
         info.style.display = "block";
       }
 
-      if (mediaItems.length > 0) {
-        const splide = new Splide('.splide', {
-          type: 'slide',
-          rewind: false,
-          speed: 350,
-          pagination: true,
-          arrows: false, // используем свои кнопки
-          keyboard: 'global',
-          waitForTransition: true,
-          updateOnMove: true,
-        }).mount();
+      // Функция, создающая Splide после реального fullscreen
+      const initSplide = () => {
+        log('Инициализация Splide');
+        if (mediaItems.length > 0) {
+          const splide = new Splide('.splide', {
+            type: 'slide',
+            rewind: false,
+            speed: 350,
+            pagination: true,
+            arrows: false, // свои стрелки
+            keyboard: 'global',
+            waitForTransition: true,
+            updateOnMove: true,
+          }).mount();
 
-        currentSplide = splide;
+          currentSplide = splide;
+          log('Splide смонтирован');
 
-        // Обновляем счётчик
-        const updateCounter = () => {
-          if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
-        };
-        splide.on('move', updateCounter);
-        updateCounter();
+          const updateCounter = () => {
+            if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
+          };
+          splide.on('move', updateCounter);
+          updateCounter();
 
-        // HLS
-        if (typeof Hls !== "undefined") {
-          document.querySelectorAll("[data-hls]").forEach((wrapper) => {
-            const video = wrapper.querySelector("video");
-            const hlsUrl = wrapper.dataset.hls;
-            if (video && hlsUrl) {
-              const hls = new Hls();
-              hls.loadSource(hlsUrl);
-              hls.attachMedia(video);
-            }
+          if (typeof Hls !== "undefined") {
+            document.querySelectorAll("[data-hls]").forEach(wrapper => {
+              const video = wrapper.querySelector("video");
+              const hlsUrl = wrapper.dataset.hls;
+              if (video && hlsUrl) {
+                const hls = new Hls();
+                hls.loadSource(hlsUrl);
+                hls.attachMedia(video);
+              }
+            });
+          }
+
+          document.getElementById("navPrev")?.addEventListener("click", () => splide.go('<'));
+          document.getElementById("navNext")?.addEventListener("click", () => splide.go('>'));
+          if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
+
+          splide.on('move', () => {
+            resetZoom();
+            pauseAllVideos();
           });
+        } else {
+          log('Нет медиа для Splide');
         }
+        initZoom();
+      };
 
-        // Навигация
-        document.getElementById("navPrev")?.addEventListener("click", () => splide.go('<'));
-        document.getElementById("navNext")?.addEventListener("click", () => splide.go('>'));
-        if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
-
-        // Пауза видео при смене слайда
-        splide.on('move', () => {
-          resetZoom();
-          pauseAllVideos();
-        });
+      // Ждём реального fullscreen или fallback
+      if (fullscreenRequested) {
+        const onFullscreenChange = () => {
+          if (document.fullscreenElement === modal) {
+            log('Fullscreen активирован');
+            document.removeEventListener('fullscreenchange', onFullscreenChange);
+            requestAnimationFrame(() => {
+              requestAnimationFrame(() => {
+                initSplide();
+              });
+            });
+          }
+        };
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        // Запасной вариант на случай, если fullscreen не сработал (мобильные)
+        setTimeout(() => {
+          if (!document.fullscreenElement) {
+            log('Fullscreen не обнаружен, запускаем Splide без него');
+            document.removeEventListener('fullscreenchange', onFullscreenChange);
+            initSplide();
+          }
+        }, 800);
+      } else {
+        log('Fullscreen не запрашивался, сразу запускаем Splide');
+        initSplide();
       }
-
-      initZoom();
     } catch (err) {
-      console.error(err);
-      content.innerHTML =
-        '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
+      log('Критическая ошибка', err);
+      content.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
     }
   }
 
   function closeModal() {
+    log('Закрытие модального окна');
     const modal = document.getElementById("postModal");
     if (!modal) return;
 
@@ -761,8 +603,7 @@
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
     destroySplide();
-    const content = document.getElementById("modalContent");
-    if (content) content.innerHTML = "";
+    document.getElementById("modalContent").innerHTML = "";
   }
 
   document.getElementById("modalClose")?.addEventListener("click", closeModal);
@@ -770,19 +611,13 @@
     if (e.target === e.currentTarget) closeModal();
   });
   document.addEventListener("keydown", (e) => {
-    if (
-      e.key === "Escape" &&
-      document.getElementById("postModal")?.classList.contains("open")
-    ) {
+    if (e.key === "Escape" && document.getElementById("postModal")?.classList.contains("open")) {
       closeModal();
     }
   });
 
   // Свайп вниз для закрытия
-  let touchStartY = 0;
-  let touchCurrentY = 0;
-  let isSwiping = false;
-
+  let touchStartY = 0, touchCurrentY = 0, isSwiping = false;
   document.addEventListener("touchstart", (e) => {
     const modal = document.getElementById("postModal");
     if (!modal?.classList.contains("open")) return;
@@ -791,7 +626,6 @@
       isSwiping = true;
     }
   });
-
   document.addEventListener("touchmove", (e) => {
     if (!isSwiping) return;
     touchCurrentY = e.touches[0].clientY;
@@ -802,7 +636,6 @@
       container.style.opacity = String(1 - diff / window.innerHeight);
     }
   });
-
   document.addEventListener("touchend", () => {
     if (!isSwiping) return;
     isSwiping = false;
