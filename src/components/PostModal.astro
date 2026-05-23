@@ -67,6 +67,7 @@
 </div>
 
 <style>
+  /* Все ваши стили модального окна остаются без изменений */
   .modal-overlay {
     position: fixed;
     inset: 0;
@@ -231,25 +232,21 @@
     }
   }
 
-  /* Swiper */
-  .media-carousel,
-  .media-swiper {
+  /* Splide переопределит высоту, но мы зададим 100% */
+  .splide {
     width: 100%;
     height: 100%;
   }
 
-  .media-swiper .swiper-wrapper,
-  .media-swiper .swiper-slide {
+  .splide__track {
     height: 100%;
-    min-width: 0;
-    min-height: 0;
   }
 
-  .media-carousel {
-    position: relative;
+  .splide__list {
+    height: 100%;
   }
 
-  .media-swiper .swiper-slide {
+  .splide__slide {
     position: relative;
     overflow: hidden;
     display: flex;
@@ -260,7 +257,7 @@
     margin: 0;
   }
 
-  .media-swiper img {
+  .splide__slide img {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -270,7 +267,7 @@
     transition: transform 0.25s ease;
   }
 
-  .media-swiper .swiper-slide.zoomed img {
+  .splide__slide.zoomed img {
     cursor: grab;
   }
 
@@ -299,10 +296,6 @@
 
   .video-wrapper iframe {
     aspect-ratio: 16 / 9;
-  }
-
-  .swiper-slide[data-type="video"] {
-    touch-action: pan-y;
   }
 
   .link-preview,
@@ -352,16 +345,34 @@
     background: var(--accent-hover);
   }
 
-  .swiper-pagination {
+  /* Splide стрелки и пагинация (можно кастомизировать) */
+  .splide__arrow {
+    background: rgba(255,255,255,0.14);
+    backdrop-filter: blur(10px);
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    opacity: 1;
+    transform: none;
+    top: calc(50% - 26px);
+  }
+
+  .splide__arrow svg {
+    fill: #fff;
+    width: 20px;
+    height: 20px;
+  }
+
+  .splide__pagination {
     bottom: 18px !important;
   }
 
-  .swiper-pagination-bullet {
-    background: rgba(255, 255, 255, 0.5);
+  .splide__pagination__page {
+    background: rgba(255,255,255,0.5);
     opacity: 1;
   }
 
-  .swiper-pagination-bullet-active {
+  .splide__pagination__page.is-active {
     background: var(--accent, #10b981);
   }
 
@@ -373,9 +384,10 @@
       right: 14px;
     }
 
-    .nav-arrow {
+    .splide__arrow {
       width: 44px;
       height: 44px;
+      top: calc(50% - 22px);
     }
 
     .post-info {
@@ -389,33 +401,32 @@
   }
 </style>
 
-<script lang="js">
+<script>
   // @ts-nocheck
+  import Splide from '@splidejs/splide';
 
-  let currentSwiper = null;
+  let currentSplide = null;
   let scale = 1;
   let zoomInitialized = false;
 
-  function destroySwiper() {
-    if (currentSwiper) {
-      currentSwiper.destroy(true, true);
-      currentSwiper = null;
+  function destroySplide() {
+    if (currentSplide) {
+      currentSplide.destroy();
+      currentSplide = null;
     }
   }
 
   function pauseAllVideos() {
-    document.querySelectorAll(".media-swiper video").forEach((v) => {
+    document.querySelectorAll(".splide video").forEach((v) => {
       if (v && typeof v.pause === "function") v.pause();
     });
   }
 
   function resetZoom() {
-    const img = document.querySelector(
-      ".media-swiper .swiper-slide-active img",
-    );
+    const img = document.querySelector(".splide__slide.is-active img");
     if (!img) return;
     img.style.transform = "scale(1)";
-    const slide = img.closest(".swiper-slide");
+    const slide = img.closest(".splide__slide");
     slide?.classList.remove("zoomed");
     scale = 1;
   }
@@ -431,7 +442,7 @@
     container.addEventListener("dblclick", (e) => {
       const img = e.target.closest("img");
       if (!img) return;
-      const slide = img.closest(".swiper-slide");
+      const slide = img.closest(".splide__slide");
       if (!slide) return;
       if (slide.classList.contains("zoomed")) {
         img.style.transform = "scale(1)";
@@ -449,9 +460,7 @@
       (e) => {
         if (e.touches.length !== 2) return;
         e.preventDefault();
-        const img = document.querySelector(
-          ".media-swiper .swiper-slide-active img",
-        );
+        const img = document.querySelector(".splide__slide.is-active img");
         if (!img) return;
         const currentDistance = Math.hypot(
           e.touches[0].clientX - e.touches[1].clientX,
@@ -468,7 +477,7 @@
         );
         img.style.transform = `scale(${nextScale})`;
         scale = nextScale;
-        const slide = img.closest(".swiper-slide");
+        const slide = img.closest(".splide__slide");
         if (nextScale > 1) slide?.classList.add("zoomed");
         else slide?.classList.remove("zoomed");
       },
@@ -489,17 +498,16 @@
 
     if (!modal || !content) return;
 
-    destroySwiper();
+    destroySplide();
     modal.classList.add("open");
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
 
-    // Автоматически разворачиваем на весь экран сразу после открытия
+    // Авто‑fullscreen сразу после открытия
     if (modal.requestFullscreen) {
       try {
         await modal.requestFullscreen();
       } catch (err) {
-        // Игнорируем ошибку (например, fullscreen не поддерживается)
         console.warn('Fullscreen request failed:', err);
       }
     }
@@ -560,9 +568,9 @@
             const img =
               att.photo.sizes.find((s) => s.type === "w") ||
               att.photo.sizes[att.photo.sizes.length - 1];
-            return `<div class="swiper-slide" data-type="photo">
+            return `<li class="splide__slide" data-type="photo">
               <img src="${img.url}" alt="Фото ${idx + 1}" loading="lazy" />
-            </div>`;
+            </li>`;
           }
 
           if (att.type === "video" && att.video) {
@@ -583,8 +591,8 @@
 
             if (videoData?.hls) {
               return `
-                <div class="swiper-slide" data-type="video">
-                  <div class="video-wrapper swiper-no-swiping" data-hls="${videoData.hls}">
+                <li class="splide__slide" data-type="video">
+                  <div class="video-wrapper" data-hls="${videoData.hls}">
                     <video
                       controls
                       playsinline
@@ -592,14 +600,14 @@
                       controlsList="nodownload"
                     ></video>
                   </div>
-                </div>
+                </li>
               `;
             }
 
             if (videoData?.mp4) {
               return `
-                <div class="swiper-slide" data-type="video">
-                  <div class="video-wrapper swiper-no-swiping">
+                <li class="splide__slide" data-type="video">
+                  <div class="video-wrapper">
                     <video
                       src="${videoData.mp4}"
                       controls
@@ -608,7 +616,7 @@
                       controlsList="nodownload"
                     ></video>
                   </div>
-                </div>
+                </li>
               `;
             }
 
@@ -618,7 +626,7 @@
               `&hash=${accessKey}` +
               `&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
             return `
-              <div class="swiper-slide" data-type="video">
+              <li class="splide__slide" data-type="video">
                 <div class="video-wrapper">
                   <iframe
                     src="${iframeSrc}"
@@ -627,7 +635,7 @@
                     referrerpolicy="no-referrer"
                   ></iframe>
                 </div>
-              </div>
+              </li>
             `;
           }
 
@@ -637,26 +645,26 @@
               ? `<img src="${link.photo.sizes[link.photo.sizes.length - 1].url}" alt="" />`
               : "";
             return `
-              <div class="swiper-slide" data-type="link">
+              <li class="splide__slide" data-type="link">
                 <div class="link-preview">
                   ${imageHtml}
                   <div class="preview-title">${link.title || "Ссылка"}</div>
                   ${link.description ? `<div class="preview-description">${link.description}</div>` : ""}
                   <a href="${link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
                 </div>
-              </div>
+              </li>
             `;
           }
 
           if (att.type === "doc" && att.doc) {
             const doc = att.doc;
             return `
-              <div class="swiper-slide" data-type="doc">
+              <li class="splide__slide" data-type="doc">
                 <div class="doc-preview">
                   <div class="preview-title">${doc.title || "Документ"}</div>
                   <a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
                 </div>
-              </div>
+              </li>
             `;
           }
 
@@ -665,118 +673,72 @@
       );
 
       const finalHTML = `
-        <div class="media-carousel">
-          <div class="swiper media-swiper">
-            <div class="swiper-wrapper">
+        <div class="splide">
+          <div class="splide__track">
+            <ul class="splide__list">
               ${slides.join("")}
-            </div>
-            <div class="swiper-pagination"></div>
+            </ul>
           </div>
         </div>
       `;
 
-      const initSwiper = () => {
-        content.innerHTML = finalHTML;
+      content.innerHTML = finalHTML;
 
-        if (info) {
-          info.innerHTML = `
-            <div class="post-date">${formattedDate}</div>
-            ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}
-          `;
-          info.style.display = "block";
-        }
+      if (info) {
+        info.innerHTML = `
+          <div class="post-date">${formattedDate}</div>
+          ${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}
+        `;
+        info.style.display = "block";
+      }
 
-        if (mediaItems.length > 0 && typeof Swiper !== "undefined") {
-          currentSwiper = new Swiper(".media-swiper", {
-            loop: false,
-            speed: 350,
+      if (mediaItems.length > 0) {
+        const splide = new Splide('.splide', {
+          type: 'slide',
+          rewind: false,
+          speed: 350,
+          pagination: true,
+          arrows: false, // используем свои кнопки
+          keyboard: 'global',
+          waitForTransition: true,
+          updateOnMove: true,
+        }).mount();
 
-            observer: true,
-            observeParents: true,
-            observeSlideChildren: true,
-            resizeObserver: true,
+        currentSplide = splide;
 
-            noSwiping: true,
-            noSwipingClass: "swiper-no-swiping",
+        // Обновляем счётчик
+        const updateCounter = () => {
+          if (counter) counter.textContent = `${splide.index + 1} / ${mediaItems.length}`;
+        };
+        splide.on('move', updateCounter);
+        updateCounter();
 
-            preloadImages: false,
-            watchOverflow: true,
-            grabCursor: true,
-
-            keyboard: {
-              enabled: true,
-              onlyInViewport: true,
-            },
-
-            pagination: {
-              el: ".swiper-pagination",
-              clickable: true,
-            },
-
-            navigation: {
-              nextEl: ".nav-next",
-              prevEl: ".nav-prev",
-            },
-
-            on: {
-              init(swiper) {
-                updateCounter(swiper, mediaItems.length);
-              },
-              slideChange(swiper) {
-                updateCounter(swiper, mediaItems.length);
-                resetZoom();
-                pauseAllVideos();
-              },
-            },
-          });
-
-          if (typeof Hls !== "undefined") {
-            document.querySelectorAll("[data-hls]").forEach((wrapper) => {
-              const video = wrapper.querySelector("video");
-              const hlsUrl = wrapper.dataset.hls;
-              if (video && hlsUrl) {
-                const hls = new Hls();
-                hls.loadSource(hlsUrl);
-                hls.attachMedia(video);
-              }
-            });
-          }
-
-          function updateCounter(swiper, total) {
-            if (!counter) return;
-            counter.textContent = `${swiper.realIndex + 1} / ${total}`;
-          }
-
-          if (navArrows) {
-            navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
-          }
-
-          document.getElementById("navPrev")?.addEventListener("click", () => {
-            currentSwiper?.slidePrev();
-          });
-          document.getElementById("navNext")?.addEventListener("click", () => {
-            currentSwiper?.slideNext();
+        // HLS
+        if (typeof Hls !== "undefined") {
+          document.querySelectorAll("[data-hls]").forEach((wrapper) => {
+            const video = wrapper.querySelector("video");
+            const hlsUrl = wrapper.dataset.hls;
+            if (video && hlsUrl) {
+              const hls = new Hls();
+              hls.loadSource(hlsUrl);
+              hls.attachMedia(video);
+            }
           });
         }
 
-        initZoom();
-      };
+        // Навигация
+        document.getElementById("navPrev")?.addEventListener("click", () => splide.go('<'));
+        document.getElementById("navNext")?.addEventListener("click", () => splide.go('>'));
+        if (navArrows) navArrows.style.display = mediaItems.length > 1 ? "flex" : "none";
 
-      // Ждём завершения анимации открытия, затем инициализируем Swiper
-      const onTransitionEnd = (e) => {
-        if (e.target === modal && e.propertyName === 'opacity') {
-          modal.removeEventListener('transitionend', onTransitionEnd);
-          initSwiper();
-        }
-      };
-      modal.addEventListener('transitionend', onTransitionEnd);
+        // Пауза видео при смене слайда
+        splide.on('move', () => {
+          resetZoom();
+          pauseAllVideos();
+        });
+      }
 
-      // Запасной таймер
-      setTimeout(() => {
-        modal.removeEventListener('transitionend', onTransitionEnd);
-        initSwiper();
-      }, 400);
-
+      initZoom();
     } catch (err) {
       console.error(err);
       content.innerHTML =
@@ -788,7 +750,6 @@
     const modal = document.getElementById("postModal");
     if (!modal) return;
 
-    // Выходим из полноэкранного режима, если он активен
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(() => {});
     }
@@ -799,7 +760,7 @@
     modal.classList.remove("open");
     modal.setAttribute("aria-hidden", "true");
     document.body.style.overflow = "";
-    destroySwiper();
+    destroySplide();
     const content = document.getElementById("modalContent");
     if (content) content.innerHTML = "";
   }

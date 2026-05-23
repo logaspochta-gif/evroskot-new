@@ -42,11 +42,12 @@ if (isLocal) {
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Poppins:wght@400;600;700;900&display=swap"
       rel="stylesheet"
     />
+    <!-- Splide CSS вместо Swiper -->
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
+      href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css"
     />
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js" defer></script>
+    <!-- hls.js для видео -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
     <style is:global>
       :root {
@@ -161,7 +162,7 @@ if (isLocal) {
     <PostModal />
 
     <!-- Передаём токен ТОЛЬКО на локальной машине -->
-        {isLocal && devToken ? (
+    {isLocal && devToken ? (
       <script is:inline>
         window.VK_ACCESS_TOKEN_FOR_DEV = "{devToken}";
       </script>
