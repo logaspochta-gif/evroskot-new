@@ -274,7 +274,6 @@
     cursor: grab;
   }
 
-  /* Видео (исправлено) */
   .video-wrapper {
     position: relative;
     width: 100%;
@@ -302,7 +301,6 @@
     aspect-ratio: 16 / 9;
   }
 
-  /* Слайды с видео не должны перехватывать жесты */
   .swiper-slide[data-type="video"] {
     touch-action: pan-y;
   }
@@ -496,6 +494,16 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
 
+    // Автоматически разворачиваем на весь экран сразу после открытия
+    if (modal.requestFullscreen) {
+      try {
+        await modal.requestFullscreen();
+      } catch (err) {
+        // Игнорируем ошибку (например, fullscreen не поддерживается)
+        console.warn('Fullscreen request failed:', err);
+      }
+    }
+
     content.innerHTML = '<div class="modal-spinner"></div>';
     if (counter) counter.textContent = "";
     if (navArrows) navArrows.style.display = "none";
@@ -546,7 +554,6 @@
         }
       }
 
-      // Генерируем HTML слайдов (вставлен полностью)
       const slides = await Promise.all(
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
@@ -574,7 +581,6 @@
               console.error("Ошибка загрузки видео:", e);
             }
 
-            // Предпочитаем HLS, если доступен
             if (videoData?.hls) {
               return `
                 <div class="swiper-slide" data-type="video">
@@ -606,7 +612,6 @@
               `;
             }
 
-            // Fallback iframe VK
             const iframeSrc =
               `https://vk.com/video_ext.php?oid=${v.owner_id}` +
               `&id=${v.id}` +
@@ -670,7 +675,6 @@
         </div>
       `;
 
-      // Функция, которая вставит HTML и создаст Swiper
       const initSwiper = () => {
         content.innerHTML = finalHTML;
 
@@ -726,7 +730,6 @@
             },
           });
 
-          // Активируем HLS для видео, если загружена библиотека hls.js
           if (typeof Hls !== "undefined") {
             document.querySelectorAll("[data-hls]").forEach((wrapper) => {
               const video = wrapper.querySelector("video");
@@ -768,7 +771,7 @@
       };
       modal.addEventListener('transitionend', onTransitionEnd);
 
-      // Запасной таймер (вдруг transition не сработает)
+      // Запасной таймер
       setTimeout(() => {
         modal.removeEventListener('transitionend', onTransitionEnd);
         initSwiper();
@@ -784,6 +787,12 @@
   function closeModal() {
     const modal = document.getElementById("postModal");
     if (!modal) return;
+
+    // Выходим из полноэкранного режима, если он активен
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+
     if (document.activeElement && modal.contains(document.activeElement)) {
       document.activeElement.blur();
     }
