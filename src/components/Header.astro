@@ -1,147 +1,233 @@
 ---
-// src/components/Advantages.astro (или встроенная секция)
+// src/components/Header.astro
 ---
 
-<section class="advantages-section" id="advantages" aria-labelledby="advantages-heading">
-  <div class="advantages-inner">
-    <h2 id="advantages-heading" class="section-title">
-      Почему <span class="accent">Scanova A/S</span>?
-    </h2>
-    <p class="section-subtitle">
-      Прямые поставки без посредников. Полный цикл сопровождения.
-    </p>
-    <ul class="advantages-grid" role="list">
-      <li class="advantage-card">
-        <span class="advantage-icon" aria-hidden="true">🏛️</span>
-        <h3>Гослицензия Дании</h3>
-        <p>Официальный экспортёр, аккредитованный Министерством сельского хозяйства Королевства Дания.</p>
-      </li>
-      <li class="advantage-card">
-        <span class="advantage-icon" aria-hidden="true">🐄</span>
-        <h3>Собственная карантинная база</h3>
-        <p>Более 1 000 голов единовременного содержания. Полный ветеринарный контроль перед отправкой.</p>
-      </li>
-      <li class="advantage-card">
-        <span class="advantage-icon" aria-hidden="true">🧬</span>
-        <h3>Генетика Viking Genetics</h3>
-        <p>Партнёрство с крупнейшим генетическим центром Европы. Только элитный племенной материал.</p>
-      </li>
-      <li class="advantage-card">
-        <span class="advantage-icon" aria-hidden="true">🚛</span>
-        <h3>Логистика «под ключ»</h3>
-        <p>Организация транспортировки, оформление всех документов, таможенное сопровождение.</p>
-      </li>
-      <li class="advantage-card">
-        <span class="advantage-icon" aria-hidden="true">👨‍⚕️</span>
-        <h3>Ветеринарная поддержка</h3>
-        <p>Сопровождение датскими специалистами: ветеринарами, технологами по кормлению и осеменению.</p>
-      </li>
-      <li class="advantage-card">
-        <span class="advantage-icon" aria-hidden="true">🎓</span>
-        <h3>Обучение персонала</h3>
-        <p>Обучение местных специалистов по уходу за поставленными животными на вашей территории.</p>
-      </li>
-    </ul>
+<header class="navbar" id="navbar">
+  <div class="logo">
+    <a href="/" class="logo-link" aria-label="Scanova A/S — главная страница">
+      <img
+        src="/favicon.svg"
+        alt=""
+        class="logo-icon"
+        aria-hidden="true"
+      />
+      <span class="logo-text">
+        Scanova <span class="accent">A/S</span>
+      </span>
+    </a>
   </div>
-</section>
+
+  <button
+    class="burger"
+    id="burger"
+    aria-label="Открыть меню"
+    aria-expanded="false"
+    aria-controls="menu"
+  >
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <nav class="menu" id="menu" role="navigation">
+    <a href="/#hero">Главная</a>
+    <a href="/#breeds">Породы</a>
+    <a href="/#about">О компании</a>
+    <a href="/#staldren">Staldren®</a>
+    <a href="/news-pages">Новости</a>
+    <a href="/#contact" class="btn-contact">Связаться</a>
+  </nav>
+</header>
 
 <style>
-  .advantages-section {
-    --adv-gap: clamp(20px, 3vw, 30px);
-    --adv-radius: 20px;
-    --adv-card-bg: var(--card-bg, #141414);
-    --adv-border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-    --adv-text: #fff;
-    --adv-muted: rgba(255, 255, 255, 0.7);
-    --adv-accent: var(--accent, #10b981);
-    --adv-transition: 0.25s ease;
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 5%;
+    background: rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(5px);
+    transition: background 0.3s ease, box-shadow 0.3s ease;
+  }
 
-    min-height: 100vh;
+  .logo { display: flex; align-items: center; flex-shrink: 0; }
+
+  .logo-link {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+    position: relative;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .logo-link:hover { transform: translateY(-1px); opacity: 0.92; }
+  .logo-link:focus-visible {
+    outline: 2px solid rgba(16, 185, 129, 0.65);
+    outline-offset: 6px;
+    border-radius: 10px;
+  }
+
+  .logo-icon {
+    height: 1.5em;
+    width: auto;
+    margin-right: 0.5em;
+    display: block;
+    filter: brightness(0) invert(1);
+    transition: transform 0.25s ease;
+  }
+  .logo-link:hover .logo-icon {
+    transform: scale(1.05);
+  }
+
+  .logo-text {
+    font-size: clamp(1.2rem, 1vw + 1rem, 1.55rem);
+    font-weight: 900;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    color: #ffffff;
+    font-family: Inter, system-ui, sans-serif;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    white-space: nowrap;
+  }
+
+  .accent { color: var(--accent, #10b981); position: relative; }
+  .accent::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -3px;
+    width: 0%;
+    height: 2px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transform: translateX(-50%);
+    transition: width 0.3s ease, opacity 0.3s ease;
+  }
+  .logo-link:hover .accent::after {
+    width: 70%;
+    opacity: 0.8;
+  }
+
+  .menu {
     display: flex;
     align-items: center;
-    justify-content: center;
-    background: #0a0a0a;
-    padding: clamp(60px, 8vh, 100px) 5%;
-    box-sizing: border-box;
+    gap: 2rem;
   }
-
-  .advantages-inner {
-    max-width: 1200px;
-    width: 100%;
-    text-align: center;
+  .menu a {
+    color: #fff;
+    text-decoration: none;
+    font-size: clamp(0.85rem, 1vw + 0.5rem, 0.95rem);
+    position: relative;
+    padding-bottom: 5px;
+    transition: opacity 0.3s ease;
   }
-
-  .section-title {
-    font-size: clamp(2rem, 5vw, 2.8rem);
-    font-weight: 900;
-    margin: 0 0 0.5rem;
-    color: var(--adv-text);
+  .menu a:hover { opacity: 0.85; }
+  .menu a::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: -6px;
+    transform: translateX(-50%);
+    width: 0%;
+    height: 2px;
+    background: var(--accent);
+    transition: width 0.3s ease;
   }
+  .menu a:hover::after { width: 60%; }
 
-  .section-subtitle {
-    color: var(--adv-muted);
-    margin: 0 auto 3rem;
-    font-size: clamp(1rem, 2.5vw, 1.1rem);
-    max-width: 600px;
-    line-height: 1.5;
-  }
-
-  .accent {
-    color: var(--adv-accent);
-  }
-
-  .advantages-grid {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: var(--adv-gap);
-  }
-
-  .advantage-card {
-    background: var(--adv-card-bg);
-    padding: clamp(25px, 4vw, 35px) clamp(20px, 3vw, 25px);
-    border-radius: var(--adv-radius);
-    border: var(--adv-border);
-    text-align: center;
-    transition: transform var(--adv-transition), border-color var(--adv-transition), box-shadow var(--adv-transition);
-    will-change: transform;
-  }
-
-  .advantage-card:hover {
-    border-color: var(--adv-accent);
-    transform: translateY(-4px);
-    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.4);
-  }
-
-  .advantage-icon {
-    display: block;
-    font-size: 2.5rem;
-    margin-bottom: 15px;
-  }
-
-  .advantage-card h3 {
-    font-size: 1.1rem;
-    margin: 0 0 10px;
+  .btn-contact {
+    background: var(--accent);
+    color: #fff;
+    padding: 0.8rem 1.8rem;
+    border-radius: 10px;
     font-weight: 700;
-    color: var(--adv-text);
+    font-size: inherit;
+    transition: background 0.3s ease, transform 0.3s ease;
+  }
+  .btn-contact:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
   }
 
-  .advantage-card p {
-    font-size: 0.9rem;
-    opacity: 0.75;
-    margin: 0;
-    color: var(--adv-muted);
-    line-height: 1.5;
+  /* Бургер */
+  .burger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    z-index: 1200;
+  }
+  .burger span {
+    width: 28px;
+    height: 3px;
+    background: #fff;
+    border-radius: 20px;
+    transition: 0.3s ease;
+  }
+
+  /* Мобильная версия */
+  @media (max-width: 992px) {
+    .navbar { padding: 1rem 5%; }
+    .burger { display: flex; }
+    .menu {
+      position: absolute;
+      top: 75px;
+      right: 5%;
+      width: 260px;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 1.5rem;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.92);
+      backdrop-filter: blur(15px);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-10px);
+      transition: 0.3s ease;
+      will-change: transform, opacity;
+    }
+    .menu.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+  }
+
+  @media (max-width: 768px) {
+    .logo-text { font-size: 1.15rem; }
+    .logo-icon { height: 1.3em; }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .advantage-card {
-      transition: none;
-    }
-    .advantage-card:hover {
-      transform: none;
-    }
+    .logo-link,
+    .menu a,
+    .btn-contact,
+    .logo-icon { transition: none; }
+    .logo-link:hover { transform: none; }
   }
 </style>
+
+<script>
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('menu');
+  if (burger && menu) {
+    burger.addEventListener('click', () => {
+      const expanded = burger.getAttribute('aria-expanded') === 'true';
+      burger.setAttribute('aria-expanded', String(!expanded));
+      menu.classList.toggle('active');
+    });
+    menu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        menu.classList.remove('active');
+        burger.setAttribute('aria-expanded', 'false');
+      });
+    });
+  }
+</script>
