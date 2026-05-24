@@ -9,7 +9,7 @@
   aria-modal="true"
   aria-hidden="true"
 >
-  <div class="modal-container">
+  <div class="modal-container" id="modalContainer">
     <button class="modal-close" id="modalClose" aria-label="Закрыть">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M18 6L6 18M6 6l12 12"></path>
@@ -48,6 +48,8 @@
     --modal-accent: var(--accent, #10b981);
     --modal-text: #fff;
     --modal-muted: rgba(255, 255, 255, 0.7);
+    --swipe-y: 0;
+    --swipe-opacity: 1;
   }
 
   .modal-overlay {
@@ -68,14 +70,19 @@
     position: fixed;
     inset: 0;
     width: 100vw;
+    height: 100vh;
     height: 100dvh;
     overflow: hidden;
     background: transparent;
+    will-change: transform, opacity;
+    transform: translateY(var(--swipe-y, 0));
+    opacity: var(--swipe-opacity, 1);
   }
   .modal-content {
     position: absolute;
     inset: 0;
     width: 100vw;
+    height: 100vh;
     height: 100dvh;
     overflow: hidden;
   }
@@ -95,6 +102,7 @@
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    touch-action: none;
   }
   .simple-slider .slide.active {
     opacity: 1;
@@ -162,6 +170,25 @@
   .video-play-btn:hover {
     transform: scale(1.1);
     background: var(--modal-accent);
+  }
+
+  .video-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: #111;
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+    z-index: 5;
+  }
+  .video-fallback a {
+    color: var(--accent);
+    text-decoration: underline;
+    font-weight: 700;
   }
 
   .nav-arrows {
@@ -255,14 +282,18 @@
   }
 
   @media (max-width: 768px) {
+    .post-info { padding: 60px 20px 20px; }
+    .post-text { font-size: 0.85rem; line-height: 1.45; max-height: 25vh; overflow-y: auto; }
     .modal-close { width: 42px; height: 42px; top: 14px; right: 14px; }
     .nav-arrow { width: 44px; height: 44px; }
-    .post-info { padding: 70px 20px 22px; }
-    .post-text { font-size: 0.88rem; line-height: 1.55; }
     .slide-counter { font-size: 12px; padding: 5px 12px; }
     .modal-overlay { background: rgba(0, 0, 0, 0.55); }
   }
-
+  @media (max-width: 768px) and (orientation: landscape) {
+    .post-info { padding: 50px 16px 16px; }
+    .post-text { max-height: 20vh; font-size: 0.8rem; line-height: 1.35; }
+    .post-date { font-size: 11px; margin-bottom: 6px; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .modal-overlay, .modal-close, .nav-arrow, .simple-slider .slide { transition: none; }
     .nav-arrow:hover, .modal-close:hover { transform: none; }
@@ -273,239 +304,416 @@
   // @ts-nocheck
   declare var Hls: any;
 
-  let currentSlideIndex = 0, totalSlides = 0, scale = 1, zoomInitialized = false;
+  // ===== СОСТОЯНИЕ =====
+  let currentSlideIndex = 0;
+  let totalSlides = 0;
+  let scale = 1;
+  let zoomInitialized = false;
   const mediaLoaded = new Set<number>();
+  const hlsInstances = new Map<HTMLVideoElement, any>();
+  let slides: HTMLElement[] = [];
+  let modalContent: HTMLElement | null = null;
+  let videoMetaCache = new Map<number, any>(); // кеш метаданных видео
+  let pendingVideoFetch: Map<number, Promise<void>> = new Map();
 
-  function log(msg, data) {
+  function log(msg: string, data?: any) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
-  function destroyPlayer() {
-    document.querySelectorAll('.simple-slider video, .simple-slider iframe').forEach(el => {
-      if (el instanceof HTMLVideoElement) { el.pause(); el.src = ''; }
-      else if (el instanceof HTMLIFrameElement) { el.src = ''; }
-    });
+  // ===== ОЧИСТКА =====
+  function destroyPlayers() {
+    hlsInstances.forEach((hls, video) => hls.destroy());
+    hlsInstances.clear();
+    document.querySelectorAll('.simple-slider video').forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); });
+    document.querySelectorAll('.simple-slider iframe').forEach(f => f.remove());
     mediaLoaded.clear();
+    videoMetaCache.clear();
+    pendingVideoFetch.clear();
   }
 
   function resetZoom() {
-    const img = document.querySelector(".simple-slider .slide.active img");
-    if (!img) return;
-    img.style.transform = "scale(1)";
-    img.closest(".slide")?.classList.remove("zoomed");
-    scale = 1;
+    if (!slides.length) return;
+    const slide = slides[currentSlideIndex];
+    if (!slide) return;
+    const img = slide.querySelector('img');
+    if (img) {
+      img.style.transform = 'scale(1)';
+      slide.classList.remove('zoomed');
+      scale = 1;
+    }
   }
 
+  // ===== ZOOM (на контейнере) =====
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
+    const container = document.getElementById('modalContainer');
+    if (!container) return;
     let initialDistance = 0, initialScale = 1;
 
-    document.body.addEventListener("dblclick", (e) => {
-      const img = e.target.closest("img");
+    container.addEventListener('dblclick', (e) => {
+      const img = (e.target as HTMLElement).closest('img');
       if (!img) return;
-      const slide = img.closest(".slide");
+      const slide = img.closest('.slide');
       if (!slide) return;
-      const zoomed = slide.classList.contains("zoomed");
-      img.style.transform = zoomed ? "scale(1)" : "scale(2)";
-      slide.classList.toggle("zoomed");
+      const zoomed = slide.classList.contains('zoomed');
+      img.style.transform = zoomed ? 'scale(1)' : 'scale(2)';
+      slide.classList.toggle('zoomed');
       scale = zoomed ? 1 : 2;
     });
 
-    document.body.addEventListener("touchmove", (e) => {
+    container.addEventListener('touchmove', (e) => {
       if (e.touches.length !== 2) return;
       e.preventDefault();
-      const img = document.querySelector(".simple-slider .slide.active img");
+      const activeSlide = slides[currentSlideIndex];
+      if (!activeSlide) return;
+      const img = activeSlide.querySelector('img');
       if (!img) return;
       const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
       if (!initialDistance) { initialDistance = d; initialScale = scale; return; }
       const ns = Math.min(Math.max(initialScale * (d / initialDistance), 1), 3);
       img.style.transform = `scale(${ns})`;
       scale = ns;
-      img.closest(".slide")?.classList.toggle("zoomed", ns > 1);
+      activeSlide.classList.toggle('zoomed', ns > 1);
     }, { passive: false });
 
-    document.body.addEventListener("touchend", () => { initialDistance = 0; });
+    container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
-  function goToSlide(index) {
-    const slides = document.querySelectorAll(".simple-slider .slide");
-    if (!slides.length) return;
+  // ===== НАВИГАЦИЯ =====
+  function goToSlide(index: number) {
+    if (!slides.length || index === currentSlideIndex) return;
+    // Останавливаем предыдущий
     const prev = slides[currentSlideIndex];
     if (prev) {
-      const v = prev.querySelector('video'), f = prev.querySelector('iframe');
-      if (v) { v.pause(); v.src = ''; }
-      if (f) f.src = '';
+      const v = prev.querySelector('video');
+      const iframe = prev.querySelector('iframe');
+      if (v) v.pause();
+      if (iframe) iframe.remove();
     }
-    slides.forEach(s => s.classList.remove("active"));
-    slides[index].classList.add("active");
+    // Переключаем классы (точечно)
+    slides[currentSlideIndex]?.classList.remove('active');
+    slides[index]?.classList.add('active');
     currentSlideIndex = index;
-    document.getElementById("slideCounter").textContent = `${index + 1} / ${totalSlides}`;
+    document.getElementById('slideCounter')!.textContent = `${index + 1} / ${totalSlides}`;
     resetZoom();
-    loadSlideContent(index);
+    // Ленивая загрузка текущего и соседних
+    preloadAdjacentSlides(index);
   }
 
   function nextSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex + 1) % totalSlides); }
   function prevSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex - 1 + totalSlides) % totalSlides); }
 
-  function loadSlideContent(index) {
+  // ===== ПРЕДЗАГРУЗКА СОСЕДНИХ СЛАЙДОВ =====
+  function preloadAdjacentSlides(activeIdx: number) {
+    const indices = new Set<number>([activeIdx]);
+    if (activeIdx > 0) indices.add(activeIdx - 1);
+    if (activeIdx < totalSlides - 1) indices.add(activeIdx + 1);
+    indices.forEach(idx => loadSlideContent(idx));
+  }
+
+  // ===== ЛЕНИВАЯ ЗАГРУЗКА КОНТЕНТА =====
+  function loadSlideContent(index: number) {
     if (mediaLoaded.has(index)) return;
-    const slide = document.querySelectorAll(".simple-slider .slide")[index];
+    const slide = slides[index];
     if (!slide) return;
+
+    // Изображение
     const img = slide.querySelector('img');
-    if (img?.dataset.src && !img.src.startsWith('http')) img.src = img.dataset.src;
-    const facade = slide.querySelector('.video-facade');
+    if (img?.dataset.src && !img.src.startsWith('http')) {
+      img.src = img.dataset.src;
+    }
+
+    // Видео-фасад
+    const facade = slide.querySelector('.video-facade') as HTMLElement;
     if (!facade) return;
-    const { videoUrl, videoType, poster } = facade.dataset;
-    let html = '';
-    if (videoType === 'hls') html = `<div class="video-wrapper" data-hls="${videoUrl}"><video controls playsinline preload="metadata" controlsList="nodownload" poster="${poster}"></video></div>`;
-    else if (videoType === 'mp4') html = `<div class="video-wrapper"><video src="${videoUrl}" controls playsinline preload="metadata" controlsList="nodownload" poster="${poster}"></video></div>`;
-    else if (videoType === 'vk_iframe') html = `<div class="video-wrapper"><iframe src="${videoUrl}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe></div>`;
-    facade.outerHTML = html;
-    mediaLoaded.add(index);
-    if (videoType === 'hls' && typeof Hls !== "undefined") {
-      const v = slide.querySelector('video');
-      if (v) { const h = new Hls(); h.loadSource(videoUrl); h.attachMedia(v); }
+
+    // Если метаданные ещё не загружены, запускаем запрос
+    const videoIndex = index; // можно хранить индекс слайда
+    if (!videoMetaCache.has(videoIndex) && !pendingVideoFetch.has(videoIndex)) {
+      // Пытаемся извлечь данные из dataset (если уже есть)
+      const { videoUrl, videoType, poster, fallbackUrl } = facade.dataset;
+      if (videoUrl) {
+        // Уже есть URL, можно сразу строить плеер
+        buildPlayerFromFacade(facade, videoUrl, videoType, poster, fallbackUrl);
+        return;
+      }
+      // Иначе нужно асинхронно получить метаданные (это делается при открытии модалки)
+    }
+
+    // Строим плеер, если метаданные уже есть
+    const meta = videoMetaCache.get(videoIndex);
+    if (meta) {
+      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl);
     }
   }
 
-  async function openPostModal(ownerId, postId) {
-    const modal = document.getElementById("postModal"), content = document.getElementById("modalContent");
-    if (!modal || !content) return;
-    destroyPlayer();
-    modal.classList.add("open"); modal.setAttribute("aria-hidden", "false");
-    document.documentElement.style.overflow = "hidden";
-    content.innerHTML = '<div class="modal-spinner"></div>';
-    document.getElementById("slideCounter").textContent = "";
-    document.getElementById("navArrows").style.display = "none";
-    document.getElementById("postInfo").style.display = "none";
-
-    const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-    try {
-      let post = null;
-      if (isLocal && window.VK_ACCESS_TOKEN_FOR_DEV) {
-        const r = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${window.VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`);
-        const d = await r.json(); if (d.error) throw new Error(d.error.error_msg);
-        post = d.response?.[0] ?? null;
-      } else {
-        const r = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
-        if (!r.ok) throw new Error("Ошибка загрузки");
-        post = await r.json();
+  function buildPlayerFromFacade(facade: HTMLElement, url: string, type: string, poster?: string, fallbackUrl?: string) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'video-wrapper';
+    if (type === 'hls') {
+      wrapper.dataset.hls = url;
+      const video = document.createElement('video');
+      video.controls = true; video.playsInline = true; video.preload = 'metadata';
+      video.setAttribute('controlsList', 'nodownload');
+      if (poster) video.poster = poster;
+      wrapper.appendChild(video);
+      facade.replaceWith(wrapper);
+      mediaLoaded.add(currentSlideIndex);
+      if (typeof Hls !== 'undefined') {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hlsInstances.set(video, hls);
       }
-      if (!post) throw new Error("Пост не найден");
+    } else if (type === 'mp4') {
+      const video = document.createElement('video');
+      video.src = url;
+      video.controls = true; video.playsInline = true; video.preload = 'metadata';
+      video.setAttribute('controlsList', 'nodownload');
+      if (poster) video.poster = poster;
+      wrapper.appendChild(video);
+      facade.replaceWith(wrapper);
+      mediaLoaded.add(currentSlideIndex);
+    } else if (type === 'vk_iframe') {
+      const iframe = document.createElement('iframe');
+      iframe.src = url;
+      iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.referrerPolicy = 'no-referrer';
+      wrapper.appendChild(iframe);
+      if (fallbackUrl) {
+        const fallbackDiv = document.createElement('div');
+        fallbackDiv.className = 'video-fallback';
+        fallbackDiv.innerHTML = `<p>Видео не загрузилось. <a href="${fallbackUrl}" target="_blank" rel="noopener">Открыть во ВКонтакте</a></p>`;
+        wrapper.appendChild(fallbackDiv);
+        const timer = setTimeout(() => {
+          if (!iframe.contentDocument || iframe.contentDocument?.body?.innerHTML === '') {
+            iframe.style.display = 'none';
+            fallbackDiv.style.display = 'flex';
+          }
+        }, 5000);
+        iframe.addEventListener('load', () => clearTimeout(timer));
+      }
+      facade.replaceWith(wrapper);
+      mediaLoaded.add(currentSlideIndex);
+    }
+  }
+
+  // ===== ОБРАБОТЧИК ФАСАДОВ (один раз) =====
+  function handleModalContentClick(e: MouseEvent) {
+    const btn = (e.target as HTMLElement).closest('.video-play-btn');
+    if (!btn) return;
+    const facade = btn.closest('.video-facade') as HTMLElement;
+    if (!facade) return;
+    const slide = facade.closest('.slide');
+    if (!slide) return;
+    const index = slides.indexOf(slide as HTMLElement);
+    if (index >= 0 && !mediaLoaded.has(index)) {
+      loadSlideContent(index);
+    }
+  }
+
+  // ===== ЗАКРЫТИЕ =====
+  function closeModal() {
+    const modal = document.getElementById('postModal');
+    if (!modal) return;
+    if (document.activeElement && modal.contains(document.activeElement)) (document.activeElement as HTMLElement).blur();
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden', 'true');
+    document.documentElement.style.overflow = '';
+    destroyPlayers();
+    if (modalContent) modalContent.innerHTML = '';
+    slides = [];
+    totalSlides = 0;
+  }
+
+  // ===== ИНИЦИАЛИЗАЦИЯ СЛУШАТЕЛЕЙ (один раз) =====
+  document.getElementById('modalClose')?.addEventListener('click', closeModal);
+  document.getElementById('postModal')?.addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.getElementById('postModal')?.classList.contains('open')) closeModal();
+  });
+
+  // Свайп для закрытия (только на контейнере)
+  {
+    const container = document.getElementById('modalContainer');
+    if (container) {
+      let startY = 0, currentY = 0, swiping = false;
+      container.addEventListener('touchstart', (e) => {
+        if (!document.getElementById('postModal')?.classList.contains('open')) return;
+        if (e.touches.length === 1) { startY = e.touches[0].clientY; swiping = true; }
+      }, { passive: true });
+      container.addEventListener('touchmove', (e) => {
+        if (!swiping) return;
+        currentY = e.touches[0].clientY;
+        const diff = currentY - startY;
+        if (diff > 0) {
+          container.style.setProperty('--swipe-y', `${diff}px`);
+          container.style.setProperty('--swipe-opacity', `${1 - diff / window.innerHeight}`);
+        }
+      }, { passive: true });
+      container.addEventListener('touchend', () => {
+        if (!swiping) return;
+        swiping = false;
+        const diff = currentY - startY;
+        if (diff > 120) closeModal();
+        else {
+          container.style.setProperty('--swipe-y', '0');
+          container.style.setProperty('--swipe-opacity', '1');
+        }
+        startY = 0; currentY = 0;
+      });
+    }
+  }
+
+  // ===== ГЛАВНАЯ ФУНКЦИЯ ОТКРЫТИЯ =====
+  async function openPostModal(ownerId: string, postId: string) {
+    const modal = document.getElementById('postModal');
+    modalContent = document.getElementById('modalContent');
+    if (!modal || !modalContent) return;
+
+    destroyPlayers();
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    document.documentElement.style.overflow = 'hidden';
+    modalContent.innerHTML = '<div class="modal-spinner"></div>';
+    document.getElementById('slideCounter')!.textContent = '';
+    document.getElementById('navArrows')!.style.display = 'none';
+    document.getElementById('postInfo')!.style.display = 'none';
+
+    const isLocal = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
+    try {
+      let post: any = null;
+      if (isLocal && (window as any).VK_ACCESS_TOKEN_FOR_DEV) {
+        const res = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${(window as any).VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error.error_msg);
+        post = data.response?.[0] ?? null;
+      } else {
+        const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
+        if (!res.ok) throw new Error('Ошибка загрузки');
+        post = await res.json();
+      }
+      if (!post) throw new Error('Пост не найден');
 
       const date = new Date(post.date * 1000);
-      const fmtDate = date.toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
-      const mediaItems = (post.attachments || []).filter(a => /photo|video|link|doc/.test(a.type));
+      const fmtDate = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      const mediaItems = (post.attachments || []).filter((a: any) => /photo|video|link|doc/.test(a.type));
       totalSlides = mediaItems.length;
 
-      const slides = await Promise.all(mediaItems.map(async (att, idx) => {
-        if (att.type === "photo" && att.photo) {
-          const u = att.photo.sizes.find(s => s.type === "w")?.url || att.photo.sizes.slice(-1)[0]?.url;
-          return `<div class="slide ${idx === 0 ? 'active' : ''}" data-type="photo"><img src="${idx === 0 ? u : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E'}" data-src="${u}" alt="Фото ${idx+1}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async" /></div>`;
-        }
-        if (att.type === "video" && att.video) {
-          const v = att.video, accessKey = v.access_key || '';
-          let vd = null;
-          try { const r = await fetch(`/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`); if (r.ok) vd = await r.json(); } catch(e) {}
-          const poster = vd?.poster || '';
-          const makeSlide = (body, isActive) => `<div class="slide ${isActive ? 'active' : ''}" data-type="video">${body}</div>`;
-          if (vd?.hls || vd?.mp4) {
-            if (idx === 0) {
-              const t = vd.hls ? 'hls' : 'mp4';
-              const body = vd.hls ? `<div class="video-wrapper" data-hls="${vd.hls}"><video controls playsinline preload="metadata" controlsList="nodownload" poster="${poster}"></video></div>`
-                : `<div class="video-wrapper"><video src="${vd.mp4}" controls playsinline preload="metadata" controlsList="nodownload" poster="${poster}"></video></div>`;
-              return makeSlide(body, true);
-            }
-            const url = vd.hls || vd.mp4;
-            return makeSlide(`<div class="video-facade" style="background-image: url(${poster})" data-video-url="${url}" data-video-type="${vd.hls ? 'hls' : 'mp4'}" data-poster="${poster}"><div class="video-play-btn"></div></div>`, false);
+      // Строим слайдер без ожидания видео
+      const sliderDiv = document.createElement('div');
+      sliderDiv.className = 'simple-slider';
+
+      mediaItems.forEach((att: any, idx: number) => {
+        const slideDiv = document.createElement('div');
+        slideDiv.className = `slide ${idx === 0 ? 'active' : ''}`;
+        slideDiv.dataset.type = att.type;
+
+        if (att.type === 'photo' && att.photo) {
+          const sizes = att.photo.sizes || [];
+          const best = sizes.reduce((prev: any, curr: any) => (curr.width || 0) > (prev.width || 0) ? curr : prev, sizes[0]);
+          const url = best?.url || '';
+          const img = document.createElement('img');
+          img.src = idx === 0 ? url : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
+          img.dataset.src = url;
+          img.alt = `Фото ${idx + 1}`;
+          img.loading = idx === 0 ? 'eager' : 'lazy';
+          img.decoding = 'async';
+          slideDiv.appendChild(img);
+        } else if (att.type === 'video' && att.video) {
+          const v = att.video;
+          const accessKey = v.access_key || '';
+          const poster = '';
+          const fallbackUrl = `https://vk.com/video${v.owner_id}_${v.id}`;
+          const facadeDiv = document.createElement('div');
+          facadeDiv.className = 'video-facade';
+          facadeDiv.style.backgroundImage = `url(${poster})`;
+          facadeDiv.dataset.fallbackUrl = fallbackUrl;
+          const playBtn = document.createElement('div');
+          playBtn.className = 'video-play-btn';
+          facadeDiv.appendChild(playBtn);
+          slideDiv.appendChild(facadeDiv);
+
+          // Загружаем метаданные видео в фоне, но не блокируем открытие
+          const videoIndex = idx;
+          if (!pendingVideoFetch.has(videoIndex)) {
+            const fetchPromise = (async () => {
+              try {
+                const res = await fetch(`/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`);
+                if (!res.ok) throw new Error('fetch error');
+                const vd = await res.json();
+                if (vd?.hls || vd?.mp4) {
+                  videoMetaCache.set(videoIndex, {
+                    url: vd.hls || vd.mp4,
+                    type: vd.hls ? 'hls' : 'mp4',
+                    poster: vd.poster || '',
+                    fallbackUrl,
+                  });
+                  // Если фасад ещё на месте, обновим его фон
+                  if (vd.poster) facadeDiv.style.backgroundImage = `url(${vd.poster})`;
+                } else {
+                  videoMetaCache.set(videoIndex, {
+                    url: `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`,
+                    type: 'vk_iframe',
+                    poster: '',
+                    fallbackUrl,
+                  });
+                }
+              } catch (e) {
+                log('Ошибка загрузки метаданных видео', e);
+              } finally {
+                pendingVideoFetch.delete(videoIndex);
+              }
+            })();
+            pendingVideoFetch.set(videoIndex, fetchPromise);
           }
-          const iframeSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
-          if (idx === 0) return makeSlide(`<div class="video-wrapper"><iframe src="${iframeSrc}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe></div>`, true);
-          return makeSlide(`<div class="video-facade" style="background-image: url(${poster})" data-video-url="${iframeSrc}" data-video-type="vk_iframe"><div class="video-play-btn"></div></div>`, false);
+        } else if (att.type === 'link' && att.link) {
+          slideDiv.innerHTML = `<div class="link-preview">
+            ${att.link.photo?.sizes?.length ? `<img src="${att.link.photo.sizes.slice(-1)[0].url}" alt="" />` : ''}
+            <div class="preview-title">${att.link.title || 'Ссылка'}</div>
+            ${att.link.description ? `<div class="preview-description">${att.link.description}</div>` : ''}
+            <a href="${att.link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
+          </div>`;
+        } else if (att.type === 'doc' && att.doc) {
+          slideDiv.innerHTML = `<div class="doc-preview">
+            <div class="preview-title">${att.doc.title || 'Документ'}</div>
+            <a href="${att.doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
+          </div>`;
         }
-        if (att.type === "link" && att.link) {
-          const l = att.link, img = l.photo?.sizes?.length ? `<img src="${l.photo.sizes.slice(-1)[0].url}" alt="" />` : '';
-          return `<div class="slide ${idx === 0 ? 'active' : ''}" data-type="link"><div class="link-preview">${img}<div class="preview-title">${l.title || "Ссылка"}</div>${l.description ? `<div class="preview-description">${l.description}</div>` : ''}<a href="${l.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a></div></div>`;
-        }
-        if (att.type === "doc" && att.doc) {
-          const d = att.doc;
-          return `<div class="slide ${idx === 0 ? 'active' : ''}" data-type="doc"><div class="doc-preview"><div class="preview-title">${d.title || "Документ"}</div><a href="${d.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a></div></div>`;
-        }
-        return "";
-      }));
-
-      content.innerHTML = `<div class="simple-slider">${slides.join("")}</div>`;
-      document.getElementById("postInfo").innerHTML = `<div class="post-date">${fmtDate}</div>${post.text ? `<div class="post-text">${post.text.replace(/\n/g, "<br>")}</div>` : ""}`;
-      document.getElementById("postInfo").style.display = "block";
-
-      currentSlideIndex = 0; mediaLoaded.clear();
-      if (document.querySelector(".simple-slider .slide.active video, .simple-slider .slide.active iframe")) mediaLoaded.add(0);
-      if (typeof Hls !== "undefined") {
-        const firstVideo = document.querySelector(".simple-slider .slide.active video");
-        const wrap = firstVideo?.closest('.video-wrapper');
-        if (wrap?.dataset.hls) { const h = new Hls(); h.loadSource(wrap.dataset.hls); h.attachMedia(firstVideo); }
-      }
-
-      document.getElementById("navPrev").onclick = prevSlide;
-      document.getElementById("navNext").onclick = nextSlide;
-      document.getElementById("navArrows").style.display = totalSlides > 1 ? "flex" : "none";
-
-      document.getElementById("modalContent")?.addEventListener('click', (e) => {
-        const btn = e.target.closest('.video-play-btn');
-        if (!btn) return;
-        const facade = btn.closest('.video-facade');
-        if (!facade) return;
-        const slide = facade.closest('.slide');
-        const idx = Array.from(document.querySelectorAll('.simple-slider .slide')).indexOf(slide);
-        if (idx >= 0 && !mediaLoaded.has(idx)) loadSlideContent(idx);
+        sliderDiv.appendChild(slideDiv);
       });
+
+      // Вставляем слайдер без полной очистки (используем замену)
+      modalContent.innerHTML = '';
+      modalContent.appendChild(sliderDiv);
+      slides = Array.from(modalContent.querySelectorAll('.slide'));
+
+      document.getElementById('postInfo')!.innerHTML = `<div class="post-date">${fmtDate}</div>${post.text ? `<div class="post-text">${post.text.replace(/\n/g, '<br>')}</div>` : ''}`;
+      document.getElementById('postInfo')!.style.display = 'block';
+
+      currentSlideIndex = 0;
+      mediaLoaded.clear();
+      // Загружаем первый слайд и предзагружаем соседние
+      preloadAdjacentSlides(0);
+
+      document.getElementById('navPrev')!.onclick = prevSlide;
+      document.getElementById('navNext')!.onclick = nextSlide;
+      document.getElementById('navArrows')!.style.display = totalSlides > 1 ? 'flex' : 'none';
 
       initZoom();
     } catch (err) {
       log('Ошибка', err);
-      content.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
+      modalContent.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
     }
   }
 
-  function closeModal() {
-    const modal = document.getElementById("postModal");
-    if (!modal) return;
-    if (document.activeElement && modal.contains(document.activeElement)) document.activeElement.blur();
-    modal.classList.remove("open"); modal.setAttribute("aria-hidden", "true");
-    document.documentElement.style.overflow = "";
-    destroyPlayer();
-    document.getElementById("modalContent").innerHTML = "";
-  }
+  // Глобальный обработчик (один раз)
+  document.getElementById('modalContent')?.addEventListener('click', handleModalContentClick);
 
-  document.getElementById("modalClose")?.addEventListener("click", closeModal);
-  document.getElementById("postModal")?.addEventListener("click", (e) => { if (e.target === e.currentTarget) closeModal(); });
-  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.getElementById("postModal")?.classList.contains("open")) closeModal(); });
-
-  let touchStartY = 0, touchCurrentY = 0, isSwiping = false;
-  document.addEventListener("touchstart", (e) => {
-    if (!document.getElementById("postModal")?.classList.contains("open")) return;
-    if (e.touches.length === 1) { touchStartY = e.touches[0].clientY; isSwiping = true; }
-  });
-  document.addEventListener("touchmove", (e) => {
-    if (!isSwiping) return;
-    touchCurrentY = e.touches[0].clientY;
-    const diff = touchCurrentY - touchStartY;
-    const container = document.querySelector(".modal-container");
-    if (container && diff > 0) {
-      container.style.transform = `translateY(${diff}px)`;
-      container.style.opacity = String(1 - diff / window.innerHeight);
-    }
-  });
-  document.addEventListener("touchend", () => {
-    if (!isSwiping) return;
-    isSwiping = false;
-    const diff = touchCurrentY - touchStartY;
-    const container = document.querySelector(".modal-container");
-    if (container && diff > 120) closeModal();
-    else if (container) { container.style.transform = ""; container.style.opacity = ""; }
-    touchStartY = 0; touchCurrentY = 0;
-  });
-
-  window.openPostModal = openPostModal;
+  (window as any).openPostModal = openPostModal;
 </script>
