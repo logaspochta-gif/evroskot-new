@@ -37,7 +37,7 @@ if (isLocal) {
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Poppins:wght@400;600;700;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Oswald:wght@400;600;700;900&display=swap"
       rel="stylesheet"
     />
 
@@ -70,11 +70,18 @@ if (isLocal) {
 
       body {
         margin: 0;
-        font-family: "Inter", "Poppins", sans-serif;
+        font-family: "Inter", sans-serif;   /* основной текст */
         background: var(--dark);
         color: var(--text);
         line-height: 1.6;
         overflow-x: hidden;
+      }
+
+      /* Заголовки — Oswald */
+      h1, h2, h3, h4, h5, h6 {
+        font-family: "Oswald", sans-serif;
+        font-weight: 700;          /* можно 900 для h1, но Oswald смотрится жирно */
+        line-height: 1.2;
       }
 
       a {

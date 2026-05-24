@@ -1,49 +1,52 @@
 ---
-// Секция "Преимущества" (можно вставить в index.astro или вынести в отдельный компонент)
+// src/components/Advantages.astro (или встроенная секция)
 ---
 
-<section class="advantages-section" id="advantages">
+<section class="advantages-section" id="advantages" aria-labelledby="advantages-heading">
   <div class="advantages-inner">
-    <h2 class="section-title">Почему <span class="accent">Scanova A/S</span>?</h2>
-    <p class="section-subtitle">Прямые поставки без посредников. Полный цикл сопровождения.</p>
-    <div class="advantages-grid">
-      <div class="advantage-card">
+    <h2 id="advantages-heading" class="section-title">
+      Почему <span class="accent">Scanova A/S</span>?
+    </h2>
+    <p class="section-subtitle">
+      Прямые поставки без посредников. Полный цикл сопровождения.
+    </p>
+    <ul class="advantages-grid" role="list">
+      <li class="advantage-card">
         <span class="advantage-icon" aria-hidden="true">🏛️</span>
         <h3>Гослицензия Дании</h3>
         <p>Официальный экспортёр, аккредитованный Министерством сельского хозяйства Королевства Дания.</p>
-      </div>
-      <div class="advantage-card">
+      </li>
+      <li class="advantage-card">
         <span class="advantage-icon" aria-hidden="true">🐄</span>
         <h3>Собственная карантинная база</h3>
         <p>Более 1 000 голов единовременного содержания. Полный ветеринарный контроль перед отправкой.</p>
-      </div>
-      <div class="advantage-card">
+      </li>
+      <li class="advantage-card">
         <span class="advantage-icon" aria-hidden="true">🧬</span>
         <h3>Генетика Viking Genetics</h3>
         <p>Партнёрство с крупнейшим генетическим центром Европы. Только элитный племенной материал.</p>
-      </div>
-      <div class="advantage-card">
+      </li>
+      <li class="advantage-card">
         <span class="advantage-icon" aria-hidden="true">🚛</span>
         <h3>Логистика «под ключ»</h3>
         <p>Организация транспортировки, оформление всех документов, таможенное сопровождение.</p>
-      </div>
-      <div class="advantage-card">
+      </li>
+      <li class="advantage-card">
         <span class="advantage-icon" aria-hidden="true">👨‍⚕️</span>
         <h3>Ветеринарная поддержка</h3>
         <p>Сопровождение датскими специалистами: ветеринарами, технологами по кормлению и осеменению.</p>
-      </div>
-      <div class="advantage-card">
+      </li>
+      <li class="advantage-card">
         <span class="advantage-icon" aria-hidden="true">🎓</span>
         <h3>Обучение персонала</h3>
         <p>Обучение местных специалистов по уходу за поставленными животными на вашей территории.</p>
-      </div>
-    </div>
+      </li>
+    </ul>
   </div>
 </section>
 
 <style>
   .advantages-section {
-    /* Общие переменные секции */
     --adv-gap: clamp(20px, 3vw, 30px);
     --adv-radius: 20px;
     --adv-card-bg: var(--card-bg, #141414);
@@ -88,6 +91,9 @@
   }
 
   .advantages-grid {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: var(--adv-gap);
