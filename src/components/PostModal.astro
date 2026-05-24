@@ -404,6 +404,7 @@
     const slides = document.querySelectorAll(".simple-slider .slide");
     if (slides.length === 0) return;
 
+    // Остановка видео на предыдущем слайде
     const prevSlide = slides[currentSlideIndex];
     if (prevSlide) {
       const video = prevSlide.querySelector('video');
@@ -413,7 +414,7 @@
         video.src = '';
       }
       if (iframe) {
-        iframe.src = '';
+        iframe.src = '';  // сбрасываем iframe
       }
     }
 
@@ -424,6 +425,7 @@
     const counter = document.getElementById("slideCounter");
     if (counter) counter.textContent = `${index + 1} / ${totalSlides}`;
     resetZoom();
+
     loadSlideContent(index);
   }
 
@@ -443,7 +445,7 @@
     if (!slide) return;
 
     const img = slide.querySelector('img');
-    if (img && img.dataset.src) {
+    if (img && img.dataset.src && !img.src.startsWith('http')) {
       img.src = img.dataset.src;
     }
 
@@ -558,7 +560,9 @@
             let videoData = null;
 
             try {
-              const videoRes = await fetch(`/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`);
+              const videoRes = await fetch(
+                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`
+              );
               if (videoRes.ok) videoData = await videoRes.json();
             } catch (e) { log('Ошибка загрузки видео', e); }
 
@@ -618,6 +622,7 @@
 
       currentSlideIndex = 0;
       mediaLoaded.clear();
+      // Первый слайд тоже с фасадом, загружаем при необходимости
       loadSlideContent(0);
 
       const prevBtn = document.getElementById("navPrev");
@@ -626,6 +631,7 @@
       if (nextBtn) nextBtn.onclick = nextSlide;
       if (navArrows) navArrows.style.display = totalSlides > 1 ? "flex" : "none";
 
+      // Делегирование для фасадов
       document.getElementById("modalContent")?.addEventListener('click', (e) => {
         const facade = (e.target as HTMLElement).closest('.video-facade');
         if (facade) {
