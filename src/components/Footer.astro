@@ -1,14 +1,115 @@
-<footer>
-  <p>&copy; 2016–2026 Scanova A/S All Rights Reserved. &nbsp;|&nbsp; Scanova A/S — племенной скот из Дании.</p>
+---
+// src/components/Footer.astro
+---
+
+<footer class="site-footer" role="contentinfo">
+  <div class="footer-social">
+    <a
+      href="https://vk.com/evroskot"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="social-link"
+      aria-label="ВКонтакте"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M15.684 0H8.316C1.592 0 0 1.592 0 8.316v7.368C0 22.408 1.592 24 8.316 24h7.368C22.408 24 24 22.408 24 15.684V8.316C24 1.592 22.408 0 15.684 0zm3.692 17.123h-1.842c-.66 0-.862-.524-2.047-1.725-1.033-1.002-1.488-1.132-1.741-1.132-.356 0-.458.1-.458.59v1.59c0 .42-.136.673-1.257.673-1.855 0-3.916-1.123-5.366-3.22C4.98 11.672 4.56 9.66 4.56 9.66c-.1-.33.1-.504.515-.504h1.842c.386 0 .53.178.66.59.722 2.07 1.927 3.88 2.422 3.88.187 0 .27-.087.27-.562V10.18c-.06-1.006-.64-1.09-.64-1.447 0-.176.14-.304.374-.304h2.896c.316 0 .433.167.433.532v2.878c0 .315.14.426.229.426.187 0 .333-.11.66-.45 1.027-1.147 1.762-2.916 1.762-2.916.094-.26.28-.504.674-.504h1.842c.462 0 .563.24.462.574-.192.905-2.06 3.52-2.06 3.52-.168.275-.233.4 0 .708.167.25.722.71 1.088 1.143.707.838 1.248 1.554 1.387 2.024.1.35-.08.702-.547.702z"/></svg>
+    </a>
+
+    <a
+      href="https://t.me/evroskot"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="social-link"
+      aria-label="Telegram"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 8.221l-1.97 9.28c-.145.658-.537.818-1.084.508l-3-2.21-1.446 1.394c-.14.18-.357.295-.6.295-.002 0-.003 0-.005 0l.213-3.054 5.56-5.022c.24-.213-.054-.334-.373-.121l-6.87 4.326-2.96-.924c-.64-.203-.658-.64.135-.954l11.566-4.458c.538-.196 1.006.128.832.938z"/></svg>
+    </a>
+
+    <a
+      href="https://wa.me/4553283429"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="social-link"
+      aria-label="WhatsApp"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+    </a>
+
+    <a
+      href="https://youtube.com/@evroskot"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="social-link"
+      aria-label="YouTube"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+    </a>
+  </div>
+
+  <p class="copyright">&copy; 2016–{new Date().getFullYear()} Scanova A/S All Rights Reserved. &nbsp;|&nbsp; Scanova A/S — племенной скот из Дании.</p>
 </footer>
 
 <style>
-  footer {
+  .site-footer {
     background: #000;
     text-align: center;
     padding: 30px 5%;
     border-top: 1px solid var(--border);
-    opacity: 0.7;
     font-size: 0.85rem;
+    color: var(--muted, rgba(255, 255, 255, 0.7));
+  }
+
+  .footer-social {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--muted);
+    transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+  }
+
+  .social-link:hover {
+    background: var(--accent);
+    color: #fff;
+    transform: translateY(-2px);
+  }
+
+  .social-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .copyright {
+    margin: 0;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 480px) {
+    .footer-social {
+      gap: 12px;
+    }
+    .social-link {
+      width: 36px;
+      height: 36px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .social-link {
+      transition: none;
+    }
+    .social-link:hover {
+      transform: none;
+    }
   }
 </style>
