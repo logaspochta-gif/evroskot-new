@@ -7,7 +7,7 @@ export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
   prefetch: {
-    defaultStrategy: 'hover',  // предзагрузка страниц при наведении
+    defaultStrategy: 'hover',
   },
   integrations: [
     favicons({

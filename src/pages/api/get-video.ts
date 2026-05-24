@@ -52,7 +52,7 @@ const ALLOWED_ORIGINS = [
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
   const headers: Record<string, string> = {
     "Content-Type": "application/json;charset=UTF-8",
-    "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=86400", // 7 дней
+    "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=86400",
     ...extraHeaders,
   };
   return new Response(JSON.stringify(data), { status, headers });
@@ -161,7 +161,6 @@ export async function GET({ request }: { request: Request }) {
       video.image
         ?.toSorted((a, b) => b.width - a.width)?.[0]?.url ?? null;
 
-    // Возвращаем только необходимые поля
     const result = {
       title: video.title || "",
       poster,

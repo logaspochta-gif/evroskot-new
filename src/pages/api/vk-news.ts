@@ -18,7 +18,7 @@ export interface VkPost {
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
   const headers = {
     'Content-Type': 'application/json;charset=UTF-8',
-    'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600', // 30 минут
+    'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600',
     ...extraHeaders,
   };
   return new Response(JSON.stringify(data), { status, headers });

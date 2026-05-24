@@ -275,6 +275,9 @@
   }
 
   @media (max-width: 768px) {
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.55);
+    }
     .modal-close {
       width: 42px;
       height: 42px;
@@ -320,14 +323,13 @@
   let totalSlides = 0;
   let scale = 1;
   let zoomInitialized = false;
-  let mediaLoaded = new Set<number>(); // отслеживание загруженных слайдов
+  let mediaLoaded = new Set<number>();
 
   function log(msg, data) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
   function destroyPlayer() {
-    // Останавливаем и удаляем все видео/iframe
     document.querySelectorAll('.simple-slider video, .simple-slider iframe').forEach(el => {
       if (el instanceof HTMLVideoElement) {
         el.pause();
@@ -402,17 +404,16 @@
     const slides = document.querySelectorAll(".simple-slider .slide");
     if (slides.length === 0) return;
 
-    // Останавливаем видео на предыдущем слайде
     const prevSlide = slides[currentSlideIndex];
     if (prevSlide) {
       const video = prevSlide.querySelector('video');
       const iframe = prevSlide.querySelector('iframe');
       if (video) {
         video.pause();
-        video.src = video.dataset.src || video.currentSrc || video.src;
+        video.src = '';
       }
       if (iframe) {
-        iframe.src = iframe.dataset.src || '';
+        iframe.src = '';
       }
     }
 
@@ -423,8 +424,6 @@
     const counter = document.getElementById("slideCounter");
     if (counter) counter.textContent = `${index + 1} / ${totalSlides}`;
     resetZoom();
-
-    // Загружаем контент текущего слайда, если ещё не загружен
     loadSlideContent(index);
   }
 
@@ -440,23 +439,19 @@
 
   function loadSlideContent(index: number) {
     if (mediaLoaded.has(index)) return;
-
     const slide = document.querySelectorAll(".simple-slider .slide")[index];
     if (!slide) return;
 
-    // Изображения
     const img = slide.querySelector('img');
-    if (img && img.dataset.src && !img.src.startsWith('http')) {
+    if (img && img.dataset.src) {
       img.src = img.dataset.src;
     }
 
-    // Видео-фасады
     const facade = slide.querySelector('.video-facade');
     if (facade) {
       const videoUrl = facade.dataset.videoUrl;
       const videoType = facade.dataset.videoType;
       const poster = facade.dataset.poster;
-      const title = facade.dataset.title;
 
       if (videoType === 'hls') {
         const videoHTML = `<div class="video-wrapper" data-hls="${videoUrl}">
@@ -476,20 +471,13 @@
           <video src="${videoUrl}" controls playsinline preload="metadata" controlsList="nodownload" poster="${poster}"></video>
         </div>`;
         facade.outerHTML = videoHTML;
-      } else if (videoType === 'youtube' || videoType === 'vk_iframe') {
+      } else if (videoType === 'vk_iframe' || videoType === 'youtube') {
         const iframeHTML = `<div class="video-wrapper">
           <iframe src="${videoUrl}" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="no-referrer"></iframe>
         </div>`;
         facade.outerHTML = iframeHTML;
       }
-
       mediaLoaded.add(index);
-    }
-
-    // Изображения загружаем отложено
-    const lazyImg = slide.querySelector('img[data-src]');
-    if (lazyImg && !lazyImg.src.startsWith('http')) {
-      lazyImg.src = lazyImg.dataset.src;
     }
   }
 
@@ -558,7 +546,6 @@
         mediaItems.map(async (att, idx) => {
           if (att.type === "photo" && att.photo) {
             const img = att.photo.sizes.find(s => s.type === "w") || att.photo.sizes[att.photo.sizes.length - 1];
-            // Первый слайд загружаем сразу, остальные – с data-src
             const placeholder = idx === 0 ? img.url : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3C/svg%3E';
             return `<div class="slide ${idx === 0 ? 'active' : ''}" data-type="photo">
               <img src="${placeholder}" data-src="${img.url}" alt="Фото ${idx + 1}" loading="${idx === 0 ? 'eager' : 'lazy'}" decoding="async" />
@@ -571,18 +558,13 @@
             let videoData = null;
 
             try {
-              const videoRes = await fetch(
-                `/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`
-              );
-              if (videoRes.ok) {
-                videoData = await videoRes.json();
-              }
+              const videoRes = await fetch(`/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`);
+              if (videoRes.ok) videoData = await videoRes.json();
             } catch (e) { log('Ошибка загрузки видео', e); }
 
-            // Обложка с кнопкой Play для отложенной загрузки
             const posterUrl = videoData?.poster || '';
             const facadeHTML = (type: string, url: string) => `
-              <div class="slide ${idx === 0 ? 'active' : ''}" data-type="video">
+              <div class="slide" data-type="video">
                 <div class="video-facade" style="background-image: url(${posterUrl})" data-video-url="${url}" data-video-type="${type}" data-poster="${posterUrl}">
                   <div class="video-play-btn"></div>
                 </div>
@@ -591,14 +573,8 @@
             if (videoData?.hls) return facadeHTML('hls', videoData.hls);
             if (videoData?.mp4) return facadeHTML('mp4', videoData.mp4);
 
-            // Iframe VK (тоже отложенно)
             const iframeSrc = `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
-            return `
-              <div class="slide ${idx === 0 ? 'active' : ''}" data-type="video">
-                <div class="video-facade" style="background-image: url(${posterUrl})" data-video-url="${iframeSrc}" data-video-type="vk_iframe" data-poster="${posterUrl}">
-                  <div class="video-play-btn"></div>
-                </div>
-              </div>`;
+            return facadeHTML('vk_iframe', iframeSrc);
           }
 
           if (att.type === "link" && att.link) {
@@ -642,7 +618,6 @@
 
       currentSlideIndex = 0;
       mediaLoaded.clear();
-      // Первый слайд загружаем сразу (изображения уже в src, видео-фасады пока не трогаем)
       loadSlideContent(0);
 
       const prevBtn = document.getElementById("navPrev");
@@ -651,11 +626,12 @@
       if (nextBtn) nextBtn.onclick = nextSlide;
       if (navArrows) navArrows.style.display = totalSlides > 1 ? "flex" : "none";
 
-      // Делегирование клика для обложек видео
       document.getElementById("modalContent")?.addEventListener('click', (e) => {
         const facade = (e.target as HTMLElement).closest('.video-facade');
         if (facade) {
-          const index = Array.from(facade.closest('.simple-slider')?.querySelectorAll('.slide') || []).findIndex(s => s.contains(facade));
+          const slide = facade.closest('.slide');
+          const slides = Array.from(document.querySelectorAll('.simple-slider .slide'));
+          const index = slides.indexOf(slide);
           if (index >= 0 && !mediaLoaded.has(index)) {
             loadSlideContent(index);
           }
