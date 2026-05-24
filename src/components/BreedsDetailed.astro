@@ -2,129 +2,129 @@
 // src/components/BreedsDetailed.astro
 ---
 
-<section class="breeds-detailed" id="breeds-detailed">
-  <div class="breeds-container">
-    <h2 class="section-title">Породы <span class="accent">крупного рогатого скота</span></h2>
-    <p class="section-subtitle">Молочное и мясное направление. Только датская селекция.</p>
+<section class="breeds-section" id="breeds">
+  <h2 class="section-title">Породы <span class="accent">крупного рогатого скота</span></h2>
+  <p class="section-subtitle">Молочное и мясное направление. Только датская селекция.</p>
 
-    <div class="breeds-grid">
-      <!-- Голштинская -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Holstein_cow_%281%29.jpg/640px-Holstein_cow_%281%29.jpg"
-          alt="Голштинская порода"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Голштинская</h3>
-          <p>Мировой лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика датской селекции.</p>
-        </div>
-      </article>
-
-      <!-- Джерсейская -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Jersey_cows_1.JPG/640px-Jersey_cows_1.JPG"
-          alt="Джерсейская порода"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Джерсейская</h3>
-          <p>Молоко с жирностью до 6%. Светло-коричневая масть. Компактное телосложение и долголетие.</p>
-        </div>
-      </article>
-
-      <!-- Красная Датская -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Danish_Red_cow.jpg/640px-Danish_Red_cow.jpg"
-          alt="Красная Датская порода"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Красная Датская</h3>
-          <p>Универсальная порода двойного назначения. Красно-пёстрая масть. Отличное здоровье и плодовитость.</p>
-        </div>
-      </article>
-
-      <!-- Шароле -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Charolais_cattle.jpg/640px-Charolais_cattle.jpg"
-          alt="Порода Шароле"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Шароле</h3>
-          <p>Мясная порода с высокой энергией роста. Кремово-белая масть. Тяжёлые быки до 1 400 кг.</p>
-        </div>
-      </article>
-
-      <!-- Абердин-Ангус -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Aberdeen_Angus_cattle.jpg/640px-Aberdeen_Angus_cattle.jpg"
-          alt="Абердин-Ангус порода"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Абердин-Ангус</h3>
-          <p>Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость отёлов и скороспелость.</p>
-        </div>
-      </article>
-
-      <!-- Герефордская -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hereford_cattle.jpg/640px-Hereford_cattle.jpg"
-          alt="Герефордская порода"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Герефордская</h3>
-          <p>Красно-белая масть. Выносливость и неприхотливость. Отличная адаптация к пастбищному содержанию.</p>
-        </div>
-      </article>
-
-      <!-- Лимузин -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Limousin_cattle.jpg/640px-Limousin_cattle.jpg"
-          alt="Порода Лимузин"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Лимузин</h3>
-          <p>Золотисто-красная масть. Высокий выход постного мяса. Отличные материнские качества.</p>
-        </div>
-      </article>
-
-      <!-- Симментальская -->
-      <article class="breed-card">
-        <img
-          src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Simmental_cattle.jpg/640px-Simmental_cattle.jpg"
-          alt="Симментальская порода"
-          loading="lazy"
-          decoding="async"
-        />
-        <div class="breed-card-body">
-          <h3>Симментальская</h3>
-          <p>Палево-пёстрая масть. Крепкая конституция и высокая продуктивность.</p>
-        </div>
-      </article>
+  <div class="splide breeds-splide" aria-label="Породы скота">
+    <div class="splide__track">
+      <ul class="splide__list">
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Holstein_cow_%281%29.jpg/640px-Holstein_cow_%281%29.jpg"
+              alt="Голштинская"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Голштинская</h3>
+              <p>Лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика датской селекции.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Jersey_cows_1.JPG/640px-Jersey_cows_1.JPG"
+              alt="Джерсейская"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Джерсейская</h3>
+              <p>Молоко с жирностью до 6%. Светло-коричневая масть. Компактное телосложение и долголетие.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Danish_Red_cow.jpg/640px-Danish_Red_cow.jpg"
+              alt="Красная Датская"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Красная Датская</h3>
+              <p>Универсальная порода двойного назначения. Красно-пёстрая масть. Отличное здоровье и плодовитость.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Charolais_cattle.jpg/640px-Charolais_cattle.jpg"
+              alt="Шароле"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Шароле</h3>
+              <p>Мясная порода с высокой энергией роста. Кремово-белая масть. Тяжёлые быки до 1 400 кг.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Aberdeen_Angus_cattle.jpg/640px-Aberdeen_Angus_cattle.jpg"
+              alt="Абердин-Ангус"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Абердин-Ангус</h3>
+              <p>Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость отёлов и скороспелость.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hereford_cattle.jpg/640px-Hereford_cattle.jpg"
+              alt="Герефордская"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Герефордская</h3>
+              <p>Красно-белая масть. Выносливость и неприхотливость. Отличная адаптация к пастбищному содержанию.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Limousin_cattle.jpg/640px-Limousin_cattle.jpg"
+              alt="Лимузин"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Лимузин</h3>
+              <p>Золотисто-красная масть. Высокий выход постного мяса. Отличные материнские качества.</p>
+            </div>
+          </article>
+        </li>
+        <li class="splide__slide">
+          <article class="breed-card">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Simmental_cattle.jpg/640px-Simmental_cattle.jpg"
+              alt="Симментальская"
+              loading="lazy"
+            />
+            <div class="breed-card-body">
+              <h3>Симментальская</h3>
+              <p>Палево-пёстрая масть. Двойное назначение: молоко и мясо. Крепкая конституция и высокая продуктивность.</p>
+            </div>
+          </article>
+        </li>
+      </ul>
+    </div>
+    <div class="splide__pagination"></div>
+    <div class="splide__arrows">
+      <button class="splide__arrow splide__arrow--prev"></button>
+      <button class="splide__arrow splide__arrow--next"></button>
     </div>
   </div>
 </section>
 
 <style>
-  .breeds-detailed {
+  .breeds-section {
     --breeds-gap: clamp(16px, 2vw, 24px);
     --breeds-radius: 20px;
     --breeds-card-bg: var(--card-bg, #141414);
@@ -136,30 +136,27 @@
 
     min-height: 100vh;
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
+    align-items: center;
     background: #000;
     padding: clamp(60px, 8vh, 100px) 5%;
     box-sizing: border-box;
-  }
-
-  .breeds-container {
-    max-width: 1200px;
-    width: 100%;
-    text-align: center;
   }
 
   .section-title {
     font-size: clamp(2rem, 5vw, 2.8rem);
     font-weight: 900;
     margin: 0 0 0.5rem;
+    text-align: center;
     color: var(--breeds-text);
   }
 
   .section-subtitle {
     color: var(--breeds-muted);
-    margin: 0 auto 3rem;
+    margin-bottom: 2rem;
     font-size: clamp(1rem, 2.5vw, 1.1rem);
+    text-align: center;
     max-width: 600px;
     line-height: 1.5;
   }
@@ -168,10 +165,11 @@
     color: var(--breeds-accent);
   }
 
-  .breeds-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: var(--breeds-gap);
+  .breeds-splide {
+    width: 100%;
+    max-width: 1200px;
+    padding-bottom: 40px;
+    overflow: hidden;
   }
 
   .breed-card {
@@ -179,6 +177,7 @@
     border-radius: var(--breeds-radius);
     overflow: hidden;
     border: var(--breeds-border);
+    height: 100%;
     transition: transform var(--breeds-transition), border-color var(--breeds-transition), box-shadow var(--breeds-transition);
     will-change: transform;
   }
@@ -191,7 +190,7 @@
 
   .breed-card img {
     width: 100%;
-    height: 200px;
+    height: 180px;
     object-fit: cover;
     display: block;
   }
@@ -215,14 +214,57 @@
     line-height: 1.5;
   }
 
+  /* Splide пагинация */
+  :global(.breeds-splide .splide__pagination) {
+    bottom: 0;
+    gap: 6px;
+  }
+
+  :global(.breeds-splide .splide__pagination__page) {
+    background: rgba(255, 255, 255, 0.4);
+    width: 10px;
+    height: 10px;
+    margin: 0 4px;
+    transition: background var(--breeds-transition), transform var(--breeds-transition);
+  }
+
+  :global(.breeds-splide .splide__pagination__page.is-active) {
+    background: var(--breeds-accent);
+    transform: scale(1.2);
+  }
+
+  /* Стрелки Splide */
+  :global(.breeds-splide .splide__arrow) {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    color: #fff;
+    transition: background var(--breeds-transition), transform var(--breeds-transition);
+  }
+
+  :global(.breeds-splide .splide__arrow:hover) {
+    background: rgba(255, 255, 255, 0.24);
+    transform: scale(1.05);
+  }
+
+  :global(.breeds-splide .splide__arrow svg) {
+    fill: #fff;
+    width: 20px;
+    height: 20px;
+  }
+
   @media (max-width: 768px) {
     .breed-card img {
-      height: 180px;
+      height: 150px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .breed-card {
+    .breed-card,
+    .splide__arrow,
+    .splide__pagination__page {
       transition: none;
     }
     .breed-card:hover {
@@ -230,3 +272,28 @@
     }
   }
 </style>
+
+<script>
+  import Splide from '@splidejs/splide';
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const el = document.querySelector('.breeds-splide');
+    if (el instanceof HTMLElement) {
+      new Splide(el, {
+        type: 'loop',
+        perPage: 3,
+        perMove: 1,
+        gap: 'var(--breeds-gap, 24px)',
+        pagination: true,
+        arrows: true,
+        keyboard: 'global',
+        speed: 400,
+        easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+        breakpoints: {
+          1024: { perPage: 2 },
+          768: { perPage: 1 },
+        },
+      }).mount();
+    }
+  });
+</script>

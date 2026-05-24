@@ -26,24 +26,36 @@ import SideNav from '../components/SideNav.astro';
     <BreedsDetailed />
     <Advantages />
     <Staldren />
-    <Contact />
-  </main>
 
-  <!-- Футер как самостоятельная секция -->
-  <section class="footer-section snap-section">
-    <Footer />
-  </section>
+    <!-- Секция Контакты + Футер -->
+    <section id="contact" class="contact-footer-section snap-section">
+      <div class="contact-scroll-area">
+        <Contact />
+        <Footer />
+      </div>
+    </section>
+  </main>
 
   <SideNav />
 </BaseLayout>
 
 <style is:global>
-  .footer-section {
+  .contact-footer-section {
     scroll-snap-align: start;
-    min-height: 100dvh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
     background: var(--dark);
+    scroll-snap-stop: always;
+  }
+
+  .contact-scroll-area {
+    min-height: 120dvh;        /* контакты + футер гарантированно выше экрана */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .contact-scroll-area .site-footer {
+    margin-top: auto;           /* прижимаем футер к низу, если контакты короткие */
   }
 </style>
