@@ -40,15 +40,29 @@
 </div>
 
 <style is:global>
+  /* =========================
+     ПЕРЕМЕННЫЕ МОДАЛЬНОГО ОКНА
+  ========================= */
+  :root {
+    --modal-bg: rgba(0, 0, 0, 0.96);
+    --modal-blur: 18px;
+    --modal-transition: 0.25s ease;
+    --modal-radius: 50%;
+    --modal-accent: var(--accent, #10b981);
+    --modal-text: #fff;
+    --modal-muted: rgba(255, 255, 255, 0.7);
+    --modal-danger: #ef4444;
+  }
+
   .modal-overlay {
     position: fixed;
     inset: 0;
     z-index: 9999;
-    background: rgba(0, 0, 0, 0.96);
-    backdrop-filter: blur(18px);
+    background: var(--modal-bg);
+    backdrop-filter: blur(var(--modal-blur));
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.25s ease, visibility 0.25s ease;
+    transition: opacity var(--modal-transition), visibility var(--modal-transition);
   }
   .modal-overlay.open {
     opacity: 1;
@@ -58,7 +72,7 @@
     position: fixed;
     inset: 0;
     width: 100vw;
-    height: 100dvh;   /* динамическая высота */
+    height: 100dvh;   /* динамическая высота, устойчивая к мобильным тулбарам */
     overflow: hidden;
     background: #000;
   }
@@ -126,18 +140,19 @@
     aspect-ratio: auto !important;
   }
 
-  /* Сообщение о недоступности (на случай, если и iframe не нужен) */
+  /* Сообщение о недоступности видео */
   .video-unavailable {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--modal-text);
     font-size: 18px;
     padding: 40px;
     text-align: center;
     height: 100%;
     width: 100%;
     background: #111;
+    border-radius: 12px;
   }
 
   /* Навигация */
@@ -155,10 +170,10 @@
     width: 52px;
     height: 52px;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--modal-radius);
     background: rgba(255, 255, 255, 0.14);
     backdrop-filter: blur(10px);
-    color: #fff;
+    color: var(--modal-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -178,9 +193,9 @@
     width: 48px;
     height: 48px;
     border: none;
-    border-radius: 50%;
+    border-radius: var(--modal-radius);
     background: rgba(255, 255, 255, 0.12);
-    color: #fff;
+    color: var(--modal-text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -202,9 +217,10 @@
     border-radius: 999px;
     background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(12px);
-    color: #fff;
+    color: var(--modal-text);
     font-size: 13px;
     font-weight: 600;
+    letter-spacing: 0.3px;
   }
   .post-info {
     position: absolute;
@@ -215,26 +231,61 @@
     padding: 90px 40px 40px;
     background: linear-gradient(to top, rgba(0,0,0,0.94), rgba(0,0,0,0.45), transparent);
     pointer-events: none;
-    color: #fff;
+    color: var(--modal-text);
   }
   .post-date {
     margin-bottom: 10px;
-    color: var(--accent, #10b981);
+    color: var(--modal-accent);
     font-size: 13px;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   .post-text {
     max-width: 900px;
     font-size: 0.96rem;
     line-height: 1.65;
     opacity: 0.92;
+    color: var(--modal-text);
   }
+
+  /* Адаптивность */
   @media (max-width: 768px) {
-    .modal-close { width: 42px; height: 42px; top: 14px; right: 14px; }
-    .nav-arrow { width: 44px; height: 44px; }
-    .post-info { padding: 70px 20px 22px; }
-    .post-text { font-size: 0.88rem; line-height: 1.55; }
+    .modal-close {
+      width: 42px;
+      height: 42px;
+      top: 14px;
+      right: 14px;
+    }
+    .nav-arrow {
+      width: 44px;
+      height: 44px;
+    }
+    .post-info {
+      padding: 70px 20px 22px;
+    }
+    .post-text {
+      font-size: 0.88rem;
+      line-height: 1.55;
+    }
+    .slide-counter {
+      font-size: 12px;
+      padding: 5px 12px;
+    }
+  }
+
+  /* Уважение к предпочтениям */
+  @media (prefers-reduced-motion: reduce) {
+    .modal-overlay,
+    .modal-close,
+    .nav-arrow,
+    .simple-slider .slide {
+      transition: none;
+    }
+    .nav-arrow:hover,
+    .modal-close:hover {
+      transform: none;
+    }
   }
 </style>
 

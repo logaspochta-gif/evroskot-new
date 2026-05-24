@@ -40,62 +40,63 @@ const slides = [
 
 <section class="hero" id="hero">
   <div class="slides" id="hero-slides">
-    {
-      slides.map((slide, index) => (
-        <div class="slide" id={`slide-${index}`}>
-          <div class="slide-bg">
-            <Image
-              src={slide.img}
-              alt=""
-              widths={[480, 768, 1280, 1920]}
-              sizes="100vw"
-              format="avif"
-              quality={65}
-              loading={index === 0 ? "eager" : "lazy"}
-              fetchpriority={index === 0 ? "high" : "auto"}
-              decoding={index === 0 ? "sync" : "async"}
-              class="slide-image"
-            />
-          </div>
-          <div class="content">
-            <span class="badge">{slide.badge}</span>
-            <h1>
-              {slide.title} <br />
-              <span class="accent">{slide.subtitle}</span>
-            </h1>
-            <p>{slide.description}</p>
-            <div class="actions">
-              <a href="#contact" class="primary-btn">
-                {slide.primaryBtn}
-              </a>
-              <a href="#breeds" class="secondary-btn">
-                {slide.secondaryBtn}
-              </a>
-            </div>
+    {slides.map((slide, index) => (
+      <div class="slide" id={`slide-${index}`}>
+        <div class="slide-bg">
+          <Image
+            src={slide.img}
+            alt=""
+            widths={[480, 768, 1280, 1920]}
+            sizes="100vw"
+            format="avif"
+            quality={65}
+            loading={index === 0 ? "eager" : "lazy"}
+            fetchpriority={index === 0 ? "high" : "auto"}
+            decoding={index === 0 ? "sync" : "async"}
+            class="slide-image"
+          />
+        </div>
+        <div class="content">
+          <span class="badge">{slide.badge}</span>
+          <h1>
+            {slide.title} <br />
+            <span class="accent">{slide.subtitle}</span>
+          </h1>
+          <p>{slide.description}</p>
+          <div class="actions">
+            <a href="#contact" class="primary-btn">
+              {slide.primaryBtn}
+            </a>
+            <a href="#breeds" class="secondary-btn">
+              {slide.secondaryBtn}
+            </a>
           </div>
         </div>
-      ))
-    }
+      </div>
+    ))}
   </div>
   <div class="dots" id="hero-dots">
-    {
-      slides.map((_, index) => (
-        <button
-          class="dot"
-          data-index={index}
-          aria-label={`Перейти к слайду ${index + 1}`}
-        ></button>
-      ))
-    }
+    {slides.map((_, index) => (
+      <button
+        class="dot"
+        data-index={index}
+        aria-label={`Перейти к слайду ${index + 1}`}
+      ></button>
+    ))}
   </div>
 </section>
 
 <style>
   .hero {
+    --hero-padding: clamp(1.5rem, 5vw, 2rem);
+    --hero-max-width: 900px;
+    --hero-text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    --hero-transition: 0.3s ease;
+
     position: relative;
     width: 100%;
     min-height: 100vh;
-    height: 100svh;
+    height: 100dvh;
     overflow: hidden;
     scroll-snap-align: start;
   }
@@ -103,12 +104,13 @@ const slides = [
   .slides {
     display: flex;
     overflow-x: auto;
-    scroll-snap-type: x proximity;
+    scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     height: 100%;
     scrollbar-width: none;
   }
+
   .slides::-webkit-scrollbar {
     display: none;
   }
@@ -139,7 +141,6 @@ const slides = [
     height: 100%;
     object-fit: cover;
     object-position: center;
-    /* Эффект Кена Бёрнса: медленное приближение */
     animation: kenBurns 20s ease alternate infinite;
   }
 
@@ -158,25 +159,28 @@ const slides = [
     display: flex;
     flex-direction: column;
     justify-content: center;
-    padding: 2rem 5%;
-    max-width: 900px; /* стало шире: было 800px */
+    padding: var(--hero-padding) 5%;
+    max-width: var(--hero-max-width);
     color: #fff;
     z-index: 10;
+    text-shadow: var(--hero-text-shadow);
   }
 
   .badge {
     display: inline-block;
     background: rgba(16, 185, 129, 0.15);
     border: 1px solid rgba(16, 185, 129, 0.5);
-    padding: 0.3rem 1rem;
+    padding: 0.4em 1.2em;
     border-radius: 50px;
-    font-size: 0.8rem;
+    font-size: clamp(0.75rem, 2vw, 0.85rem);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 1rem;
     width: fit-content;
-    /* Плавное появление */
     animation: fadeInUp 0.8s ease forwards;
+    backdrop-filter: blur(8px);
+    color: #fff;
+    font-weight: 600;
   }
 
   h1 {
@@ -197,7 +201,7 @@ const slides = [
     font-size: clamp(0.9rem, 2.5vh, 1.2rem);
     opacity: 0.9;
     margin-bottom: 2rem;
-    max-width: 600px; /* стало шире: было 500px */
+    max-width: 600px;
     animation: fadeInUp 0.8s ease 0.4s forwards;
     opacity: 0;
   }
@@ -213,21 +217,27 @@ const slides = [
   .primary-btn,
   .secondary-btn {
     padding: 0.8rem 1.8rem;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 700;
     text-decoration: none;
-    transition:
-      background 0.2s,
-      transform 0.2s;
+    transition: background var(--hero-transition), transform var(--hero-transition), box-shadow var(--hero-transition);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+    font-size: 1rem;
   }
 
   .primary-btn {
     background: var(--accent);
     color: #fff;
   }
+
   .primary-btn:hover {
     background: var(--accent-hover);
     transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
   }
 
   .secondary-btn {
@@ -235,8 +245,10 @@ const slides = [
     border: 1px solid rgba(255, 255, 255, 0.4);
     background: rgba(255, 255, 255, 0.08);
   }
+
   .secondary-btn:hover {
     transform: translateY(-2px);
+    background: rgba(255, 255, 255, 0.15);
   }
 
   .dots {
@@ -245,20 +257,22 @@ const slides = [
     left: 50%;
     transform: translateX(-50%);
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem;
     z-index: 20;
+    padding: 0.5rem 0.8rem;
+    background: rgba(0,0,0,0.2);
+    border-radius: 50px;
+    backdrop-filter: blur(10px);
   }
 
   .dot {
-    width: 12px;
-    height: 12px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.5);
     border: none;
     cursor: pointer;
-    transition:
-      background 0.3s,
-      transform 0.2s;
+    transition: background var(--hero-transition), transform var(--hero-transition);
     padding: 0;
     font-size: 0;
   }
@@ -268,7 +282,6 @@ const slides = [
     transform: scale(1.3);
   }
 
-  /* Анимация появления текста */
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -287,6 +300,20 @@ const slides = [
     }
     .content p {
       max-width: 100%;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide-image {
+      animation: none;
+    }
+    .badge,
+    h1,
+    .content p,
+    .actions {
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
   }
 </style>
@@ -318,19 +345,17 @@ const slides = [
       });
     }
 
-    // Запускаем автопрокрутку (без остановки при наведении)
     function startAutoplay() {
       if (interval) clearInterval(interval);
       interval = setInterval(() => {
         currentIndex = (currentIndex + 1) % totalSlides;
         goTo(currentIndex);
         updateDots(currentIndex);
-      }, 7000); // 7 секунд
+      }, 7000);
     }
 
     startAutoplay();
 
-    // Клик по точкам – переключение и перезапуск таймера
     dots.forEach((dot) => {
       dot.addEventListener("click", (e) => {
         const targetDot = e.currentTarget as HTMLElement;
@@ -339,11 +364,10 @@ const slides = [
         currentIndex = parseInt(indexStr, 10);
         goTo(currentIndex);
         updateDots(currentIndex);
-        startAutoplay(); // перезапуск после ручного переключения
+        startAutoplay();
       });
     });
 
-    // Отслеживание скролла (если пользователь прокрутил вручную)
     if (slidesContainer) {
       slidesContainer.addEventListener(
         "scroll",
@@ -358,7 +382,6 @@ const slides = [
               if (newIndex !== currentIndex) {
                 currentIndex = newIndex;
                 updateDots(currentIndex);
-                // Не перезапускаем таймер – он продолжит идти сам
               }
               ticking = false;
             });

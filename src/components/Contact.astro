@@ -1,13 +1,9 @@
 ---
-/*
-  src/components/Contact.astro
-  Premium Design — Serverless Ready
-*/
+// src/components/Contact.astro
 ---
 
 <section class="contact-section" id="contact">
   <div class="contact-container">
-    <!-- HEADER -->
     <div class="section-header">
       <span class="section-badge">Контакты</span>
       <h2 class="section-title">
@@ -19,97 +15,57 @@
     </div>
 
     <div class="contact-grid">
-      <!-- INFO CARD -->
+      <!-- Контактная информация -->
       <div class="contact-info">
-        <div class="info-card">
+        <article class="info-card">
           <h3 class="card-title">
-            <svg
-              class="card-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path
-                d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.89.32 1.76.59 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.16a2 2 0 0 1 2.11-.45c.84.27 1.71.47 2.6.59A2 2 0 0 1 22 16.92z"
-              ></path>
+            <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.12.89.32 1.76.59 2.6a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.48-1.16a2 2 0 0 1 2.11-.45c.84.27 1.71.47 2.6.59A2 2 0 0 1 22 16.92z"></path>
             </svg>
             Контакты
           </h3>
           <div class="info-item">
             <span class="info-label">Представитель в РФ</span>
-            <a href="tel:+79236540951">+7 (923) 654-09-51 — Антон</a>
+            <a href="tel:+79236540951">+7 923 654 09 51 — Антон</a>
           </div>
           <div class="info-item">
             <span class="info-label">Поставщик в Дании</span>
             <a href="tel:+4553283429">+45 53 28 34 29 — Михаил Матвеевич</a>
-            <a href="tel:+4543551504">+4 </a>
+            <a href="tel:+0000000000">+0000000000</a>
           </div>
           <div class="info-item">
             <span class="info-label">Email</span>
             <a href="mailto:evroskot@gmail.com">evroskot@gmail.com</a>
-            <a href="mailto:scanova@hotmail.dk">scanova@scanova.info</a>
+            <a href="mailto:scanova@scanova.info">scanova@scanova.info</a>
           </div>
-        </div>
+        </article>
       </div>
 
-      <!-- FORM -->
+      <!-- Форма -->
       <div class="contact-form-wrapper">
-        <div class="contact-form-glow"></div>
+        <div class="contact-form-glow" aria-hidden="true"></div>
         <form id="contactForm" class="contact-form" method="POST" novalidate>
           <h3 class="card-title">
-            <svg
-              class="card-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              aria-hidden="true"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"
-              ></path>
+            <svg class="card-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
               <polyline points="17 3 21 3 21 7"></polyline>
               <line x1="9" y1="15" x2="21" y2="3"></line>
             </svg>
             Оставить заявку
           </h3>
 
-          <input
-            type="text"
-            name="_gotcha"
-            class="hidden-field"
-            tabindex="-1"
-            autocomplete="off"
-          />
+          <!-- Скрытое поле для защиты от спама -->
+          <input type="text" name="_gotcha" class="hidden-field" tabindex="-1" autocomplete="off" />
 
           <div class="form-group">
             <label for="name">Имя *</label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              aria-describedby="name-error"
-            />
+            <input id="name" name="name" type="text" required aria-describedby="name-error" />
             <span id="name-error" class="form-error" data-error="name"></span>
           </div>
 
           <div class="form-group">
             <label for="email">Email *</label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              aria-describedby="email-error"
-            />
+            <input id="email" name="email" type="email" required aria-describedby="email-error" />
             <span id="email-error" class="form-error" data-error="email"></span>
           </div>
 
@@ -120,13 +76,8 @@
 
           <div class="form-group">
             <label for="message">Сообщение *</label>
-            <textarea
-              id="message"
-              name="message"
-              required
-              aria-describedby="message-error"></textarea>
-            <span id="message-error" class="form-error" data-error="message"
-            ></span>
+            <textarea id="message" name="message" required aria-describedby="message-error"></textarea>
+            <span id="message-error" class="form-error" data-error="message"></span>
           </div>
 
           <div class="privacy-note">
@@ -136,31 +87,12 @@
           <button type="submit" id="submitBtn" class="submit-btn">
             <span class="btn-text">Отправить заявку</span>
             <svg class="spinner" viewBox="0 0 50 50" aria-hidden="true">
-              <circle
-                class="spinner-path"
-                cx="25"
-                cy="25"
-                r="20"
-                fill="none"
-                stroke-width="4"></circle>
+              <circle class="spinner-path" cx="25" cy="25" r="20" fill="none" stroke-width="4"></circle>
             </svg>
           </button>
 
-          <div
-            id="formSuccess"
-            class="form-success"
-            role="status"
-            aria-live="polite"
-            tabindex="-1"
-          >
-          </div>
-          <div
-            id="formError"
-            class="form-global-error"
-            role="alert"
-            aria-live="assertive"
-          >
-          </div>
+          <div id="formSuccess" class="form-success" role="status" aria-live="polite" tabindex="-1"></div>
+          <div id="formError" class="form-global-error" role="alert" aria-live="assertive"></div>
         </form>
       </div>
     </div>
@@ -173,15 +105,21 @@
   }
 
   .contact-section {
-    position: relative;
-    min-height: 100svh;
+    --ctc-gap: clamp(30px, 5vw, 60px);
+    --ctc-radius: 28px;
+    --ctc-card-bg: rgba(20, 20, 20, 0.92);
+    --ctc-border: 1px solid rgba(255, 255, 255, 0.08);
+    --ctc-accent: var(--accent, #10b981);
+    --ctc-text: #fff;
+    --ctc-muted: rgba(255, 255, 255, 0.7);
+    --ctc-transition: 0.25s ease;
+
+    min-height: 100dvh;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: clamp(80px, 10vw, 140px) 5%;
-    background:
-      radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 35%),
-      #0a0a0a;
+    background: radial-gradient(circle at top, rgba(16, 185, 129, 0.08), transparent 35%), #0a0a0a;
     overflow: hidden;
     content-visibility: auto;
     contain-intrinsic-size: 1200px;
@@ -190,7 +128,6 @@
   .contact-container {
     width: 100%;
     max-width: 1280px;
-    position: relative;
     z-index: 2;
   }
 
@@ -206,7 +143,7 @@
     border-radius: 999px;
     border: 1px solid rgba(16, 185, 129, 0.35);
     background: rgba(16, 185, 129, 0.08);
-    color: var(--accent);
+    color: var(--ctc-accent);
     font-size: 0.8rem;
     font-weight: 600;
     letter-spacing: 0.4px;
@@ -219,11 +156,11 @@
     font-size: clamp(2.5rem, 6vw, 4.6rem);
     line-height: 1.05;
     font-weight: 900;
-    color: #fff;
+    color: var(--ctc-text);
   }
 
   .accent {
-    color: var(--accent);
+    color: var(--ctc-accent);
   }
 
   .section-subtitle {
@@ -231,13 +168,13 @@
     margin: 1.2rem auto 0;
     font-size: clamp(1rem, 2vw, 1.15rem);
     line-height: 1.7;
-    color: var(--muted);
+    color: var(--ctc-muted);
   }
 
   .contact-grid {
     display: grid;
     grid-template-columns: 1fr 1.1fr;
-    gap: clamp(30px, 5vw, 60px);
+    gap: var(--ctc-gap);
     align-items: stretch;
   }
 
@@ -245,27 +182,27 @@
   .contact-form {
     position: relative;
     padding: clamp(24px, 4vw, 42px);
-    border-radius: 28px;
-    border: 1px solid var(--border);
-    background: rgba(20, 20, 20, 0.92);
+    border-radius: var(--ctc-radius);
+    border: var(--ctc-border);
+    background: var(--ctc-card-bg);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
-    contain: layout paint style;
-    transition:
-      transform 0.3s ease,
-      border-color 0.3s ease,
-      box-shadow 0.3s ease;
+    transition: transform var(--ctc-transition), border-color var(--ctc-transition), box-shadow var(--ctc-transition);
+    will-change: transform;
   }
 
   @supports (backdrop-filter: blur(1px)) {
     .info-card,
     .contact-form {
-      background: linear-gradient(
-        180deg,
-        rgba(255, 255, 255, 0.04),
-        rgba(255, 255, 255, 0.015)
-      );
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
       backdrop-filter: blur(16px);
     }
+  }
+
+  .info-card:hover,
+  .contact-form:hover {
+    border-color: var(--ctc-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
   }
 
   .card-title {
@@ -276,10 +213,11 @@
     margin-bottom: 2rem;
     font-size: 1.4rem;
     font-weight: 800;
+    color: var(--ctc-text);
   }
 
   .card-icon {
-    color: var(--accent);
+    color: var(--ctc-accent);
     flex-shrink: 0;
   }
 
@@ -299,16 +237,14 @@
 
   .info-item a {
     width: fit-content;
-    color: #fff;
+    color: var(--ctc-text);
     text-decoration: none;
     font-size: 1rem;
-    transition:
-      color 0.25s ease,
-      transform 0.25s ease;
+    transition: color var(--ctc-transition), transform var(--ctc-transition);
   }
 
   .info-item a:hover {
-    color: var(--accent);
+    color: var(--ctc-accent);
     transform: translateX(3px);
   }
 
@@ -319,12 +255,8 @@
   .contact-form-glow {
     position: absolute;
     inset: -2px;
-    border-radius: 32px;
-    background: radial-gradient(
-      circle at top,
-      rgba(16, 185, 129, 0.22),
-      transparent 70%
-    );
+    border-radius: var(--ctc-radius);
+    background: radial-gradient(circle at top, rgba(16, 185, 129, 0.22), transparent 70%);
     filter: blur(35px);
     opacity: 0.8;
     z-index: 0;
@@ -346,7 +278,7 @@
   .form-group input,
   .form-group textarea,
   .submit-btn {
-    font-size: 16px;
+    font-size: 16px; /* предотвращает масштабирование на iOS */
   }
 
   .form-group input,
@@ -356,12 +288,9 @@
     border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.08);
     background: rgba(255, 255, 255, 0.03);
-    color: #fff;
+    color: var(--ctc-text);
     font-family: inherit;
-    transition:
-      border-color 0.25s ease,
-      box-shadow 0.25s ease,
-      background 0.25s ease;
+    transition: border-color var(--ctc-transition), box-shadow var(--ctc-transition), background var(--ctc-transition);
     box-sizing: border-box;
   }
 
@@ -398,7 +327,7 @@
     border-radius: 14px;
     border: 1px solid rgba(16, 185, 129, 0.28);
     background: rgba(16, 185, 129, 0.08);
-    color: #fff;
+    color: var(--ctc-text);
     text-align: center;
     font-weight: 600;
     display: none;
@@ -420,19 +349,16 @@
     padding: 1rem 2rem;
     border: none;
     border-radius: 16px;
-    background: var(--accent);
+    background: var(--ctc-accent);
     color: #fff;
     font-weight: 700;
     cursor: pointer;
     will-change: transform;
-    transition:
-      transform 0.25s ease,
-      background 0.25s ease,
-      box-shadow 0.25s ease;
+    transition: transform var(--ctc-transition), background var(--ctc-transition), box-shadow var(--ctc-transition);
   }
 
   .submit-btn:hover {
-    background: var(--accent-hover);
+    background: var(--accent-hover, #059669);
     transform: translateY(-2px);
   }
 
@@ -476,29 +402,31 @@
       grid-template-columns: 1fr;
     }
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .info-card,
+    .contact-form,
+    .info-item a,
+    .submit-btn {
+      transition: none;
+    }
+    .info-card:hover,
+    .contact-form:hover {
+      transform: none;
+    }
+  }
 </style>
 
 <script>
   (() => {
-    const form = document.getElementById(
-      "contactForm",
-    ) as HTMLFormElement | null;
+    const form = document.getElementById("contactForm") as HTMLFormElement | null;
     if (!form) return;
 
-    const endpoint = "/api/contact"; // ← замените на 'https://formspree.io/f/xgodrypd' при локальном тестировании без воркера
-
-    const submitBtn = document.getElementById(
-      "submitBtn",
-    ) as HTMLButtonElement | null;
-    const successBox = document.getElementById(
-      "formSuccess",
-    ) as HTMLDivElement | null;
-    const errorBox = document.getElementById(
-      "formError",
-    ) as HTMLDivElement | null;
-    const btnText = submitBtn?.querySelector(
-      ".btn-text",
-    ) as HTMLSpanElement | null;
+    const endpoint = "/api/contact";
+    const submitBtn = document.getElementById("submitBtn") as HTMLButtonElement | null;
+    const successBox = document.getElementById("formSuccess") as HTMLDivElement | null;
+    const errorBox = document.getElementById("formError") as HTMLDivElement | null;
+    const btnText = submitBtn?.querySelector(".btn-text") as HTMLSpanElement | null;
 
     const fields = {
       name: document.getElementById("name") as HTMLInputElement | null,
@@ -507,27 +435,24 @@
     };
 
     const errors = {
-      name: document.querySelector(
-        '[data-error="name"]',
-      ) as HTMLSpanElement | null,
-      email: document.querySelector(
-        '[data-error="email"]',
-      ) as HTMLSpanElement | null,
-      message: document.querySelector(
-        '[data-error="message"]',
-      ) as HTMLSpanElement | null,
+      name: document.querySelector('[data-error="name"]') as HTMLSpanElement | null,
+      email: document.querySelector('[data-error="email"]') as HTMLSpanElement | null,
+      message: document.querySelector('[data-error="message"]') as HTMLSpanElement | null,
     };
 
     function setLoading(state: boolean): void {
       if (!submitBtn) return;
       submitBtn.disabled = state;
       submitBtn.classList.toggle("loading", state);
-      if (btnText)
-        btnText.textContent = state ? "Отправка..." : "Отправить заявку";
+      if (btnText) btnText.textContent = state ? "Отправка..." : "Отправить заявку";
     }
 
     function validate(data: Record<string, string>): boolean {
       let ok = true;
+      if (errors.name) errors.name.textContent = "";
+      if (errors.email) errors.email.textContent = "";
+      if (errors.message) errors.message.textContent = "";
+
       if (!data.name?.trim()) {
         if (errors.name) errors.name.textContent = "Введите имя";
         ok = false;
@@ -578,8 +503,7 @@
           if (errorBox) errorBox.textContent = json?.error || "Ошибка отправки";
         }
       } catch {
-        if (errorBox)
-          errorBox.textContent = "Сетевая ошибка. Попробуйте снова.";
+        if (errorBox) errorBox.textContent = "Сетевая ошибка. Попробуйте снова.";
       } finally {
         setLoading(false);
       }

@@ -1,5 +1,5 @@
 ---
-
+// Секция Staldren (можно вставить в index.astro или отдельным компонентом)
 ---
 
 <section class="staldren-section" id="staldren">
@@ -18,69 +18,113 @@
       <p>Дистрибуция в РФ — через партнёрскую сеть.</p>
     </div>
     <div class="staldren-visual">
-      <div class="big-icon">🧪</div>
+      <span class="big-icon" aria-hidden="true">🧪</span>
       <h3>Staldren®</h3>
-      <p style="opacity:0.8;">Сухость. Чистота. Здоровое поголовье.</p>
+      <p>Сухость. Чистота. Здоровое поголовье.</p>
     </div>
   </div>
 </section>
 
 <style>
   .staldren-section {
-    height: 100vh;
+    --staldren-gap: clamp(30px, 5vw, 60px);
+    --staldren-radius: 24px;
+    --staldren-card-bg: linear-gradient(135deg, #1e3a8a, #0f172a);
+    --staldren-border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    --staldren-accent: var(--accent, #10b981);
+    --staldren-text: #fff;
+    --staldren-muted: rgba(255, 255, 255, 0.7);
+    --staldren-transition: 0.25s ease;
+
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #000;
-    padding: 0 5%;
+    padding: clamp(60px, 8vh, 100px) 5%;
     box-sizing: border-box;
   }
+
   .staldren-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 60px;
+    gap: var(--staldren-gap);
     align-items: center;
     max-width: 1200px;
     width: 100%;
   }
+
   .staldren-text h2 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.8rem);
     font-weight: 900;
-    margin-bottom: 1rem;
+    margin: 0 0 1rem;
+    color: var(--staldren-text);
+    line-height: 1.2;
   }
+
   .accent {
-    color: var(--accent);
+    color: var(--staldren-accent);
   }
+
   .staldren-text p {
-    opacity: 0.8;
-    margin-bottom: 1rem;
+    opacity: 0.85;
+    margin: 0 0 1rem;
+    color: var(--staldren-muted);
+    font-size: clamp(0.95rem, 1.5vw, 1.05rem);
+    line-height: 1.6;
   }
-  .staldren-link {
-    color: var(--accent);
-    font-weight: 600;
-    text-decoration: none;
-    font-size: 1.1rem;
-  }
+
   .staldren-visual {
-    background: linear-gradient(135deg, #1e3a8a, #0f172a);
-    border-radius: 24px;
-    padding: 50px;
+    background: var(--staldren-card-bg);
+    border-radius: var(--staldren-radius);
+    padding: clamp(30px, 5vw, 50px);
     text-align: center;
-    border: 1px solid var(--border);
+    border: var(--staldren-border);
+    transition: transform var(--staldren-transition), box-shadow var(--staldren-transition);
+    will-change: transform;
   }
+
+  .staldren-visual:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+  }
+
   .staldren-visual .big-icon {
-    font-size: 5rem;
+    display: block;
+    font-size: clamp(4rem, 8vw, 5rem);
     margin-bottom: 15px;
   }
+
   .staldren-visual h3 {
-    font-size: 1.8rem;
+    font-size: clamp(1.5rem, 3vw, 1.8rem);
     font-weight: 900;
-    color: var(--accent);
+    color: var(--staldren-accent);
+    margin: 0 0 10px;
   }
+
+  .staldren-visual p {
+    opacity: 0.8;
+    margin: 0;
+    color: var(--staldren-muted);
+    font-size: 0.95rem;
+  }
+
   @media (max-width: 768px) {
     .staldren-container {
       grid-template-columns: 1fr;
       gap: 30px;
+    }
+    .staldren-visual {
+      order: -1; /* визуальный блок сначала на мобильных */
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .staldren-visual {
+      transition: none;
+    }
+    .staldren-visual:hover {
+      transform: none;
     }
   }
 </style>

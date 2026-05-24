@@ -1,5 +1,7 @@
 ---
+// Секция Steps (можно вставить в index.astro или отдельным компонентом)
 ---
+
 <section class="steps-section" id="steps">
   <div class="steps-container">
     <span class="badge">Как мы работаем</span>
@@ -7,29 +9,29 @@
     
     <div class="steps-grid">
       <div class="step-card">
-        <div class="step-number">01</div>
-        <div class="step-icon">🐄</div>
+        <div class="step-number" aria-hidden="true">01</div>
+        <span class="step-icon" aria-hidden="true">🐄</span>
         <h3>Отбор в Дании</h3>
         <p>Выезд в лучшие племенные хозяйства Дании. Ручной отбор каждого животного по генетическим картам.</p>
       </div>
 
       <div class="step-card">
-        <div class="step-number">02</div>
-        <div class="step-icon">🛡️</div>
+        <div class="step-number" aria-hidden="true">02</div>
+        <span class="step-icon" aria-hidden="true">🛡️</span>
         <h3>Карантин</h3>
         <p>30 дней строгого ветеринарного контроля на экспортной базе под наблюдением датских специалистов.</p>
       </div>
 
       <div class="step-card">
-        <div class="step-number">03</div>
-        <div class="step-icon">🚛</div>
+        <div class="step-number" aria-hidden="true">03</div>
+        <span class="step-icon" aria-hidden="true">🚛</span>
         <h3>Транспортировка</h3>
         <p>Доставка специализированными двух- и трехпалубными скотовозами с системой климат-контроля и поения.</p>
       </div>
 
       <div class="step-card">
-        <div class="step-number">04</div>
-        <div class="step-icon">📑</div>
+        <div class="step-number" aria-hidden="true">04</div>
+        <span class="step-icon" aria-hidden="true">📑</span>
         <h3>Таможня и Документы</h3>
         <p>Полное сопровождение: от ветеринарных сертификатов ЕС до постановки на карантин в вашем регионе.</p>
       </div>
@@ -39,19 +41,30 @@
 
 <style>
   .steps-section {
-    height: 100vh;
+    --steps-gap: clamp(20px, 3vw, 24px);
+    --steps-radius: 24px;
+    --steps-card-bg: var(--card-bg, #141414);
+    --steps-border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    --steps-accent: var(--accent, #10b981);
+    --steps-text: #fff;
+    --steps-muted: rgba(255, 255, 255, 0.7);
+    --steps-transition: 0.25s ease;
+
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
     background: #000;
-    padding: 0 5%;
+    padding: clamp(60px, 8vh, 100px) 5%;
     box-sizing: border-box;
   }
+
   .steps-container {
     max-width: 1200px;
     width: 100%;
     text-align: center;
   }
+
   .badge {
     display: inline-block;
     background: rgba(16, 185, 129, 0.15);
@@ -62,69 +75,101 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 1.5rem;
-    color: #fff;
+    color: var(--steps-text);
   }
+
   h2 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.8rem);
     font-weight: 900;
-    margin-bottom: 3rem;
-    line-height: 1.3;
+    margin: 0 0 3rem;
+    line-height: 1.2;
+    color: var(--steps-text);
   }
+
   .accent {
-    color: var(--accent);
+    color: var(--steps-accent);
   }
+
   .steps-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px;
+    gap: var(--steps-gap);
     margin-top: 2rem;
   }
+
   .step-card {
-    background: var(--card-bg);
-    border: 1px solid var(--border);
-    border-radius: 24px;
-    padding: 30px 20px;
+    background: var(--steps-card-bg);
+    border: var(--steps-border);
+    border-radius: var(--steps-radius);
+    padding: clamp(25px, 4vw, 30px) clamp(15px, 3vw, 20px);
     position: relative;
-    transition: transform 0.3s, border-color 0.3s;
+    transition: transform var(--steps-transition), border-color var(--steps-transition), box-shadow var(--steps-transition);
+    will-change: transform;
   }
+
   .step-card:hover {
     transform: translateY(-5px);
-    border-color: var(--accent);
+    border-color: var(--steps-accent);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
   }
+
   .step-number {
     position: absolute;
     top: 15px;
     right: 20px;
     font-size: 2.5rem;
     font-weight: 900;
-    color: rgba(255,255,255,0.05);
+    color: rgba(255, 255, 255, 0.05);
     line-height: 1;
     z-index: 0;
+    pointer-events: none;
   }
+
   .step-icon {
-    font-size: 2.5rem;
+    display: block;
+    font-size: clamp(2rem, 5vw, 2.5rem);
     margin-bottom: 15px;
     position: relative;
     z-index: 1;
   }
+
   h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
+    font-size: clamp(1.1rem, 2vw, 1.2rem);
+    margin: 0 0 10px;
     font-weight: 700;
+    color: var(--steps-text);
+    position: relative;
+    z-index: 1;
   }
+
   p {
-    opacity: 0.7;
-    font-size: 0.9rem;
+    opacity: 0.75;
+    font-size: clamp(0.85rem, 1.5vw, 0.9rem);
     margin: 0;
+    color: var(--steps-muted);
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
   }
+
   @media (max-width: 992px) {
     .steps-grid {
       grid-template-columns: repeat(2, 1fr);
     }
   }
+
   @media (max-width: 600px) {
     .steps-grid {
       grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .step-card {
+      transition: none;
+    }
+    .step-card:hover {
+      transform: none;
     }
   }
 </style>
