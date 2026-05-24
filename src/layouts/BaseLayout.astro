@@ -1,6 +1,7 @@
 ---
 // src/layouts/BaseLayout.astro
 import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 import PostModal from "../components/PostModal.astro";
 
 export interface Props {
@@ -70,17 +71,16 @@ if (isLocal) {
 
       body {
         margin: 0;
-        font-family: "Inter", sans-serif;   /* основной текст */
+        font-family: "Inter", sans-serif;
         background: var(--dark);
         color: var(--text);
         line-height: 1.6;
         overflow-x: hidden;
       }
 
-      /* Заголовки — Oswald */
       h1, h2, h3, h4, h5, h6 {
         font-family: "Oswald", sans-serif;
-        font-weight: 700;          /* можно 900 для h1, но Oswald смотрится жирно */
+        font-weight: 700;
         line-height: 1.2;
       }
 
@@ -89,7 +89,6 @@ if (isLocal) {
         text-decoration: none;
       }
 
-      /* Утилитарные классы */
       .section-title {
         text-align: center;
         font-size: clamp(2rem, 5vw, 2.8rem);
@@ -108,7 +107,6 @@ if (isLocal) {
         color: var(--accent);
       }
 
-      /* Анимации появления */
       .anim-fade-up,
       .anim-fade-left,
       .anim-fade-right {
@@ -117,15 +115,9 @@ if (isLocal) {
         transition: opacity 0.6s ease, transform 0.6s ease;
       }
 
-      .anim-fade-up {
-        transform: translateY(30px);
-      }
-      .anim-fade-left {
-        transform: translateX(-30px);
-      }
-      .anim-fade-right {
-        transform: translateX(30px);
-      }
+      .anim-fade-up { transform: translateY(30px); }
+      .anim-fade-left { transform: translateX(-30px); }
+      .anim-fade-right { transform: translateX(30px); }
 
       .anim-fade-up.visible,
       .anim-fade-left.visible,
@@ -140,7 +132,6 @@ if (isLocal) {
       .anim-delay-4 { transition-delay: 0.4s; }
       .anim-delay-5 { transition-delay: 0.5s; }
 
-      /* Скролл-снап и производительность */
       html {
         scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
@@ -177,18 +168,16 @@ if (isLocal) {
   <body>
     <Header />
     <slot />
+    <Footer />
     <PostModal />
 
-    <!-- Токен VK только для локальной разработки -->
     {isLocal && devToken ? (
       <script is:inline>
         window.VK_ACCESS_TOKEN_FOR_DEV = "{devToken}";
       </script>
     ) : null}
 
-    <!-- Анимации и перехват кликов -->
     <script is:inline>
-      // Анимации при прокрутке
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
@@ -200,7 +189,6 @@ if (isLocal) {
       document.querySelectorAll('.anim-fade-up, .anim-fade-left, .anim-fade-right')
         .forEach(el => observer.observe(el));
 
-      // Открытие модального окна при клике на карточку новости
       document.addEventListener('click', (e) => {
         const link = e.target.closest('a[data-owner-id][data-post-id]');
         if (!link) return;

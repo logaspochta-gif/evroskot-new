@@ -9,7 +9,6 @@ import Advantages from '../components/Advantages.astro';
 import Staldren from '../components/Staldren.astro';
 import Contact from '../components/Contact.astro';
 import News from '../components/News.astro';
-import Footer from '../components/Footer.astro';
 import SideNav from '../components/SideNav.astro';
 ---
 
@@ -27,11 +26,9 @@ import SideNav from '../components/SideNav.astro';
     <Advantages />
     <Staldren />
 
-    <!-- Секция Контакты + Футер -->
     <section id="contact" class="contact-footer-section snap-section">
       <div class="contact-scroll-area">
         <Contact />
-        <Footer />
       </div>
     </section>
   </main>
@@ -50,12 +47,8 @@ import SideNav from '../components/SideNav.astro';
   }
 
   .contact-scroll-area {
-    min-height: 120dvh;        /* контакты + футер гарантированно выше экрана */
+    min-height: 110dvh;
     display: flex;
     flex-direction: column;
-  }
-
-  .contact-scroll-area .site-footer {
-    margin-top: auto;           /* прижимаем футер к низу, если контакты короткие */
   }
 </style>
