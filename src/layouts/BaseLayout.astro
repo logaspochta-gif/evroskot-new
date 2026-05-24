@@ -7,7 +7,7 @@ import PostModal from "../components/PostModal.astro";
 export interface Props {
   title: string;
   description: string;
-  hideFooter?: boolean;
+  hideFooter?: boolean;   // для главной, где футер уже внутри контактов
 }
 
 const { title, description, hideFooter = false } = Astro.props;
@@ -35,7 +35,6 @@ if (isLocal) {
     <title>{title}</title>
     <meta name="description" content={description} />
 
-    <!-- Предзагрузка шрифтов -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -43,13 +42,11 @@ if (isLocal) {
       rel="stylesheet"
     />
 
-    <!-- Splide CSS (карусель пород) -->
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css"
     />
 
-    <!-- hls.js для видео в модальном окне -->
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
 
     <style is:global>
@@ -149,6 +146,16 @@ if (isLocal) {
         contain-intrinsic-size: auto;
       }
 
+      /* Футер как отдельная секция (для страниц, где он не встроен в контакты) */
+      .footer-snap {
+        scroll-snap-align: start;
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--dark);
+      }
+
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -169,7 +176,11 @@ if (isLocal) {
   <body>
     <Header />
     <slot />
-    {!hideFooter && <Footer />}
+    {!hideFooter && (
+      <section class="footer-snap">
+        <Footer />
+      </section>
+    )}
     <PostModal />
 
     {isLocal && devToken ? (
