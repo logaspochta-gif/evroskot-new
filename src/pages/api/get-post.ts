@@ -2,28 +2,14 @@
 
 export const prerender = false;
 
+// Разрешённые источники запросов (CORS)
 const ALLOWED_ORIGINS = [
   'https://new.evroskot.ru',
   'https://evroskot.ru',
+  'http://localhost:4321',   // для локальной разработки
 ];
 
-interface VkPost {
-  id: number;
-  date: number;
-  text?: string;
-  attachments?: any[];
-}
-
-function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
-  const headers = {
-    'Content-Type': 'application/json;charset=UTF-8',
-    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
-    ...extraHeaders,
-  };
-  return new Response(JSON.stringify(data), { status, headers });
-}
-
-// Получение токена (Cloudflare Workers → env, иначе import.meta.env)
+// Универсальное получение токена VK (Cloudflare Workers / локальная среда)
 async function getAccessToken(): Promise<string> {
   try {
     const { env } = await import('cloudflare:workers');
@@ -35,9 +21,22 @@ async function getAccessToken(): Promise<string> {
   throw new Error('Token not configured');
 }
 
+// Формирование JSON‑ответа с заголовками
+function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
+  const headers = {
+    'Content-Type': 'application/json;charset=UTF-8',
+    'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+    ...extraHeaders,
+  };
+  return new Response(JSON.stringify(data), { status, headers });
+}
+
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
   const origin = request.headers.get('Origin');
+  const cors = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+
+  // Проверка Origin (опционально, но оставлено для безопасности)
   if (origin && !ALLOWED_ORIGINS.includes(origin)) {
     return json({ error: 'Origin not allowed' }, 403);
   }
@@ -55,7 +54,7 @@ export async function GET({ request }: { request: Request }) {
     return json({ error: 'Token not configured' }, 500);
   }
 
-  // Edge‑кеш
+  // Edge‑кеш (работает только в Cloudflare Workers)
   const cache = typeof caches !== 'undefined'
     ? (caches as unknown as { default: Cache }).default
     : null;
@@ -64,7 +63,7 @@ export async function GET({ request }: { request: Request }) {
     const cached = await cache.match(cacheKey);
     if (cached) {
       const response = new Response(cached.body, cached);
-      response.headers.set('Access-Control-Allow-Origin', origin || '*');
+      response.headers.set('Access-Control-Allow-Origin', cors);
       return response;
     }
   }
@@ -82,14 +81,15 @@ export async function GET({ request }: { request: Request }) {
     clearTimeout(timeout);
 
     const data = await res.json();
-    if (data.error) throw new Error(data.error.error_msg || 'VK API error');
+    if (data.error) {
+      console.error('VK API error:', data.error);
+      throw new Error(data.error.error_msg || 'VK API error');
+    }
 
     const post = data.response?.[0] ?? null;
     if (!post) return json({ error: 'Post not found' }, 404);
 
-    const response = json(post, 200, {
-      'Access-Control-Allow-Origin': origin || '*',
-    });
+    const response = json(post, 200, { 'Access-Control-Allow-Origin': cors });
 
     if (cache) {
       await cache.put(cacheKey, response.clone());
@@ -97,8 +97,9 @@ export async function GET({ request }: { request: Request }) {
 
     return response;
   } catch (error) {
+    console.error('get-post error:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';
     const status = error instanceof DOMException && error.name === 'AbortError' ? 408 : 500;
-    return json({ error: message }, status, { 'Access-Control-Allow-Origin': origin || '*' });
+    return json({ error: message }, status, { 'Access-Control-Allow-Origin': cors });
   }
 }
