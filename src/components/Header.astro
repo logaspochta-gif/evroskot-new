@@ -5,32 +5,42 @@
 <header class="navbar" id="navbar">
   <div class="logo">
     <a href="/" class="logo-link" aria-label="Scanova A/S — главная страница">
+      <!-- Иконка перед логотипом -->
+      <img
+        src="/favicon.svg"
+        alt=""
+        class="logo-icon"
+        aria-hidden="true"
+      />
       <span class="logo-text">
         Scanova <span class="accent">A/S</span>
       </span>
     </a>
   </div>
 
-  <button class="burger" id="burger" aria-label="Открыть меню">
+  <button
+    class="burger"
+    id="burger"
+    aria-label="Открыть меню"
+    aria-expanded="false"
+    aria-controls="menu"
+  >
     <span></span>
     <span></span>
     <span></span>
   </button>
 
-  <nav class="menu" id="menu">
+  <nav class="menu" id="menu" role="navigation">
     <a href="/#hero">Главная</a>
     <a href="/#breeds">Породы</a>
     <a href="/#about">О компании</a>
     <a href="/#staldren">Staldren®</a>
     <a href="/news-pages">Новости</a>
-    <a href="/#contact">
-      <button class="btn-contact">Связаться</button>
-    </a>
+    <a href="/#contact" class="btn-contact">Связаться</a>
   </nav>
 </header>
 
 <style>
-  /* ===== НАВБАР ===== */
   .navbar {
     position: fixed;
     top: 0;
@@ -46,12 +56,7 @@
     transition: background 0.3s ease, box-shadow 0.3s ease;
   }
 
-  /* ===== ЛОГОТИП ===== */
-  .logo {
-    display: flex;
-    align-items: center;
-    flex-shrink: 0;
-  }
+  .logo { display: flex; align-items: center; flex-shrink: 0; }
 
   .logo-link {
     display: inline-flex;
@@ -60,16 +65,24 @@
     position: relative;
     transition: opacity 0.25s ease, transform 0.25s ease;
   }
-
-  .logo-link:hover {
-    transform: translateY(-1px);
-    opacity: 0.92;
-  }
-
+  .logo-link:hover { transform: translateY(-1px); opacity: 0.92; }
   .logo-link:focus-visible {
     outline: 2px solid rgba(16, 185, 129, 0.65);
     outline-offset: 6px;
     border-radius: 10px;
+  }
+
+  /* Иконка логотипа */
+  .logo-icon {
+    height: 1.5em;                /* привязка к размеру шрифта */
+    width: auto;
+    margin-right: 0.5em;
+    display: block;
+    filter: brightness(0) invert(1); /* делает иконку белой, если она тёмная */
+    transition: transform 0.25s ease;
+  }
+  .logo-link:hover .logo-icon {
+    transform: scale(1.05);
   }
 
   .logo-text {
@@ -79,18 +92,11 @@
     line-height: 1;
     color: #ffffff;
     font-family: Inter, Poppins, system-ui, sans-serif;
-    text-rendering: optimizeLegibility;
-    -webkit-font-smoothing: antialiased;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
     white-space: nowrap;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.3);   /* лёгкая тень для лучшей читаемости */
   }
 
-  .accent {
-    color: var(--accent, #10b981);
-    position: relative;
-  }
-
-  /* Декоративная линия под акцентом */
+  .accent { color: var(--accent, #10b981); position: relative; }
   .accent::after {
     content: '';
     position: absolute;
@@ -104,32 +110,25 @@
     transform: translateX(-50%);
     transition: width 0.3s ease, opacity 0.3s ease;
   }
-
   .logo-link:hover .accent::after {
     width: 70%;
     opacity: 0.8;
   }
 
-  /* ===== МЕНЮ ===== */
   .menu {
     display: flex;
     align-items: center;
     gap: 2rem;
   }
-
   .menu a {
     color: #fff;
     text-decoration: none;
-    font-size: 0.95rem;
+    font-size: clamp(0.85rem, 1vw + 0.5rem, 0.95rem);
     position: relative;
     padding-bottom: 5px;
     transition: opacity 0.3s ease;
   }
-
-  .menu a:hover {
-    opacity: 0.85;
-  }
-
+  .menu a:hover { opacity: 0.85; }
   .menu a::after {
     content: '';
     position: absolute;
@@ -141,29 +140,23 @@
     background: var(--accent);
     transition: width 0.3s ease;
   }
-
-  .menu a:hover::after {
-    width: 60%;
-  }
+  .menu a:hover::after { width: 60%; }
 
   .btn-contact {
     background: var(--accent);
     color: #fff;
-    border: none;
     padding: 0.8rem 1.8rem;
     border-radius: 10px;
     font-weight: 700;
-    cursor: pointer;
-    font-size: 0.9rem;
+    font-size: inherit;
     transition: background 0.3s ease, transform 0.3s ease;
   }
-
   .btn-contact:hover {
     background: var(--accent-hover);
     transform: translateY(-2px);
   }
 
-  /* ===== БУРГЕР ===== */
+  /* Бургер */
   .burger {
     display: none;
     flex-direction: column;
@@ -173,7 +166,6 @@
     cursor: pointer;
     z-index: 1200;
   }
-
   .burger span {
     width: 28px;
     height: 3px;
@@ -182,20 +174,14 @@
     transition: 0.3s ease;
   }
 
-  /* ===== МОБИЛЬНАЯ АДАПТАЦИЯ ===== */
+  /* Мобильная версия */
   @media (max-width: 992px) {
-    .navbar {
-      padding: 1rem 5%;
-    }
-
-    .burger {
-      display: flex;
-    }
-
+    .navbar { padding: 1rem 5%; }
+    .burger { display: flex; }
     .menu {
       position: absolute;
       top: 75px;
-      right: 15%;
+      right: 5%;
       width: 260px;
       flex-direction: column;
       align-items: flex-start;
@@ -207,8 +193,8 @@
       visibility: hidden;
       transform: translateY(-10px);
       transition: 0.3s ease;
+      will-change: transform, opacity;
     }
-
     .menu.active {
       opacity: 1;
       visibility: visible;
@@ -217,39 +203,33 @@
   }
 
   @media (max-width: 768px) {
-    .logo-text {
-      font-size: 1.15rem;
-    }
+    .logo-text { font-size: 1.15rem; }
+    .logo-icon { height: 1.3em; }   /* чуть меньше на маленьких экранах */
   }
 
   @media (prefers-reduced-motion: reduce) {
     .logo-link,
     .menu a,
-    .btn-contact {
-      transition: none;
-    }
-
-    .logo-link:hover {
-      transform: none;
-    }
+    .btn-contact,
+    .logo-icon { transition: none; }
+    .logo-link:hover { transform: none; }
   }
 </style>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const burger = document.getElementById('burger');
-    const menu = document.getElementById('menu');
-
-    if (burger && menu) {
-      burger.addEventListener('click', () => {
-        menu.classList.toggle('active');
+  const burger = document.getElementById('burger');
+  const menu = document.getElementById('menu');
+  if (burger && menu) {
+    burger.addEventListener('click', () => {
+      const expanded = burger.getAttribute('aria-expanded') === 'true';
+      burger.setAttribute('aria-expanded', String(!expanded));
+      menu.classList.toggle('active');
+    });
+    menu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => {
+        menu.classList.remove('active');
+        burger.setAttribute('aria-expanded', 'false');
       });
-
-      menu.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => {
-          menu.classList.remove('active');
-        });
-      });
-    }
-  });
+    });
+  }
 </script>
