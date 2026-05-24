@@ -7,9 +7,10 @@ import PostModal from "../components/PostModal.astro";
 export interface Props {
   title: string;
   description: string;
+  hideFooter?: boolean;
 }
 
-const { title, description } = Astro.props;
+const { title, description, hideFooter = false } = Astro.props;
 
 // Локальное окружение и токен VK (только для разработки)
 const isLocal = Astro.url.hostname === 'localhost' || Astro.url.hostname === '127.0.0.1';
@@ -168,7 +169,7 @@ if (isLocal) {
   <body>
     <Header />
     <slot />
-    <Footer />
+    {!hideFooter && <Footer />}
     <PostModal />
 
     {isLocal && devToken ? (

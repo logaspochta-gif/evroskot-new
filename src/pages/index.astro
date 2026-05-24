@@ -8,6 +8,7 @@ import BreedsDetailed from '../components/BreedsDetailed.astro';
 import Advantages from '../components/Advantages.astro';
 import Staldren from '../components/Staldren.astro';
 import Contact from '../components/Contact.astro';
+import Footer from '../components/Footer.astro';
 import News from '../components/News.astro';
 import SideNav from '../components/SideNav.astro';
 ---
@@ -15,6 +16,7 @@ import SideNav from '../components/SideNav.astro';
 <BaseLayout
   title="Scanova A/S — Племенной скот из Дании"
   description="Прямые поставки высокопродуктивных животных в РФ и СНГ."
+  hideFooter={true}
 >
   <main>
     <Hero />
@@ -29,6 +31,7 @@ import SideNav from '../components/SideNav.astro';
     <section id="contact" class="contact-footer-section snap-section">
       <div class="contact-scroll-area">
         <Contact />
+        <Footer />
       </div>
     </section>
   </main>
@@ -50,5 +53,9 @@ import SideNav from '../components/SideNav.astro';
     min-height: 110dvh;
     display: flex;
     flex-direction: column;
+  }
+
+  .contact-scroll-area .site-footer {
+    margin-top: auto;
   }
 </style>
