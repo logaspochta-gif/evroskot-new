@@ -5,7 +5,7 @@ export const prerender = false;
 const ALLOWED_ORIGINS = [
   'https://new.evroskot.ru',
   'https://evroskot.ru',
-  'http://localhost:4321',  // локальная разработка Astro
+  'http://localhost:4321',
 ];
 
 export interface VkPost {
@@ -18,13 +18,12 @@ export interface VkPost {
 function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
   const headers = {
     'Content-Type': 'application/json;charset=UTF-8',
-    'Cache-Control': 'public, s-maxage=600, stale-while-revalidate=3600',
+    'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=3600', // 30 минут
     ...extraHeaders,
   };
   return new Response(JSON.stringify(data), { status, headers });
 }
 
-// Универсальное получение токена VK (Cloudflare Workers / локально)
 async function getAccessToken(): Promise<string> {
   try {
     const { env } = await import('cloudflare:workers');
@@ -36,7 +35,6 @@ async function getAccessToken(): Promise<string> {
   throw new Error('Token not configured');
 }
 
-// Основная функция для прямого вызова из других модулей (например, news-pages.astro)
 export async function fetchNewsFromVk(): Promise<VkPost[]> {
   const ACCESS_TOKEN = await getAccessToken();
 
@@ -58,28 +56,23 @@ export async function fetchNewsFromVk(): Promise<VkPost[]> {
   try {
     const res = await fetch(`https://api.vk.com/method/wall.get?${params}`, {
       signal: controller.signal,
-      cf: { cacheTtl: 600, cacheEverything: true },
+      cf: { cacheTtl: 1800, cacheEverything: true },
       headers: { 'User-Agent': 'EvroskotNewsProxy/1.0' },
     });
     clearTimeout(timeout);
 
     const data = await res.json();
-    if (data.error) {
-      console.error('VK wall.get error:', data.error);
-      throw new Error(data.error.error_msg || 'VK API error');
-    }
+    if (data.error) throw new Error(data.error.error_msg || 'VK API error');
 
     const posts = data.response?.items;
     if (!posts) throw new Error('No posts found');
     return posts;
   } catch (error) {
     clearTimeout(timeout);
-    console.error('fetchNewsFromVk error:', error);
     throw error;
   }
 }
 
-// HTTP-обработчик для маршрута /api/vk-news
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
   const origin = request.headers.get('Origin');
@@ -93,7 +86,6 @@ export async function GET({ request }: { request: Request }) {
     const posts = await fetchNewsFromVk();
     const response = json(posts, 200, { 'Access-Control-Allow-Origin': cors });
 
-    // Edge-кеш (только в Cloudflare Workers)
     if (typeof caches !== 'undefined') {
       const cache = (caches as unknown as { default: Cache }).default;
       const cacheKey = new Request(request.url, request);
@@ -102,7 +94,6 @@ export async function GET({ request }: { request: Request }) {
 
     return response;
   } catch (error) {
-    console.error('GET /api/vk-news error:', error);
     const message = error instanceof Error ? error.message : 'Internal server error';
     const status = error instanceof DOMException && error.name === 'AbortError' ? 408 : 500;
     return json({ error: message }, status, { 'Access-Control-Allow-Origin': cors });

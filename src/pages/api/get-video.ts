@@ -2,7 +2,6 @@
 
 export const prerender = false;
 
-// Расширенные типы для VK API (оставлены для строгости)
 declare global {
   interface RequestInit {
     cf?: Record<string, unknown>;
@@ -44,14 +43,21 @@ interface VKResponse {
   };
 }
 
-// Разрешённые источники для CORS
 const ALLOWED_ORIGINS = [
   "https://new.evroskot.ru",
   "https://evroskot.ru",
-  "http://localhost:4321",  // локальная разработка
+  "http://localhost:4321",
 ];
 
-// Универсальное получение токена (Cloudflare Workers / локально)
+function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json;charset=UTF-8",
+    "Cache-Control": "public, s-maxage=604800, stale-while-revalidate=86400", // 7 дней
+    ...extraHeaders,
+  };
+  return new Response(JSON.stringify(data), { status, headers });
+}
+
 async function getAccessToken(): Promise<string> {
   try {
     const { env } = await import('cloudflare:workers');
@@ -63,22 +69,11 @@ async function getAccessToken(): Promise<string> {
   throw new Error('VK_ACCESS_TOKEN missing');
 }
 
-// Формирование JSON-ответа
-function json(data: unknown, status = 200, extraHeaders: Record<string, string> = {}) {
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json;charset=UTF-8",
-    "Cache-Control": "public, s-maxage=86400, stale-while-revalidate=604800",
-    ...extraHeaders,
-  };
-  return new Response(JSON.stringify(data), { status, headers });
-}
-
 export async function GET({ request }: { request: Request }) {
   const url = new URL(request.url);
   const origin = request.headers.get("Origin");
   const cors = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
 
-  // CORS-проверка
   if (origin && !ALLOWED_ORIGINS.includes(origin)) {
     return json({ error: "Origin not allowed" }, 403);
   }
@@ -104,7 +99,6 @@ export async function GET({ request }: { request: Request }) {
     return json({ error: "VK_ACCESS_TOKEN missing" }, 500);
   }
 
-  // Edge-кеш (только в Cloudflare Workers)
   const cache = typeof caches !== 'undefined'
     ? (caches as unknown as { default: Cache }).default
     : null;
@@ -132,7 +126,7 @@ export async function GET({ request }: { request: Request }) {
 
     const response = await fetch(vkUrl, {
       signal: controller.signal,
-      cf: { cacheTtl: 86400, cacheEverything: true },
+      cf: { cacheTtl: 604800, cacheEverything: true },
       headers: { "User-Agent": "EvroskotVideoProxy/1.0" },
     });
 
@@ -152,7 +146,6 @@ export async function GET({ request }: { request: Request }) {
 
     const files = video.files || {};
 
-    // Собираем источники от лучшего к худшему
     const sources = [
       files.mp4_2160,
       files.mp4_1440,
@@ -164,29 +157,16 @@ export async function GET({ request }: { request: Request }) {
     ].filter(Boolean);
 
     const bestMp4 = sources[0] || null;
-
     const poster =
       video.image
         ?.toSorted((a, b) => b.width - a.width)?.[0]?.url ?? null;
 
+    // Возвращаем только необходимые поля
     const result = {
-      success: true,
       title: video.title || "",
-      duration: video.duration || 0,
-      width: video.width || 0,
-      height: video.height || 0,
       poster,
       hls: files.hls || null,
       mp4: bestMp4,
-      qualities: {
-        "2160": files.mp4_2160 || null,
-        "1440": files.mp4_1440 || null,
-        "1080": files.mp4_1080 || null,
-        "720": files.mp4_720 || null,
-        "480": files.mp4_480 || null,
-        "360": files.mp4_360 || null,
-        "240": files.mp4_240 || null,
-      },
     };
 
     const res = json(result, 200, { "Access-Control-Allow-Origin": cors });

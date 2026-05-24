@@ -6,9 +6,12 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
+  prefetch: {
+    defaultStrategy: 'hover',  // предзагрузка страниц при наведении
+  },
   integrations: [
     favicons({
-      masterPicture: './public/favicon.svg',   // ← файл должен лежать в public/
+      masterPicture: './public/favicon.svg',
       appName: 'Scanova A/S',
       appShortName: 'Scanova A/S',
       appDescription: 'Поставка племенного крупнорогатого скота из Европы',

@@ -38,6 +38,7 @@ const hasItems = items.length > 0;
               data-post-id={item.postId}
               class="card-link"
               aria-label={`Открыть новость: ${item.title}`}
+              data-astro-prefetch="hover"
             >
               {item.image ? (
                 <div

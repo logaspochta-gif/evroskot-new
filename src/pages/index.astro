@@ -8,7 +8,7 @@ import BreedsDetailed from '../components/BreedsDetailed.astro';
 import Advantages from '../components/Advantages.astro';
 import Staldren from '../components/Staldren.astro';
 import Contact from '../components/Contact.astro';
-import News from '../components/News.astro';    // ← добавьте этот импорт
+import News from '../components/News.astro';
 import Footer from '../components/Footer.astro';
 import SideNav from '../components/SideNav.astro';
 ---
@@ -21,14 +21,29 @@ import SideNav from '../components/SideNav.astro';
     <Hero />
     <BentoBreeds />
     <About />
-    <News />    <!-- ← и эту строку -->
+    <News />
     <Steps />
     <BreedsDetailed />
     <Advantages />
     <Staldren />
-    
     <Contact />
   </main>
-  <Footer />
+
+  <!-- Футер как самостоятельная секция -->
+  <section class="footer-section snap-section">
+    <Footer />
+  </section>
+
   <SideNav />
 </BaseLayout>
+
+<style is:global>
+  .footer-section {
+    scroll-snap-align: start;
+    min-height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--dark);
+  }
+</style>
