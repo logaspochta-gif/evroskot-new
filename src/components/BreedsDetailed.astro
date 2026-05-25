@@ -179,7 +179,7 @@
     width: 100%;
     max-width: 1400px;
     padding: 0 60px;
-    perspective: 1200px;
+    perspective: 1600px; /* Увеличена глубина сцены */
   }
 
   .breed-card {
@@ -187,7 +187,7 @@
     border-radius: var(--breeds-radius);
     overflow: hidden;
     border: var(--breeds-border);
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
     transition: transform var(--breeds-transition), box-shadow var(--breeds-transition), border-color var(--breeds-transition);
     will-change: transform;
   }
@@ -240,27 +240,31 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
     will-change: transform;
-    transform: scale(0.85);
-    opacity: 0.6;
+    transform: scale(0.8);
+    opacity: 0.55;
   }
 
   .splide__slide.is-active {
-    transform: scale(1.05);
+    transform: scale(1.08);
     opacity: 1;
     z-index: 2;
   }
 
+  .splide__slide.is-active .breed-card {
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+  }
+
   .splide__slide.is-prev {
-    transform: scale(0.85) rotateY(20deg) translateX(15%);
-    opacity: 0.7;
+    transform: scale(0.8) rotateY(30deg) translateX(25%);
+    opacity: 0.65;
     z-index: 1;
   }
 
   .splide__slide.is-next {
-    transform: scale(0.85) rotateY(-20deg) translateX(-15%);
-    opacity: 0.7;
+    transform: scale(0.8) rotateY(-30deg) translateX(-25%);
+    opacity: 0.65;
     z-index: 1;
   }
 
@@ -294,10 +298,10 @@
       height: 200px;
     }
     .splide__slide.is-prev {
-      transform: scale(0.85) rotateY(10deg) translateX(5%);
+      transform: scale(0.8) rotateY(15deg) translateX(10%);
     }
     .splide__slide.is-next {
-      transform: scale(0.85) rotateY(-10deg) translateX(-5%);
+      transform: scale(0.8) rotateY(-15deg) translateX(-10%);
     }
   }
 </style>
