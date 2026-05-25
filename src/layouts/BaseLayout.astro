@@ -7,12 +7,13 @@ import PostModal from "../components/PostModal.astro";
 export interface Props {
   title: string;
   description: string;
-  hideFooter?: boolean;   // для главной, где футер уже внутри контактов
+  hideFooter?: boolean;
+  disableSnap?: boolean;
 }
 
-const { title, description, hideFooter = false } = Astro.props;
+const { title, description, hideFooter = false, disableSnap = false } = Astro.props;
 
-// Локальное окружение и токен VK (только для разработки)
+// локальный токен (без изменений)
 const isLocal = Astro.url.hostname === 'localhost' || Astro.url.hostname === '127.0.0.1';
 let devToken = '';
 if (isLocal) {
@@ -20,35 +21,29 @@ if (isLocal) {
     const { env } = await import('cloudflare:workers');
     if (env.VK_ACCESS_TOKEN) devToken = env.VK_ACCESS_TOKEN;
   } catch {
-    if (import.meta.env?.VK_ACCESS_TOKEN) {
-      devToken = import.meta.env.VK_ACCESS_TOKEN;
-    }
+    if (import.meta.env?.VK_ACCESS_TOKEN) devToken = import.meta.env.VK_ACCESS_TOKEN;
   }
 }
 ---
 
 <!doctype html>
-<html lang="ru">
+<html lang="ru" class:list={[!disableSnap && 'snap-enabled']}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
-
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Oswald:wght@400;600;700;900&display=swap"
       rel="stylesheet"
     />
-
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/@splidejs/splide@4.1.4/dist/css/splide.min.css"
     />
-
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest" defer></script>
-
     <style is:global>
       :root {
         --dark: #0a0a0a;
@@ -74,6 +69,13 @@ if (isLocal) {
         color: var(--text);
         line-height: 1.6;
         overflow-x: hidden;
+        display: flex;
+        flex-direction: column;
+        min-height: 100dvh;
+      }
+
+      .main-content {
+        flex: 1 1 auto;
       }
 
       h1, h2, h3, h4, h5, h6 {
@@ -101,9 +103,7 @@ if (isLocal) {
         font-size: clamp(1rem, 2.5vw, 1.1rem);
       }
 
-      .accent {
-        color: var(--accent);
-      }
+      .accent { color: var(--accent); }
 
       .anim-fade-up,
       .anim-fade-left,
@@ -130,23 +130,24 @@ if (isLocal) {
       .anim-delay-4 { transition-delay: 0.4s; }
       .anim-delay-5 { transition-delay: 0.5s; }
 
-      html {
+      /* snap-скролл только при классе snap-enabled */
+      html.snap-enabled {
         scroll-snap-type: y mandatory;
         scroll-behavior: smooth;
       }
 
-      section:not(#hero) {
+      html.snap-enabled section:not(#hero) {
         scroll-snap-align: start;
         content-visibility: auto;
         contain-intrinsic-size: 1000px;
       }
 
-      #hero {
+      html.snap-enabled #hero {
         content-visibility: visible;
         contain-intrinsic-size: auto;
       }
 
-      /* Футер как отдельная секция (для страниц, где он не встроен в контакты) */
+      /* Футер как секция (для страниц с snap) */
       .footer-snap {
         scroll-snap-align: start;
         min-height: 100dvh;
@@ -175,12 +176,10 @@ if (isLocal) {
   </head>
   <body>
     <Header />
-    <slot />
-    {!hideFooter && (
-      <section class="footer-snap">
-        <Footer />
-      </section>
-    )}
+    <main class="main-content">
+      <slot />
+    </main>
+    {!hideFooter && <Footer />}
     <PostModal />
 
     {isLocal && devToken ? (
