@@ -179,16 +179,18 @@
   }
 
   .breed-card {
-    flex: 1 1 250px;
-    max-width: 300px;
+    flex: 0 0 300px;                /* увеличена базовая ширина */
+    max-width: 340px;               /* чуть больше места */
     border-radius: var(--breeds-radius);
     overflow: hidden;
     background: var(--breeds-card-bg);
     border: var(--breeds-border);
-    transition: transform var(--breeds-transition), box-shadow var(--breeds-transition), z-index 0s;
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1),
+                box-shadow var(--breeds-transition),
+                border-color var(--breeds-transition);
     position: relative;
     z-index: 1;
-    margin-left: -20px;          /* наложение */
+    margin-left: -20px;             /* наложение сохранено */
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
   }
 
@@ -196,12 +198,38 @@
     margin-left: 0;
   }
 
+  /* ========== Револьверный эффект при наведении ========== */
+  /* Контейнер, в котором есть наведённая карточка */
+  .breeds-overlap-container:has(.breed-card:hover) .breed-card {
+    transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1),
+                box-shadow var(--breeds-transition),
+                border-color var(--breeds-transition);
+  }
+
+  /* Карточка под курсором – увеличивается и слегка приподнимается */
   .breed-card:hover {
-    transform: scale(1.07) rotate(1deg);
-    z-index: 10;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+    transform: scale(1.1) translateY(-4px);
+    z-index: 20;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
     border-color: var(--breeds-accent);
   }
+
+  /* Остальные карточки чуть сжимаются */
+  .breeds-overlap-container:has(.breed-card:hover) .breed-card:not(:hover) {
+    transform: scale(0.95);
+    z-index: 1;
+  }
+
+  /* Карточки слева от наведённой – сдвигаются вправо (сильнее наползают) */
+  .breed-card:has(~ .breed-card:hover) {
+    transform: scale(0.95) translateX(20px);
+  }
+
+  /* Карточки справа от наведённой – сдвигаются влево */
+  .breed-card:hover ~ .breed-card {
+    transform: scale(0.95) translateX(-20px);
+  }
+  /* ===================================================== */
 
   .breed-link {
     text-decoration: none;
@@ -213,29 +241,29 @@
 
   .breed-image {
     width: 100%;
-    height: 200px;
+    height: 230px;                  /* немного выше для квадратных пропорций */
     object-fit: cover;
     display: block;
   }
 
   .breed-body {
-    padding: 20px;
+    padding: 18px;                  /* чуть компактнее */
     display: flex;
     flex-direction: column;
     flex: 1;
   }
 
   .breed-body h3 {
-    font-size: 1.2rem;
-    margin: 0 0 8px;
+    font-size: 1.25rem;
+    margin: 0 0 6px;
     font-weight: 700;
     color: var(--breeds-text);
   }
 
   .breed-body p {
-    margin: 0 0 16px;
+    margin: 0 0 14px;
     color: var(--breeds-muted);
-    line-height: 1.5;
+    line-height: 1.4;
     flex: 1;
     font-size: 0.9rem;
   }
@@ -254,7 +282,7 @@
     gap: 8px;
   }
 
-  /* Мобильная версия — столбиком, без наложения */
+  /* Мобильная версия — столбиком, без наложения и сложной анимации */
   @media (max-width: 768px) {
     .breeds-overlap-container {
       flex-direction: column;
@@ -263,12 +291,20 @@
     }
 
     .breed-card {
+      flex: 1 1 auto;
       max-width: 100%;
       margin-left: 0;
     }
 
+    /* Отключаем револьверные смещения */
+    .breeds-overlap-container:has(.breed-card:hover) .breed-card:not(:hover),
+    .breed-card:has(~ .breed-card:hover),
+    .breed-card:hover ~ .breed-card {
+      transform: scale(0.98);
+    }
+
     .breed-card:hover {
-      transform: scale(1.02) rotate(0deg);
+      transform: scale(1.02) translateY(-2px);
     }
   }
 </style>
