@@ -40,7 +40,7 @@ export async function fetchNewsFromVk(): Promise<VkPost[]> {
 
   const GROUP_ID = '99133048';
   const API_VERSION = '5.131';
-  const POSTS_LIMIT = 30;
+  const POSTS_LIMIT = 16;
 
   const ownerId = -Math.abs(parseInt(GROUP_ID));
   const params = new URLSearchParams({
