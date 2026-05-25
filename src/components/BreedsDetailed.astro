@@ -15,11 +15,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/Holstein_cow_%281%29.jpg/640px-Holstein_cow_%281%29.jpg"
               alt="Голштинская"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Голштинская</h3>
               <p>Лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика датской селекции.</p>
-              <a href="/breeds/holstein" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -29,11 +30,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Jersey_cows_1.JPG/640px-Jersey_cows_1.JPG"
               alt="Джерсейская"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Джерсейская</h3>
               <p>Молоко с жирностью до 6%. Светло-коричневая масть. Компактное телосложение и долголетие.</p>
-              <a href="/breeds/jersey" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -43,11 +45,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Danish_Red_cow.jpg/640px-Danish_Red_cow.jpg"
               alt="Красная Датская"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Красная Датская</h3>
               <p>Универсальная порода двойного назначения. Красно-пёстрая масть. Отличное здоровье и плодовитость.</p>
-              <a href="/breeds/danish-red" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -57,11 +60,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Charolais_cattle.jpg/640px-Charolais_cattle.jpg"
               alt="Шароле"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Шароле</h3>
               <p>Мясная порода с высокой энергией роста. Кремово-белая масть. Тяжёлые быки до 1 400 кг.</p>
-              <a href="/breeds/charolais" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -71,11 +75,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Aberdeen_Angus_cattle.jpg/640px-Aberdeen_Angus_cattle.jpg"
               alt="Абердин-Ангус"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Абердин-Ангус</h3>
               <p>Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость отёлов и скороспелость.</p>
-              <a href="/breeds/angus" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -85,11 +90,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Hereford_cattle.jpg/640px-Hereford_cattle.jpg"
               alt="Герефордская"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Герефордская</h3>
               <p>Красно-белая масть. Выносливость и неприхотливость. Отличная адаптация к пастбищному содержанию.</p>
-              <a href="/breeds/hereford" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -99,11 +105,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Limousin_cattle.jpg/640px-Limousin_cattle.jpg"
               alt="Лимузин"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Лимузин</h3>
               <p>Золотисто-красная масть. Высокий выход постного мяса. Отличные материнские качества.</p>
-              <a href="/breeds/limousin" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -113,11 +120,12 @@
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6e/Simmental_cattle.jpg/640px-Simmental_cattle.jpg"
               alt="Симментальская"
               loading="lazy"
+              class="breed-image"
             />
             <div class="breed-body">
               <h3>Симментальская</h3>
               <p>Палево-пёстрая масть. Двойное назначение: молоко и мясо. Крепкая конституция и высокая продуктивность.</p>
-              <a href="/breeds/simmental" class="breed-link">Подробнее →</a>
+              <span class="breed-link-text">Подробнее →</span>
             </div>
           </article>
         </li>
@@ -138,6 +146,7 @@
     --breeds-text: #fff;
     --breeds-muted: rgba(255, 255, 255, 0.7);
     --breeds-accent: var(--accent, #10b981);
+    --breeds-transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 
     min-height: 100vh;
     display: flex;
@@ -168,8 +177,9 @@
 
   .breeds-splide {
     width: 100%;
-    max-width: 900px;
+    max-width: 1400px;
     padding: 0 60px;
+    perspective: 1200px;
   }
 
   .breed-card {
@@ -177,19 +187,14 @@
     border-radius: var(--breeds-radius);
     overflow: hidden;
     border: var(--breeds-border);
-    transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+    transition: transform var(--breeds-transition), box-shadow var(--breeds-transition), border-color var(--breeds-transition);
     will-change: transform;
   }
 
-  .splide__slide.is-active .breed-card {
-    border-color: var(--breeds-accent);
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9);
-  }
-
-  .breed-card img {
+  .breed-image {
     width: 100%;
-    height: 250px;
+    height: 240px;
     object-fit: cover;
     display: block;
   }
@@ -216,21 +221,50 @@
     flex: 1;
   }
 
-  .breed-link {
+  .breed-link-text {
     color: var(--breeds-accent);
     font-weight: 600;
-    text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 4px;
+    margin-top: auto;
     transition: gap 0.2s ease;
   }
 
-  .breed-link:hover {
+  .breed-card:hover .breed-link-text {
     gap: 8px;
   }
 
-  /* Стрелки */
+  /* === 3D Револьверный эффект === */
+  .splide__slide {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+    transform: scale(0.85);
+    opacity: 0.6;
+  }
+
+  .splide__slide.is-active {
+    transform: scale(1.05);
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .splide__slide.is-prev {
+    transform: scale(0.85) rotateY(20deg) translateX(15%);
+    opacity: 0.7;
+    z-index: 1;
+  }
+
+  .splide__slide.is-next {
+    transform: scale(0.85) rotateY(-20deg) translateX(-15%);
+    opacity: 0.7;
+    z-index: 1;
+  }
+
+  /* Стрелки Splide */
   :global(.breeds-splide .splide__arrow) {
     background: rgba(255, 255, 255, 0.12);
     backdrop-filter: blur(8px);
@@ -256,8 +290,14 @@
     .breeds-splide {
       padding: 0 40px;
     }
-    .breed-card img {
+    .breed-image {
       height: 200px;
+    }
+    .splide__slide.is-prev {
+      transform: scale(0.85) rotateY(10deg) translateX(5%);
+    }
+    .splide__slide.is-next {
+      transform: scale(0.85) rotateY(-10deg) translateX(-5%);
     }
   }
 </style>
@@ -272,30 +312,18 @@
         type: 'loop',
         perPage: 3,
         perMove: 1,
-        gap: 24,
-        padding: '10%',
+        gap: 32,
         focus: 'center',
+        padding: { left: '8%', right: '8%' },
         updateOnMove: true,
         waitForTransition: true,
-        coverflow: {
-          rotate: 35,
-          depth: 100,
-          modifier: 1.2,
-          slideShadows: true,
-        },
         pagination: false,
         arrows: true,
         keyboard: 'global',
         breakpoints: {
           768: {
             perPage: 1,
-            padding: '20%',
-            coverflow: {
-              rotate: 25,
-              depth: 80,
-              modifier: 1,
-              slideShadows: true,
-            },
+            padding: { left: '20%', right: '20%' },
           },
         },
       }).mount();
