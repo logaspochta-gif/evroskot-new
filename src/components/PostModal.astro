@@ -313,7 +313,6 @@
   // @ts-nocheck
   declare var Hls: any;
 
-  // ----- СОСТОЯНИЕ -----
   let currentSlideIndex = 0;
   let totalSlides = 0;
   let scale = 1;
@@ -324,35 +323,22 @@
   let modalContent: HTMLElement | null = null;
   let modalAbort = new AbortController();
 
-  // Метаданные медиа (храним для виртуальных слайдов)
   type MediaMeta = {
-    type: 'photo';
-    url: string;
-    alt: string;
+    type: 'photo'; url: string; alt: string;
   } | {
-    type: 'video';
-    ownerId: string;
-    videoId: string;
-    accessKey: string;
-    fallbackUrl: string;
-    poster: string;
+    type: 'video'; ownerId: string; videoId: string; accessKey: string; fallbackUrl: string; poster: string;
   } | {
-    type: 'link';
-    html: string;
+    type: 'link'; html: string;
   } | {
-    type: 'doc';
-    html: string;
+    type: 'doc'; html: string;
   };
   let mediaMetaList: MediaMeta[] = [];
-
-  // Кеш загруженных видео метаданных (для предотвращения повторных fetch)
   const videoMetaCache = new Map<number, { url: string; type: string; poster: string; fallbackUrl: string }>();
 
   function log(msg: string, data?: any) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
-  // ----- ОЧИСТКА -----
   function destroyPlayers() {
     hlsInstances.forEach((hls, video) => hls.destroy());
     hlsInstances.clear();
@@ -374,7 +360,6 @@
     }
   }
 
-  // ----- ZOOM (один раз на контейнере) -----
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
@@ -411,7 +396,6 @@
     container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
-  // ----- ВИРТУАЛИЗАЦИЯ СЛАЙДОВ -----
   function renderVirtualSlides() {
     const slider = document.querySelector('.simple-slider');
     if (!slider) return;
@@ -452,8 +436,6 @@
 
     if (meta.type === 'photo') {
       const img = document.createElement('img');
-      const targetWidth = window.innerWidth * window.devicePixelRatio;
-      const sizes = meta.url ? [meta.url] : []; // уже выбран лучший URL ранее
       img.src = index === currentSlideIndex ? meta.url : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
       img.dataset.src = meta.url;
       img.alt = meta.alt;
@@ -482,10 +464,8 @@
     return slide;
   }
 
-  // ----- НАВИГАЦИЯ -----
   function goToSlide(index: number) {
     if (!slides.length || index === currentSlideIndex) return;
-    // Очищаем старый слайд
     const prev = slides[currentSlideIndex];
     if (prev) {
       const v = prev.querySelector('video');
@@ -494,32 +474,26 @@
       if (iframe) iframe.remove();
     }
     currentSlideIndex = index;
-    // Перестраиваем виртуальный набор
     renderVirtualSlides();
-    // Обновляем счётчик
     const counter = document.getElementById('slideCounter');
     if (counter) counter.textContent = `${index + 1} / ${totalSlides}`;
     resetZoom();
-    // Ленивая загрузка текущего слайда
     loadSlideContent(index);
   }
 
   function nextSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex + 1) % totalSlides); }
   function prevSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex - 1 + totalSlides) % totalSlides); }
 
-  // ----- ЗАГРУЗКА КОНТЕНТА СЛАЙДА -----
   async function loadSlideContent(index: number) {
     if (mediaLoaded.has(index)) return;
     const slide = slides.find(s => s.classList.contains('active'));
     if (!slide) return;
 
-    // Изображение
     const img = slide.querySelector('img');
     if (img?.dataset.src && !img.src.startsWith('http')) {
       img.src = img.dataset.src;
     }
 
-    // Видео-фасад
     const facade = slide.querySelector('.video-facade') as HTMLElement;
     if (!facade) return;
 
@@ -615,7 +589,6 @@
     }
   }
 
-  // ----- ОБРАБОТЧИК ФАСАДА -----
   function handleModalContentClick(e: MouseEvent) {
     const btn = (e.target as HTMLElement).closest('.video-play-btn');
     if (!btn) return;
@@ -629,7 +602,6 @@
     }
   }
 
-  // ----- ЗАКРЫТИЕ -----
   function closeModal() {
     const modal = document.getElementById('postModal');
     if (!modal) return;
@@ -640,13 +612,14 @@
     modalAbort.abort();
     modalAbort = new AbortController();
     destroyPlayers();
-    if (modalContent) modalContent.innerHTML = '';
+    if (modalContent) {
+      modalContent.innerHTML = '';  // полностью удаляем .simple-slider и всё содержимое
+    }
     slides = [];
     totalSlides = 0;
     mediaMetaList = [];
   }
 
-  // ----- SINGLETON INIT -----
   let eventsInitialized = false;
   function initModalEvents() {
     if (eventsInitialized) return;
@@ -696,7 +669,6 @@
     document.getElementById('modalContent')?.addEventListener('click', handleModalContentClick);
   }
 
-  // ----- ОТКРЫТИЕ -----
   async function openPostModal(ownerId: string, postId: string) {
     const modal = document.getElementById('postModal');
     modalContent = document.getElementById('modalContent');
@@ -733,11 +705,9 @@
       const attachments = (post.attachments || []).filter((a: any) => /photo|video|link|doc/.test(a.type));
       totalSlides = attachments.length;
 
-      // Сохраняем метаданные
       mediaMetaList = attachments.map((att: any) => {
         if (att.type === 'photo' && att.photo) {
           const sizes = att.photo.sizes || [];
-          // Адаптивный выбор размера
           const targetWidth = window.innerWidth * window.devicePixelRatio;
           const best = sizes.find((s: any) => s.width >= targetWidth) || sizes[sizes.length - 1];
           return {
@@ -770,13 +740,17 @@
           </div>`;
           return { type: 'doc' as const, html };
         }
-        return { type: 'photo' as const, url: '', alt: '' }; // fallback
+        return { type: 'photo' as const, url: '', alt: '' };
       });
 
-      // Виртуализированный рендер
-      renderVirtualSlides();
+      // Отложенная инициализация, чтобы гарантировать наличие .simple-slider в DOM
+      requestAnimationFrame(() => {
+        renderVirtualSlides();
+        requestAnimationFrame(() => {
+          loadSlideContent(0);
+        });
+      });
 
-      // Пост-информация
       const postInfo = document.getElementById('postInfo')!;
       postInfo.innerHTML = '';
       const dateDiv = document.createElement('div');
@@ -793,7 +767,6 @@
 
       currentSlideIndex = 0;
       mediaLoaded.clear();
-      loadSlideContent(0);
 
       document.getElementById('navPrev')!.onclick = prevSlide;
       document.getElementById('navNext')!.onclick = nextSlide;
