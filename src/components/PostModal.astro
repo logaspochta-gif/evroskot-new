@@ -47,8 +47,6 @@
     --modal-accent: var(--accent, #10b981);
     --modal-text: #fff;
     --modal-muted: rgba(255, 255, 255, 0.7);
-    --swipe-y: 0;
-    --swipe-opacity: 1;
   }
 
   .modal-overlay {
@@ -70,20 +68,18 @@
     inset: 0;
     width: 100vw;
     height: 100vh;
+    min-height: 100svh;
     height: 100dvh;
     overflow: hidden;
     background: transparent;
-    will-change: transform, opacity;
-    transform: translateY(var(--swipe-y, 0));
-    opacity: var(--swipe-opacity, 1);
+    will-change: transform;
     contain: layout style paint;
   }
   .modal-content {
     position: absolute;
     inset: 0;
     width: 100vw;
-    height: 100vh;
-    height: 100dvh;
+    height: 100%;
     overflow: hidden;
   }
 
@@ -313,17 +309,28 @@
   // @ts-nocheck
   declare var Hls: any;
 
-  // ----- КЕШИРОВАННЫЕ ССЫЛКИ НА DOM -----
-  const refs = {
-    get modal() { return document.getElementById('postModal'); },
-    get content() { return document.getElementById('modalContent'); },
-    get container() { return document.getElementById('modalContainer'); },
-    get counter() { return document.getElementById('slideCounter'); },
-    get navArrows() { return document.getElementById('navArrows'); },
-    get postInfo() { return document.getElementById('postInfo'); },
-    get navPrev() { return document.getElementById('navPrev'); },
-    get navNext() { return document.getElementById('navNext'); },
+  // ----- КЕШИРОВАННЫЕ ССЫЛКИ (инициализируются один раз) -----
+  const refs: Record<string, HTMLElement | null> = {
+    modal: null,
+    content: null,
+    container: null,
+    counter: null,
+    navArrows: null,
+    postInfo: null,
+    navPrev: null,
+    navNext: null,
   };
+
+  function initRefs() {
+    refs.modal = document.getElementById('postModal');
+    refs.content = document.getElementById('modalContent');
+    refs.container = document.getElementById('modalContainer');
+    refs.counter = document.getElementById('slideCounter');
+    refs.navArrows = document.getElementById('navArrows');
+    refs.postInfo = document.getElementById('postInfo');
+    refs.navPrev = document.getElementById('navPrev');
+    refs.navNext = document.getElementById('navNext');
+  }
 
   // ----- СОСТОЯНИЕ -----
   let currentSlideIndex = 0;
@@ -334,11 +341,10 @@
   const hlsInstances = new Map<HTMLVideoElement, any>();
   let modalContent: HTMLElement | null = null;
   let modalAbort = new AbortController();
+  let modalSession = 0; // для предотвращения race condition
 
-  // Виртуальный кеш отрендеренных слайдов
   const renderedSlides = new Map<number, HTMLElement>();
 
-  // Метаданные медиа
   type MediaMeta = {
     type: 'photo';
     url: string;
@@ -352,17 +358,17 @@
     poster: string;
   } | {
     type: 'link';
-    html: string;
+    title: string;
+    description: string;
+    url: string;
+    imageHtml: string;
   } | {
     type: 'doc';
-    html: string;
+    title: string;
+    url: string;
   };
   let mediaMetaList: MediaMeta[] = [];
-
-  // Кеш метаданных видео
   const videoMetaCache = new Map<number, { url: string; type: string; poster: string; fallbackUrl: string }>();
-
-  // Фокус перед открытием
   let previousFocusedElement: HTMLElement | null = null;
 
   function log(msg: string, data?: any) {
@@ -370,6 +376,18 @@
   }
 
   // ----- ОЧИСТКА -----
+  function cleanupSlide(slide: HTMLElement) {
+    const video = slide.querySelector('video');
+    if (video) {
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+    }
+    const iframe = slide.querySelector('iframe');
+    if (iframe) iframe.src = 'about:blank';
+    slide.remove();
+  }
+
   function destroyPlayers() {
     hlsInstances.forEach((hls, video) => {
       hls.destroy();
@@ -411,7 +429,7 @@
       img.style.transform = zoomed ? 'scale(1)' : 'scale(2)';
       slide.classList.toggle('zoomed');
       scale = zoomed ? 1 : 2;
-    });
+    }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
       if (e.touches.length !== 2) return;
@@ -431,7 +449,7 @@
     container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
-  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР (window shift) -----
+  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР -----
   function getVirtualRange(): number[] {
     if (totalSlides === 0) return [];
     if (totalSlides === 1) return [0];
@@ -447,31 +465,25 @@
   function updateVirtualSlides() {
     const slider = document.querySelector('.simple-slider');
     if (!slider) return;
-
     const range = new Set(getVirtualRange());
 
-    // Удаляем слайды, которых нет в новом диапазоне
     for (const [index, slide] of renderedSlides.entries()) {
       if (!range.has(index)) {
-        slider.removeChild(slide);
+        cleanupSlide(slide);
         renderedSlides.delete(index);
       }
     }
 
-    // Добавляем недостающие слайды
-    for (const index of range) {
+    // Сортируем индексы для правильного порядка вставки
+    const sortedIndices = Array.from(range).sort((a, b) => a - b);
+    for (const index of sortedIndices) {
       if (!renderedSlides.has(index)) {
         const slide = createSlideElement(index);
         slider.appendChild(slide);
         renderedSlides.set(index, slide);
       } else {
-        // Обновляем активный класс
         const slide = renderedSlides.get(index)!;
-        if (index === currentSlideIndex) {
-          slide.classList.add('active');
-        } else {
-          slide.classList.remove('active');
-        }
+        slide.classList.toggle('active', index === currentSlideIndex);
       }
     }
   }
@@ -491,12 +503,7 @@
       img.decoding = 'async';
       if (index === currentSlideIndex) {
         img.fetchPriority = 'high';
-        // Преддекодирование для первого слайда
-        img.decode().then(() => {
-          if (img.src === meta.url) {
-            // уже загружено
-          }
-        });
+        img.decode().catch(() => {});
       }
       slide.appendChild(img);
     } else if (meta.type === 'video') {
@@ -511,12 +518,46 @@
       playBtn.className = 'video-play-btn';
       facade.appendChild(playBtn);
       slide.appendChild(facade);
-    } else if (meta.type === 'link' || meta.type === 'doc') {
-      // Для безопасности создаём через DOM API, а не innerHTML
+    } else if (meta.type === 'link') {
       const container = document.createElement('div');
-      container.className = meta.type === 'link' ? 'link-preview' : 'doc-preview';
-      // парсим заранее сохранённый HTML можно, т.к. он строился из безопасных данных
-      container.innerHTML = meta.html;
+      container.className = 'link-preview';
+      if (meta.imageHtml) {
+        const imgDiv = document.createElement('div');
+        imgDiv.innerHTML = meta.imageHtml; // img tag строка безопасна
+        container.appendChild(imgDiv.firstElementChild!);
+      }
+      const title = document.createElement('div');
+      title.className = 'preview-title';
+      title.textContent = meta.title;
+      container.appendChild(title);
+      if (meta.description) {
+        const desc = document.createElement('div');
+        desc.className = 'preview-description';
+        desc.textContent = meta.description;
+        container.appendChild(desc);
+      }
+      const link = document.createElement('a');
+      link.className = 'preview-button';
+      link.href = meta.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Открыть';
+      container.appendChild(link);
+      slide.appendChild(container);
+    } else if (meta.type === 'doc') {
+      const container = document.createElement('div');
+      container.className = 'doc-preview';
+      const title = document.createElement('div');
+      title.className = 'preview-title';
+      title.textContent = meta.title;
+      container.appendChild(title);
+      const link = document.createElement('a');
+      link.className = 'preview-button';
+      link.href = meta.url;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Скачать / Открыть';
+      container.appendChild(link);
       slide.appendChild(container);
     }
 
@@ -526,7 +567,6 @@
   // ----- НАВИГАЦИЯ -----
   function goToSlide(index: number) {
     if (totalSlides === 0 || index === currentSlideIndex) return;
-    // Останавливаем предыдущий
     const prevSlide = renderedSlides.get(currentSlideIndex);
     if (prevSlide) {
       const v = prevSlide.querySelector('video');
@@ -540,11 +580,19 @@
     resetZoom();
     requestAnimationFrame(() => {
       loadSlideContent(index);
+      preloadAdjacent(index);
     });
   }
 
   function nextSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex + 1) % totalSlides); }
   function prevSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex - 1 + totalSlides) % totalSlides); }
+
+  function preloadAdjacent(index: number) {
+    const prev = (index - 1 + totalSlides) % totalSlides;
+    const next = (index + 1) % totalSlides;
+    if (!mediaLoaded.has(prev)) loadSlideContent(prev);
+    if (!mediaLoaded.has(next)) loadSlideContent(next);
+  }
 
   // ----- ЗАГРУЗКА КОНТЕНТА СЛАЙДА -----
   async function loadSlideContent(index: number) {
@@ -552,13 +600,11 @@
     const slide = renderedSlides.get(index);
     if (!slide) return;
 
-    // Изображение
     const img = slide.querySelector('img');
     if (img?.dataset.src && !img.src.startsWith('http')) {
       img.src = img.dataset.src;
     }
 
-    // Видео-фасад
     const facade = slide.querySelector('.video-facade') as HTMLElement;
     if (!facade) return;
 
@@ -569,7 +615,7 @@
 
     if (videoMetaCache.has(index)) {
       const meta = videoMetaCache.get(index)!;
-      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl);
+      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl, index);
       return;
     }
 
@@ -590,7 +636,7 @@
         poster = '';
       }
       videoMetaCache.set(index, { url, type, poster, fallbackUrl });
-      buildPlayerFromFacade(facade, url, type, poster, fallbackUrl);
+      buildPlayerFromFacade(facade, url, type, poster, fallbackUrl, index);
     } catch (err) {
       if ((err as DOMException).name === 'AbortError') return;
       log('Ошибка загрузки видео', err);
@@ -602,7 +648,7 @@
     }
   }
 
-  function buildPlayerFromFacade(facade: HTMLElement, url: string, type: string, poster: string, fallbackUrl: string) {
+  function buildPlayerFromFacade(facade: HTMLElement, url: string, type: string, poster: string, fallbackUrl: string, index: number) {
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
     if (type === 'hls') {
@@ -613,12 +659,14 @@
       if (poster) video.poster = poster;
       wrapper.appendChild(video);
       facade.replaceWith(wrapper);
-      mediaLoaded.add(currentSlideIndex);
-      if (typeof Hls !== 'undefined') {
+      mediaLoaded.add(index);
+      if (typeof Hls !== 'undefined' && !video.canPlayType('application/vnd.apple.mpegurl')) {
         const hls = new Hls();
         hls.loadSource(url);
         hls.attachMedia(video);
         hlsInstances.set(video, hls);
+      } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
       }
     } else if (type === 'mp4') {
       const video = document.createElement('video');
@@ -628,7 +676,7 @@
       if (poster) video.poster = poster;
       wrapper.appendChild(video);
       facade.replaceWith(wrapper);
-      mediaLoaded.add(currentSlideIndex);
+      mediaLoaded.add(index);
     } else if (type === 'vk_iframe') {
       const iframe = document.createElement('iframe');
       iframe.src = url;
@@ -651,7 +699,7 @@
         }, 5000);
       }
       facade.replaceWith(wrapper);
-      mediaLoaded.add(currentSlideIndex);
+      mediaLoaded.add(index);
     }
   }
 
@@ -663,12 +711,9 @@
     if (!facade) return;
     const slide = facade.closest('.slide');
     if (!slide) return;
-    // Ищем индекс по карте
     for (const [index, s] of renderedSlides.entries()) {
-      if (s === slide) {
-        if (!mediaLoaded.has(index)) {
-          loadSlideContent(index);
-        }
+      if (s === slide && !mediaLoaded.has(index)) {
+        loadSlideContent(index);
         break;
       }
     }
@@ -692,6 +737,10 @@
         modalContent.removeChild(modalContent.firstChild);
       }
     }
+    // очистка всех виртуальных слайдов
+    for (const slide of renderedSlides.values()) {
+      cleanupSlide(slide);
+    }
     renderedSlides.clear();
     totalSlides = 0;
     mediaMetaList = [];
@@ -699,6 +748,7 @@
       previousFocusedElement.focus();
       previousFocusedElement = null;
     }
+    modalSession++; // инкремент сессии, чтобы старые async не влияли
   }
 
   // ----- SINGLETON INIT -----
@@ -706,12 +756,14 @@
   function initModalEvents() {
     if (eventsInitialized) return;
     eventsInitialized = true;
+    initRefs();
+
     document.getElementById('modalClose')?.addEventListener('click', closeModal);
     document.getElementById('postModal')?.addEventListener('click', (e) => {
       if (e.target === e.currentTarget) closeModal();
     });
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.getElementById('postModal')?.classList.contains('open')) closeModal();
+      if (e.key === 'Escape' && refs.modal?.classList.contains('open')) closeModal();
     });
     document.addEventListener('astro:before-swap', closeModal);
 
@@ -729,8 +781,8 @@
         if (diff > 0) {
           cancelAnimationFrame(rafId);
           rafId = requestAnimationFrame(() => {
-            container.style.setProperty('--swipe-y', `${diff}px`);
-            container.style.setProperty('--swipe-opacity', `${1 - diff / window.innerHeight}`);
+            container.style.transform = `translate3d(0, ${diff}px, 0)`;
+            container.style.opacity = `${1 - diff / window.innerHeight}`;
           });
         }
       }, { passive: true });
@@ -741,8 +793,8 @@
         if (diff > 120) {
           closeModal();
         } else {
-          container.style.setProperty('--swipe-y', '0');
-          container.style.setProperty('--swipe-opacity', '1');
+          container.style.transform = '';
+          container.style.opacity = '';
         }
         startY = 0; currentY = 0;
       });
@@ -757,14 +809,15 @@
     modalContent = refs.content;
     if (!modal || !modalContent) return;
 
+    const session = ++modalSession; // сохраняем текущую сессию
     previousFocusedElement = document.activeElement as HTMLElement;
 
     destroyPlayers();
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
+    document.body.inert = true; // делаем фон инертным
 
-    // Спиннер (DOM API)
     modalContent.replaceChildren();
     const spinner = document.createElement('div');
     spinner.className = 'modal-spinner';
@@ -787,6 +840,7 @@
         if (!res.ok) throw new Error('Ошибка загрузки');
         post = await res.json();
       }
+      if (session !== modalSession) return; // сессия устарела
       if (!post) throw new Error('Пост не найден');
 
       const date = new Date(post.date * 1000);
@@ -794,7 +848,6 @@
       const attachments = (post.attachments || []).filter((a: any) => /photo|video|link|doc/.test(a.type));
       totalSlides = attachments.length;
 
-      // Метаданные
       mediaMetaList = attachments.map((att: any) => {
         if (att.type === 'photo' && att.photo) {
           const sizes = att.photo.sizes || [];
@@ -805,34 +858,35 @@
           const v = att.video;
           return { type: 'video' as const, ownerId: String(v.owner_id), videoId: String(v.id), accessKey: v.access_key || '', fallbackUrl: `https://vk.com/video${v.owner_id}_${v.id}`, poster: '' };
         } else if (att.type === 'link' && att.link) {
-          const link = att.link;
-          const imgHtml = link.photo?.sizes?.length ? `<img src="${link.photo.sizes.slice(-1)[0].url}" alt="" />` : '';
-          const title = link.title || 'Ссылка';
-          const desc = link.description ? `<div class="preview-description">${link.description}</div>` : '';
-          return { type: 'link' as const, html: `<div class="link-preview">${imgHtml}<div class="preview-title">${title}</div>${desc}<a href="${link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a></div>` };
+          return {
+            type: 'link' as const,
+            imageHtml: att.link.photo?.sizes?.length ? `<img src="${att.link.photo.sizes.slice(-1)[0].url}" alt="" />` : '',
+            title: att.link.title || 'Ссылка',
+            description: att.link.description || '',
+            url: att.link.url,
+          };
         } else if (att.type === 'doc' && att.doc) {
-          const doc = att.doc;
-          const title = doc.title || 'Документ';
-          return { type: 'doc' as const, html: `<div class="doc-preview"><div class="preview-title">${title}</div><a href="${doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a></div>` };
+          return { type: 'doc' as const, title: att.doc.title || 'Документ', url: att.doc.url };
         }
         return { type: 'photo' as const, url: '', alt: '' };
       });
 
-      // Инициализация виртуального слайдера
       currentSlideIndex = 0;
       mediaLoaded.clear();
+      // очистка предыдущих виртуальных слайдов
+      for (const slide of renderedSlides.values()) cleanupSlide(slide);
       renderedSlides.clear();
-      // Создаём контейнер слайдера
+
       const slider = document.createElement('div');
       slider.className = 'simple-slider';
       modalContent.replaceChildren(slider);
       updateVirtualSlides();
-      // Загружаем первый слайд после отрисовки
       requestAnimationFrame(() => {
+        if (session !== modalSession) return;
         loadSlideContent(0);
+        preloadAdjacent(0);
       });
 
-      // Пост-информация (DOM API, безопасно)
       const postInfo = refs.postInfo;
       if (postInfo) {
         postInfo.replaceChildren();
@@ -843,7 +897,7 @@
         if (post.text) {
           const textDiv = document.createElement('div');
           textDiv.className = 'post-text';
-          textDiv.textContent = post.text; // чистый текст
+          textDiv.textContent = post.text;
           textDiv.style.whiteSpace = 'pre-wrap';
           postInfo.appendChild(textDiv);
         }
@@ -856,6 +910,7 @@
 
       initZoom();
     } catch (err) {
+      if (session !== modalSession) return;
       if ((err as DOMException).name === 'AbortError') return;
       log('Ошибка', err);
       modalContent.replaceChildren();
