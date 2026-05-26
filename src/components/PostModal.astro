@@ -310,17 +310,7 @@
   declare var Hls: any;
 
   // ----- КЕШИРОВАННЫЕ ССЫЛКИ (инициализируются один раз) -----
-  const refs: Record<string, HTMLElement | null> = {
-    modal: null,
-    content: null,
-    container: null,
-    counter: null,
-    navArrows: null,
-    postInfo: null,
-    navPrev: null,
-    navNext: null,
-  };
-
+  const refs: Record<string, HTMLElement | null> = {};
   function initRefs() {
     refs.modal = document.getElementById('postModal');
     refs.content = document.getElementById('modalContent');
@@ -341,31 +331,18 @@
   const hlsInstances = new Map<HTMLVideoElement, any>();
   let modalContent: HTMLElement | null = null;
   let modalAbort = new AbortController();
-  let modalSession = 0; // для предотвращения race condition
+  let modalSession = 0;
 
   const renderedSlides = new Map<number, HTMLElement>();
 
   type MediaMeta = {
-    type: 'photo';
-    url: string;
-    alt: string;
+    type: 'photo'; url: string; alt: string;
   } | {
-    type: 'video';
-    ownerId: string;
-    videoId: string;
-    accessKey: string;
-    fallbackUrl: string;
-    poster: string;
+    type: 'video'; ownerId: string; videoId: string; accessKey: string; fallbackUrl: string; poster: string;
   } | {
-    type: 'link';
-    title: string;
-    description: string;
-    url: string;
-    imageHtml: string;
+    type: 'link'; title: string; description: string; url: string; imageHtml: string;
   } | {
-    type: 'doc';
-    title: string;
-    url: string;
+    type: 'doc'; title: string; url: string;
   };
   let mediaMetaList: MediaMeta[] = [];
   const videoMetaCache = new Map<number, { url: string; type: string; poster: string; fallbackUrl: string }>();
@@ -378,25 +355,15 @@
   // ----- ОЧИСТКА -----
   function cleanupSlide(slide: HTMLElement) {
     const video = slide.querySelector('video');
-    if (video) {
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
-    }
+    if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
     const iframe = slide.querySelector('iframe');
     if (iframe) iframe.src = 'about:blank';
     slide.remove();
   }
 
   function destroyPlayers() {
-    hlsInstances.forEach((hls, video) => {
-      hls.destroy();
-      video.removeAttribute('src');
-      video.load();
-    });
+    hlsInstances.forEach((hls, video) => { hls.destroy(); video.removeAttribute('src'); video.load(); });
     hlsInstances.clear();
-    document.querySelectorAll('.simple-slider video').forEach(v => { v.pause(); v.removeAttribute('src'); v.load(); });
-    document.querySelectorAll('.simple-slider iframe').forEach(f => f.remove());
     mediaLoaded.clear();
     videoMetaCache.clear();
   }
@@ -405,11 +372,7 @@
     const currentSlide = renderedSlides.get(currentSlideIndex);
     if (!currentSlide) return;
     const img = currentSlide.querySelector('img');
-    if (img) {
-      img.style.transform = 'scale(1)';
-      currentSlide.classList.remove('zoomed');
-      scale = 1;
-    }
+    if (img) { img.style.transform = 'scale(1)'; currentSlide.classList.remove('zoomed'); scale = 1; }
   }
 
   // ----- ZOOM -----
@@ -449,7 +412,7 @@
     container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
-  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР -----
+  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР (window shift) -----
   function getVirtualRange(): number[] {
     if (totalSlides === 0) return [];
     if (totalSlides === 1) return [0];
@@ -474,7 +437,6 @@
       }
     }
 
-    // Сортируем индексы для правильного порядка вставки
     const sortedIndices = Array.from(range).sort((a, b) => a - b);
     for (const index of sortedIndices) {
       if (!renderedSlides.has(index)) {
@@ -523,7 +485,7 @@
       container.className = 'link-preview';
       if (meta.imageHtml) {
         const imgDiv = document.createElement('div');
-        imgDiv.innerHTML = meta.imageHtml; // img tag строка безопасна
+        imgDiv.innerHTML = meta.imageHtml;
         container.appendChild(imgDiv.firstElementChild!);
       }
       const title = document.createElement('div');
@@ -692,10 +654,7 @@
         let loaded = false;
         iframe.onload = () => { loaded = true; };
         setTimeout(() => {
-          if (!loaded) {
-            iframe.style.display = 'none';
-            fallbackDiv.style.display = 'flex';
-          }
+          if (!loaded) { iframe.style.display = 'none'; fallbackDiv.style.display = 'flex'; }
         }, 5000);
       }
       facade.replaceWith(wrapper);
@@ -729,26 +688,19 @@
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
+    document.body.inert = false;
     modalAbort.abort();
     modalAbort = new AbortController();
     destroyPlayers();
     if (modalContent) {
-      while (modalContent.firstChild) {
-        modalContent.removeChild(modalContent.firstChild);
-      }
+      while (modalContent.firstChild) modalContent.removeChild(modalContent.firstChild);
     }
-    // очистка всех виртуальных слайдов
-    for (const slide of renderedSlides.values()) {
-      cleanupSlide(slide);
-    }
+    for (const slide of renderedSlides.values()) cleanupSlide(slide);
     renderedSlides.clear();
     totalSlides = 0;
     mediaMetaList = [];
-    if (previousFocusedElement) {
-      previousFocusedElement.focus();
-      previousFocusedElement = null;
-    }
-    modalSession++; // инкремент сессии, чтобы старые async не влияли
+    if (previousFocusedElement) { previousFocusedElement.focus(); previousFocusedElement = null; }
+    modalSession++;
   }
 
   // ----- SINGLETON INIT -----
@@ -809,14 +761,14 @@
     modalContent = refs.content;
     if (!modal || !modalContent) return;
 
-    const session = ++modalSession; // сохраняем текущую сессию
+    const session = ++modalSession;
     previousFocusedElement = document.activeElement as HTMLElement;
 
     destroyPlayers();
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
-    document.body.inert = true; // делаем фон инертным
+    document.body.inert = true;
 
     modalContent.replaceChildren();
     const spinner = document.createElement('div');
@@ -840,7 +792,7 @@
         if (!res.ok) throw new Error('Ошибка загрузки');
         post = await res.json();
       }
-      if (session !== modalSession) return; // сессия устарела
+      if (session !== modalSession) return;
       if (!post) throw new Error('Пост не найден');
 
       const date = new Date(post.date * 1000);
@@ -873,7 +825,6 @@
 
       currentSlideIndex = 0;
       mediaLoaded.clear();
-      // очистка предыдущих виртуальных слайдов
       for (const slide of renderedSlides.values()) cleanupSlide(slide);
       renderedSlides.clear();
 
