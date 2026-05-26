@@ -157,6 +157,7 @@
     justify-content: center;
     transition: transform 0.25s ease, background 0.25s ease;
     z-index: 2;
+    pointer-events: none;
   }
   .video-play-btn::after {
     content: '';
@@ -168,7 +169,7 @@
     border-bottom: 14px solid transparent;
     margin-left: 6px;
   }
-  .video-play-btn:hover {
+  .video-facade:hover .video-play-btn {
     transform: scale(1.1);
     background: var(--modal-accent);
   }
@@ -309,7 +310,7 @@
   // @ts-nocheck
   declare var Hls: any;
 
-  // ----- КЕШИРОВАННЫЕ ССЫЛКИ (инициализируются один раз) -----
+  // ----- КЕШИРОВАННЫЕ ССЫЛКИ -----
   const refs: Record<string, HTMLElement | null> = {};
   function initRefs() {
     refs.modal = document.getElementById('postModal');
@@ -340,7 +341,7 @@
   } | {
     type: 'video'; ownerId: string; videoId: string; accessKey: string; fallbackUrl: string; poster: string;
   } | {
-    type: 'link'; title: string; description: string; url: string; imageHtml: string;
+    type: 'link'; title: string; description: string; url: string; imageUrl?: string; imageAlt?: string;
   } | {
     type: 'doc'; title: string; url: string;
   };
@@ -352,17 +353,30 @@
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
-  // ----- ОЧИСТКА -----
+  // ----- ОЧИСТКА (включая HLS) -----
   function cleanupSlide(slide: HTMLElement) {
     const video = slide.querySelector('video');
-    if (video) { video.pause(); video.removeAttribute('src'); video.load(); }
+    if (video) {
+      if (hlsInstances.has(video)) {
+        const hls = hlsInstances.get(video)!;
+        hls.destroy();
+        hlsInstances.delete(video);
+      }
+      video.pause();
+      video.removeAttribute('src');
+      video.load();
+    }
     const iframe = slide.querySelector('iframe');
     if (iframe) iframe.src = 'about:blank';
     slide.remove();
   }
 
   function destroyPlayers() {
-    hlsInstances.forEach((hls, video) => { hls.destroy(); video.removeAttribute('src'); video.load(); });
+    hlsInstances.forEach((hls, video) => {
+      hls.destroy();
+      video.removeAttribute('src');
+      video.load();
+    });
     hlsInstances.clear();
     mediaLoaded.clear();
     videoMetaCache.clear();
@@ -375,7 +389,7 @@
     if (img) { img.style.transform = 'scale(1)'; currentSlide.classList.remove('zoomed'); scale = 1; }
   }
 
-  // ----- ZOOM -----
+  // ----- ZOOM (исправлен сброс initialDistance при изменении числа пальцев) -----
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
@@ -395,7 +409,11 @@
     }, { passive: true });
 
     container.addEventListener('touchmove', (e) => {
-      if (e.touches.length !== 2) return;
+      if (e.touches.length !== 2) {
+        // Сброс при любом изменении числа пальцев
+        initialDistance = 0;
+        return;
+      }
       e.preventDefault();
       const currentSlide = renderedSlides.get(currentSlideIndex);
       if (!currentSlide) return;
@@ -410,9 +428,10 @@
     }, { passive: false });
 
     container.addEventListener('touchend', () => { initialDistance = 0; });
+    container.addEventListener('touchcancel', () => { initialDistance = 0; });
   }
 
-  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР (window shift) -----
+  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР -----
   function getVirtualRange(): number[] {
     if (totalSlides === 0) return [];
     if (totalSlides === 1) return [0];
@@ -483,10 +502,11 @@
     } else if (meta.type === 'link') {
       const container = document.createElement('div');
       container.className = 'link-preview';
-      if (meta.imageHtml) {
-        const imgDiv = document.createElement('div');
-        imgDiv.innerHTML = meta.imageHtml;
-        container.appendChild(imgDiv.firstElementChild!);
+      if (meta.imageUrl) {
+        const img = document.createElement('img');
+        img.src = meta.imageUrl;
+        img.alt = meta.imageAlt || '';
+        container.appendChild(img);
       }
       const title = document.createElement('div');
       title.className = 'preview-title';
@@ -531,6 +551,7 @@
     if (totalSlides === 0 || index === currentSlideIndex) return;
     const prevSlide = renderedSlides.get(currentSlideIndex);
     if (prevSlide) {
+      // Останавливаем видео, но не удаляем слайд (виртуальный диапазон сам позаботится)
       const v = prevSlide.querySelector('video');
       const iframe = prevSlide.querySelector('iframe');
       if (v) v.pause();
@@ -662,11 +683,9 @@
     }
   }
 
-  // ----- ОБРАБОТЧИК ФАСАДА -----
+  // ----- ОБРАБОТЧИК ФАСАДА (клик по всей области) -----
   function handleModalContentClick(e: MouseEvent) {
-    const btn = (e.target as HTMLElement).closest('.video-play-btn');
-    if (!btn) return;
-    const facade = btn.closest('.video-facade') as HTMLElement;
+    const facade = (e.target as HTMLElement).closest('.video-facade');
     if (!facade) return;
     const slide = facade.closest('.slide');
     if (!slide) return;
@@ -688,7 +707,18 @@
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
-    document.body.inert = false;
+
+    // Снимаем инертность с main
+    const main = document.querySelector('main');
+    if (main) main.removeAttribute('inert');
+
+    // Сброс инлайн-стилей контейнера, оставшихся после свайпа
+    const container = refs.container;
+    if (container) {
+      container.style.transform = '';
+      container.style.opacity = '';
+    }
+
     modalAbort.abort();
     modalAbort = new AbortController();
     destroyPlayers();
@@ -768,7 +798,8 @@
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
-    document.body.inert = true;
+    const main = document.querySelector('main');
+    if (main) main.setAttribute('inert', '');
 
     modalContent.replaceChildren();
     const spinner = document.createElement('div');
@@ -810,12 +841,20 @@
           const v = att.video;
           return { type: 'video' as const, ownerId: String(v.owner_id), videoId: String(v.id), accessKey: v.access_key || '', fallbackUrl: `https://vk.com/video${v.owner_id}_${v.id}`, poster: '' };
         } else if (att.type === 'link' && att.link) {
+          let imageUrl = '';
+          let imageAlt = '';
+          if (att.link.photo?.sizes?.length) {
+            const lastSize = att.link.photo.sizes[att.link.photo.sizes.length - 1];
+            imageUrl = lastSize.url;
+            imageAlt = 'Изображение ссылки';
+          }
           return {
             type: 'link' as const,
-            imageHtml: att.link.photo?.sizes?.length ? `<img src="${att.link.photo.sizes.slice(-1)[0].url}" alt="" />` : '',
             title: att.link.title || 'Ссылка',
             description: att.link.description || '',
             url: att.link.url,
+            imageUrl,
+            imageAlt,
           };
         } else if (att.type === 'doc' && att.doc) {
           return { type: 'doc' as const, title: att.doc.title || 'Документ', url: att.doc.url };
