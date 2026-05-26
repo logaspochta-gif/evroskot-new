@@ -157,6 +157,7 @@
     justify-content: center;
     transition: transform 0.25s ease, background 0.25s ease;
     z-index: 2;
+    pointer-events: none;  /* клики проходят сквозь кнопку к фасаду */
   }
   .video-play-btn::after {
     content: '';
@@ -168,7 +169,7 @@
     border-bottom: 14px solid transparent;
     margin-left: 6px;
   }
-  .video-play-btn:hover {
+  .video-facade:hover .video-play-btn {
     transform: scale(1.1);
     background: var(--modal-accent);
   }
@@ -309,7 +310,7 @@
   // @ts-nocheck
   declare var Hls: any;
 
-  // ----- КЕШИРОВАННЫЕ ССЫЛКИ (инициализируются один раз) -----
+  // ----- КЕШИРОВАННЫЕ ССЫЛКИ -----
   const refs: Record<string, HTMLElement | null> = {};
   function initRefs() {
     refs.modal = document.getElementById('postModal');
@@ -412,7 +413,7 @@
     container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
-  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР (window shift) -----
+  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР -----
   function getVirtualRange(): number[] {
     if (totalSlides === 0) return [];
     if (totalSlides === 1) return [0];
@@ -662,11 +663,9 @@
     }
   }
 
-  // ----- ОБРАБОТЧИК ФАСАДА -----
+  // ----- ОБРАБОТЧИК ФАСАДА (клик по всей области) -----
   function handleModalContentClick(e: MouseEvent) {
-    const btn = (e.target as HTMLElement).closest('.video-play-btn');
-    if (!btn) return;
-    const facade = btn.closest('.video-facade') as HTMLElement;
+    const facade = (e.target as HTMLElement).closest('.video-facade');
     if (!facade) return;
     const slide = facade.closest('.slide');
     if (!slide) return;
@@ -688,7 +687,10 @@
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
-    document.body.inert = false;
+    // Снимаем инертность с main
+    const main = document.querySelector('main');
+    if (main) main.removeAttribute('inert');
+
     modalAbort.abort();
     modalAbort = new AbortController();
     destroyPlayers();
@@ -768,7 +770,9 @@
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
-    document.body.inert = true;
+    // Делаем основной контент инертным, модалка остаётся доступной
+    const main = document.querySelector('main');
+    if (main) main.setAttribute('inert', '');
 
     modalContent.replaceChildren();
     const spinner = document.createElement('div');
