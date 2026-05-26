@@ -330,6 +330,7 @@
   let zoomInitialized = false;
   const mediaLoaded = new Set<number>();
   const hlsInstances = new Map<HTMLVideoElement, any>();
+  const iframeTimeouts = new Map<HTMLIFrameElement, number>(); // для очистки таймаутов
   let modalContent: HTMLElement | null = null;
   let modalAbort = new AbortController();
   let modalSession = 0;
@@ -353,21 +354,30 @@
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
-  // ----- ОЧИСТКА (включая HLS) -----
+  // ----- ОЧИСТКА -----
+  function destroyPlayerForVideo(video: HTMLVideoElement) {
+    const hls = hlsInstances.get(video);
+    if (hls) {
+      hls.destroy();
+      hlsInstances.delete(video);
+    }
+    video.pause();
+    video.removeAttribute('src');
+    video.load();
+  }
+
   function cleanupSlide(slide: HTMLElement) {
     const video = slide.querySelector('video');
-    if (video) {
-      if (hlsInstances.has(video)) {
-        const hls = hlsInstances.get(video)!;
-        hls.destroy();
-        hlsInstances.delete(video);
-      }
-      video.pause();
-      video.removeAttribute('src');
-      video.load();
-    }
+    if (video) destroyPlayerForVideo(video);
     const iframe = slide.querySelector('iframe');
-    if (iframe) iframe.src = 'about:blank';
+    if (iframe) {
+      const timeoutId = iframeTimeouts.get(iframe);
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        iframeTimeouts.delete(iframe);
+      }
+      iframe.src = 'about:blank';
+    }
     slide.remove();
   }
 
@@ -378,6 +388,9 @@
       video.load();
     });
     hlsInstances.clear();
+    // Очищаем все таймауты iframe
+    iframeTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
+    iframeTimeouts.clear();
     mediaLoaded.clear();
     videoMetaCache.clear();
   }
@@ -389,7 +402,7 @@
     if (img) { img.style.transform = 'scale(1)'; currentSlide.classList.remove('zoomed'); scale = 1; }
   }
 
-  // ----- ZOOM (исправлен сброс initialDistance при изменении числа пальцев) -----
+  // ----- ZOOM -----
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
@@ -408,9 +421,12 @@
       scale = zoomed ? 1 : 2;
     }, { passive: true });
 
+    container.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 2) initialDistance = 0;
+    }, { passive: true });
+
     container.addEventListener('touchmove', (e) => {
       if (e.touches.length !== 2) {
-        // Сброс при любом изменении числа пальцев
         initialDistance = 0;
         return;
       }
@@ -551,11 +567,17 @@
     if (totalSlides === 0 || index === currentSlideIndex) return;
     const prevSlide = renderedSlides.get(currentSlideIndex);
     if (prevSlide) {
-      // Останавливаем видео, но не удаляем слайд (виртуальный диапазон сам позаботится)
       const v = prevSlide.querySelector('video');
       const iframe = prevSlide.querySelector('iframe');
-      if (v) v.pause();
-      if (iframe) iframe.remove();
+      if (v) destroyPlayerForVideo(v);
+      if (iframe) {
+        const timeoutId = iframeTimeouts.get(iframe);
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+          iframeTimeouts.delete(iframe);
+        }
+        iframe.remove();
+      }
     }
     currentSlideIndex = index;
     updateVirtualSlides();
@@ -674,9 +696,14 @@
         wrapper.appendChild(fallbackDiv);
         let loaded = false;
         iframe.onload = () => { loaded = true; };
-        setTimeout(() => {
-          if (!loaded) { iframe.style.display = 'none'; fallbackDiv.style.display = 'flex'; }
+        const timeoutId = window.setTimeout(() => {
+          if (!loaded && iframe && iframe.style) {
+            iframe.style.display = 'none';
+            fallbackDiv.style.display = 'flex';
+          }
+          iframeTimeouts.delete(iframe);
         }, 5000);
+        iframeTimeouts.set(iframe, timeoutId);
       }
       facade.replaceWith(wrapper);
       mediaLoaded.add(index);
@@ -712,11 +739,10 @@
     const main = document.querySelector('main');
     if (main) main.removeAttribute('inert');
 
-    // Сброс инлайн-стилей контейнера, оставшихся после свайпа
-    const container = refs.container;
-    if (container) {
-      container.style.transform = '';
-      container.style.opacity = '';
+    // Сброс инлайн-стилей контейнера
+    if (refs.container) {
+      refs.container.style.transform = '';
+      refs.container.style.opacity = '';
     }
 
     modalAbort.abort();
@@ -912,5 +938,11 @@
   }
 
   initModalEvents();
-  (window as any).openPostModal = openPostModal;
+
+  // Используем событие для открытия модалки
+  document.addEventListener('post-modal:open', ((e: CustomEvent) => {
+    if (e.detail) {
+      openPostModal(e.detail.ownerId, e.detail.postId);
+    }
+  }) as EventListener);
 </script>
