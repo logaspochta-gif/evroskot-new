@@ -11,23 +11,30 @@ export interface Props {
   disableSnap?: boolean;
 }
 
-const { title, description, hideFooter = false, disableSnap = false } = Astro.props;
+const {
+  title,
+  description,
+  hideFooter = false,
+  disableSnap = false,
+} = Astro.props;
 
 // локальный токен (без изменений)
-const isLocal = Astro.url.hostname === 'localhost' || Astro.url.hostname === '127.0.0.1';
-let devToken = '';
+const isLocal =
+  Astro.url.hostname === "localhost" || Astro.url.hostname === "127.0.0.1";
+let devToken = "";
 if (isLocal) {
   try {
-    const { env } = await import('cloudflare:workers');
+    const { env } = await import("cloudflare:workers");
     if (env.VK_ACCESS_TOKEN) devToken = env.VK_ACCESS_TOKEN;
   } catch {
-    if (import.meta.env?.VK_ACCESS_TOKEN) devToken = import.meta.env.VK_ACCESS_TOKEN;
+    if (import.meta.env?.VK_ACCESS_TOKEN)
+      devToken = import.meta.env.VK_ACCESS_TOKEN;
   }
 }
 ---
 
 <!doctype html>
-<html lang="ru" class:list={[!disableSnap && 'snap-enabled']}>
+<html lang="ru" class:list={[!disableSnap && "snap-enabled"]}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,6 +42,8 @@ if (isLocal) {
     <meta name="description" content={description} />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://vk.com" />
+    <link rel="preconnect" href="https://sun9-*.userapi.com" />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&family=Oswald:wght@400;600;700;900&display=swap"
       rel="stylesheet"
@@ -78,7 +87,12 @@ if (isLocal) {
         flex: 1 1 auto;
       }
 
-      h1, h2, h3, h4, h5, h6 {
+      h1,
+      h2,
+      h3,
+      h4,
+      h5,
+      h6 {
         font-family: "Oswald", sans-serif;
         font-weight: 700;
         line-height: 1.2;
@@ -103,19 +117,29 @@ if (isLocal) {
         font-size: clamp(1rem, 2.5vw, 1.1rem);
       }
 
-      .accent { color: var(--accent); }
+      .accent {
+        color: var(--accent);
+      }
 
       .anim-fade-up,
       .anim-fade-left,
       .anim-fade-right {
         opacity: 0;
         will-change: transform, opacity;
-        transition: opacity 0.6s ease, transform 0.6s ease;
+        transition:
+          opacity 0.6s ease,
+          transform 0.6s ease;
       }
 
-      .anim-fade-up { transform: translateY(30px); }
-      .anim-fade-left { transform: translateX(-30px); }
-      .anim-fade-right { transform: translateX(30px); }
+      .anim-fade-up {
+        transform: translateY(30px);
+      }
+      .anim-fade-left {
+        transform: translateX(-30px);
+      }
+      .anim-fade-right {
+        transform: translateX(30px);
+      }
 
       .anim-fade-up.visible,
       .anim-fade-left.visible,
@@ -124,11 +148,21 @@ if (isLocal) {
         transform: translate(0);
       }
 
-      .anim-delay-1 { transition-delay: 0.1s; }
-      .anim-delay-2 { transition-delay: 0.2s; }
-      .anim-delay-3 { transition-delay: 0.3s; }
-      .anim-delay-4 { transition-delay: 0.4s; }
-      .anim-delay-5 { transition-delay: 0.5s; }
+      .anim-delay-1 {
+        transition-delay: 0.1s;
+      }
+      .anim-delay-2 {
+        transition-delay: 0.2s;
+      }
+      .anim-delay-3 {
+        transition-delay: 0.3s;
+      }
+      .anim-delay-4 {
+        transition-delay: 0.4s;
+      }
+      .anim-delay-5 {
+        transition-delay: 0.5s;
+      }
 
       /* snap-скролл только при классе snap-enabled */
       html.snap-enabled {
@@ -182,31 +216,37 @@ if (isLocal) {
     {!hideFooter && <Footer />}
     <PostModal />
 
-    {isLocal && devToken ? (
-      <script is:inline>
-        window.VK_ACCESS_TOKEN_FOR_DEV = "{devToken}";
-      </script>
-    ) : null}
+    {
+      isLocal && devToken ? (
+        <script is:inline>
+          window.VK_ACCESS_TOKEN_FOR_DEV = "{devToken}";
+        </script>
+      ) : null
+    }
 
     <script is:inline>
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.15 });
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("visible");
+            }
+          });
+        },
+        { threshold: 0.15 },
+      );
 
-      document.querySelectorAll('.anim-fade-up, .anim-fade-left, .anim-fade-right')
-        .forEach(el => observer.observe(el));
+      document
+        .querySelectorAll(".anim-fade-up, .anim-fade-left, .anim-fade-right")
+        .forEach((el) => observer.observe(el));
 
-      document.addEventListener('click', (e) => {
-        const link = e.target.closest('a[data-owner-id][data-post-id]');
+      document.addEventListener("click", (e) => {
+        const link = e.target.closest("a[data-owner-id][data-post-id]");
         if (!link) return;
 
-        const ownerId = link.getAttribute('data-owner-id');
-        const postId = link.getAttribute('data-post-id');
-        if (ownerId && postId && typeof window.openPostModal === 'function') {
+        const ownerId = link.getAttribute("data-owner-id");
+        const postId = link.getAttribute("data-post-id");
+        if (ownerId && postId && typeof window.openPostModal === "function") {
           e.preventDefault();
           window.openPostModal(ownerId, postId);
         }

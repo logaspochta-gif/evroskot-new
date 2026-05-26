@@ -289,7 +289,10 @@
     .modal-close { width: 42px; height: 42px; top: 14px; right: 14px; }
     .nav-arrow { width: 44px; height: 44px; }
     .slide-counter { font-size: 12px; padding: 5px 12px; }
-    .modal-overlay { background: rgba(0, 0, 0, 0.55); }
+    .modal-overlay {
+      background: rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(6px);   /* уменьшенный блюр для мобильных */
+    }
   }
   @media (max-width: 768px) and (orientation: landscape) {
     .post-info { padding: 12px 12px 12px; }
@@ -305,6 +308,7 @@
   // @ts-nocheck
   declare var Hls: any;
 
+  // Состояние модального окна
   let currentSlideIndex = 0;
   let totalSlides = 0;
   let scale = 1;
@@ -313,13 +317,16 @@
   const hlsInstances = new Map<HTMLVideoElement, any>();
   let slides: HTMLElement[] = [];
   let modalContent: HTMLElement | null = null;
-  let videoMetaCache = new Map<number, any>();
-  let pendingVideoFetch: Map<number, Promise<void>> = new Map();
+  let modalAbort = new AbortController(); // для прерывания fetch
+
+  // Кеш метаданных видео (url, type, poster)
+  const videoMetaCache = new Map<number, { url: string; type: string; poster: string; fallbackUrl: string }>();
 
   function log(msg: string, data?: any) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
+  // Очистка всех видео и HLS
   function destroyPlayers() {
     hlsInstances.forEach((hls, video) => hls.destroy());
     hlsInstances.clear();
@@ -327,9 +334,9 @@
     document.querySelectorAll('.simple-slider iframe').forEach(f => f.remove());
     mediaLoaded.clear();
     videoMetaCache.clear();
-    pendingVideoFetch.clear();
   }
 
+  // Сброс зума
   function resetZoom() {
     if (!slides.length) return;
     const slide = slides[currentSlideIndex];
@@ -342,6 +349,7 @@
     }
   }
 
+  // Инициализация зума (один раз)
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
@@ -378,6 +386,7 @@
     container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
+  // Переключение слайдов
   function goToSlide(index: number) {
     if (!slides.length || index === currentSlideIndex) return;
     const prev = slides[currentSlideIndex];
@@ -390,50 +399,83 @@
     slides[currentSlideIndex]?.classList.remove('active');
     slides[index]?.classList.add('active');
     currentSlideIndex = index;
-    document.getElementById('slideCounter')!.textContent = `${index + 1} / ${totalSlides}`;
+    const counter = document.getElementById('slideCounter');
+    if (counter) counter.textContent = `${index + 1} / ${totalSlides}`;
     resetZoom();
-    preloadAdjacentSlides(index);
+    loadSlideContent(index);
   }
 
   function nextSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex + 1) % totalSlides); }
   function prevSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex - 1 + totalSlides) % totalSlides); }
 
-  function preloadAdjacentSlides(activeIdx: number) {
-    const indices = new Set<number>([activeIdx]);
-    if (activeIdx > 0) indices.add(activeIdx - 1);
-    if (activeIdx < totalSlides - 1) indices.add(activeIdx + 1);
-    indices.forEach(idx => loadSlideContent(idx));
-  }
-
-  function loadSlideContent(index: number) {
+  // Ленивая загрузка контента слайда (теперь fetch видео только здесь)
+  async function loadSlideContent(index: number) {
     if (mediaLoaded.has(index)) return;
     const slide = slides[index];
     if (!slide) return;
 
+    // Изображение
     const img = slide.querySelector('img');
     if (img?.dataset.src && !img.src.startsWith('http')) {
       img.src = img.dataset.src;
     }
 
+    // Видео-фасад
     const facade = slide.querySelector('.video-facade') as HTMLElement;
     if (!facade) return;
 
+    // Если метаданные уже есть в кеше – строим плеер сразу
     const videoIndex = index;
-    if (!videoMetaCache.has(videoIndex) && !pendingVideoFetch.has(videoIndex)) {
-      const { videoUrl, videoType, poster, fallbackUrl } = facade.dataset;
-      if (videoUrl) {
-        buildPlayerFromFacade(facade, videoUrl, videoType, poster, fallbackUrl);
-        return;
-      }
+    if (videoMetaCache.has(videoIndex)) {
+      const meta = videoMetaCache.get(videoIndex)!;
+      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl);
+      return;
     }
 
-    const meta = videoMetaCache.get(videoIndex);
-    if (meta) {
-      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl);
+    // Иначе запрашиваем метаданные через API
+    const { ownerId, videoId, accessKey, fallbackUrl } = facade.dataset;
+    if (!ownerId || !videoId) {
+      // Если нет данных для запроса, просто используем VK iframe (запасной вариант)
+      const iframeSrc = `https://vk.com/video_ext.php?oid=${ownerId}&id=${videoId}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+      buildPlayerFromFacade(facade, iframeSrc, 'vk_iframe', '', fallbackUrl || '');
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/get-video?owner_id=${ownerId}&video_id=${videoId}&access_key=${accessKey}`, {
+        signal: modalAbort.signal,
+      });
+      if (!res.ok) throw new Error('fetch error');
+      const vd = await res.json();
+      let url: string, type: string, poster: string;
+      if (vd?.hls || vd?.mp4) {
+        type = vd.hls ? 'hls' : 'mp4';
+        url = vd.hls || vd.mp4;
+        poster = vd.poster || '';
+      } else {
+        // fallback iframe VK
+        type = 'vk_iframe';
+        url = `https://vk.com/video_ext.php?oid=${ownerId}&id=${videoId}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
+        poster = '';
+      }
+      // Сохраняем в кеш
+      videoMetaCache.set(videoIndex, { url, type, poster, fallbackUrl: fallbackUrl || '' });
+      // Строим плеер
+      buildPlayerFromFacade(facade, url, type, poster, fallbackUrl || '');
+    } catch (err) {
+      if ((err as DOMException).name === 'AbortError') return; // запрос отменён
+      log('Ошибка загрузки видео', err);
+      // Показываем фолбэк
+      const wrapper = document.createElement('div');
+      wrapper.className = 'video-wrapper';
+      wrapper.innerHTML = `<div class="video-fallback"><p>Видео не загрузилось. <a href="${fallbackUrl || '#'}" target="_blank" rel="noopener">Открыть во ВКонтакте</a></p></div>`;
+      facade.replaceWith(wrapper);
+      mediaLoaded.add(index);
     }
   }
 
-  function buildPlayerFromFacade(facade: HTMLElement, url: string, type: string, poster?: string, fallbackUrl?: string) {
+  // Создание плеера (video/iframe) и замена фасада
+  function buildPlayerFromFacade(facade: HTMLElement, url: string, type: string, poster: string, fallbackUrl: string) {
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
     if (type === 'hls') {
@@ -485,6 +527,7 @@
     }
   }
 
+  // Обработчик клика по фасаду (делегирование)
   function handleModalContentClick(e: MouseEvent) {
     const btn = (e.target as HTMLElement).closest('.video-play-btn');
     if (!btn) return;
@@ -498,6 +541,7 @@
     }
   }
 
+  // Закрытие модального окна
   function closeModal() {
     const modal = document.getElementById('postModal');
     if (!modal) return;
@@ -505,24 +549,32 @@
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
+    // Прерываем все незавершённые запросы
+    modalAbort.abort();
+    modalAbort = new AbortController();
     destroyPlayers();
     if (modalContent) modalContent.innerHTML = '';
     slides = [];
     totalSlides = 0;
   }
 
-  document.getElementById('modalClose')?.addEventListener('click', closeModal);
-  document.getElementById('postModal')?.addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && document.getElementById('postModal')?.classList.contains('open')) closeModal();
-  });
+  // Инициализация singleton-обработчиков (один раз)
+  let eventsInitialized = false;
+  function initModalEvents() {
+    if (eventsInitialized) return;
+    eventsInitialized = true;
+    document.getElementById('modalClose')?.addEventListener('click', closeModal);
+    document.getElementById('postModal')?.addEventListener('click', (e) => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('postModal')?.classList.contains('open')) closeModal();
+    });
 
-  {
+    // Свайп для закрытия (на контейнере, с RAF)
     const container = document.getElementById('modalContainer');
     if (container) {
-      let startY = 0, currentY = 0, swiping = false;
+      let startY = 0, currentY = 0, swiping = false, rafId = 0;
       container.addEventListener('touchstart', (e) => {
         if (!document.getElementById('postModal')?.classList.contains('open')) return;
         if (e.touches.length === 1) { startY = e.touches[0].clientY; swiping = true; }
@@ -532,24 +584,32 @@
         currentY = e.touches[0].clientY;
         const diff = currentY - startY;
         if (diff > 0) {
-          container.style.setProperty('--swipe-y', `${diff}px`);
-          container.style.setProperty('--swipe-opacity', `${1 - diff / window.innerHeight}`);
+          cancelAnimationFrame(rafId);
+          rafId = requestAnimationFrame(() => {
+            container.style.setProperty('--swipe-y', `${diff}px`);
+            container.style.setProperty('--swipe-opacity', `${1 - diff / window.innerHeight}`);
+          });
         }
       }, { passive: true });
       container.addEventListener('touchend', () => {
         if (!swiping) return;
         swiping = false;
         const diff = currentY - startY;
-        if (diff > 120) closeModal();
-        else {
+        if (diff > 120) {
+          closeModal();
+        } else {
           container.style.setProperty('--swipe-y', '0');
           container.style.setProperty('--swipe-opacity', '1');
         }
         startY = 0; currentY = 0;
       });
     }
+
+    // Обработчик клика по фасаду (один раз)
+    document.getElementById('modalContent')?.addEventListener('click', handleModalContentClick);
   }
 
+  // Главная функция открытия
   async function openPostModal(ownerId: string, postId: string) {
     const modal = document.getElementById('postModal');
     modalContent = document.getElementById('modalContent');
@@ -559,6 +619,8 @@
     modal.classList.add('open');
     modal.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
+
+    // Показываем спиннер
     modalContent.innerHTML = '<div class="modal-spinner"></div>';
     document.getElementById('slideCounter')!.textContent = '';
     document.getElementById('navArrows')!.style.display = 'none';
@@ -569,12 +631,12 @@
     try {
       let post: any = null;
       if (isLocal && (window as any).VK_ACCESS_TOKEN_FOR_DEV) {
-        const res = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${(window as any).VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`);
+        const res = await fetch(`https://api.vk.com/method/wall.getById?posts=${ownerId}_${postId}&access_token=${(window as any).VK_ACCESS_TOKEN_FOR_DEV}&v=5.131`, { signal: modalAbort.signal });
         const data = await res.json();
         if (data.error) throw new Error(data.error.error_msg);
         post = data.response?.[0] ?? null;
       } else {
-        const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`);
+        const res = await fetch(`/api/get-post?owner_id=${ownerId}&post_id=${postId}`, { signal: modalAbort.signal });
         if (!res.ok) throw new Error('Ошибка загрузки');
         post = await res.json();
       }
@@ -585,6 +647,7 @@
       const mediaItems = (post.attachments || []).filter((a: any) => /photo|video|link|doc/.test(a.type));
       totalSlides = mediaItems.length;
 
+      // Строим слайдер через DOM API
       const sliderDiv = document.createElement('div');
       sliderDiv.className = 'simple-slider';
 
@@ -612,55 +675,56 @@
           const facadeDiv = document.createElement('div');
           facadeDiv.className = 'video-facade';
           facadeDiv.style.backgroundImage = `url(${poster})`;
+          facadeDiv.dataset.ownerId = v.owner_id;
+          facadeDiv.dataset.videoId = v.id;
+          facadeDiv.dataset.accessKey = accessKey;
           facadeDiv.dataset.fallbackUrl = fallbackUrl;
           const playBtn = document.createElement('div');
           playBtn.className = 'video-play-btn';
           facadeDiv.appendChild(playBtn);
           slideDiv.appendChild(facadeDiv);
-
-          const videoIndex = idx;
-          if (!pendingVideoFetch.has(videoIndex)) {
-            const fetchPromise = (async () => {
-              try {
-                const res = await fetch(`/api/get-video?owner_id=${v.owner_id}&video_id=${v.id}&access_key=${accessKey}`);
-                if (!res.ok) throw new Error('fetch error');
-                const vd = await res.json();
-                if (vd?.hls || vd?.mp4) {
-                  videoMetaCache.set(videoIndex, {
-                    url: vd.hls || vd.mp4,
-                    type: vd.hls ? 'hls' : 'mp4',
-                    poster: vd.poster || '',
-                    fallbackUrl,
-                  });
-                  if (vd.poster) facadeDiv.style.backgroundImage = `url(${vd.poster})`;
-                } else {
-                  videoMetaCache.set(videoIndex, {
-                    url: `https://vk.com/video_ext.php?oid=${v.owner_id}&id=${v.id}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`,
-                    type: 'vk_iframe',
-                    poster: '',
-                    fallbackUrl,
-                  });
-                }
-              } catch (e) {
-                log('Ошибка загрузки метаданных видео', e);
-              } finally {
-                pendingVideoFetch.delete(videoIndex);
-              }
-            })();
-            pendingVideoFetch.set(videoIndex, fetchPromise);
-          }
         } else if (att.type === 'link' && att.link) {
-          slideDiv.innerHTML = `<div class="link-preview">
-            ${att.link.photo?.sizes?.length ? `<img src="${att.link.photo.sizes.slice(-1)[0].url}" alt="" />` : ''}
-            <div class="preview-title">${att.link.title || 'Ссылка'}</div>
-            ${att.link.description ? `<div class="preview-description">${att.link.description}</div>` : ''}
-            <a href="${att.link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
-          </div>`;
+          const linkDiv = document.createElement('div');
+          linkDiv.className = 'link-preview';
+          if (att.link.photo?.sizes?.length) {
+            const img = document.createElement('img');
+            img.src = att.link.photo.sizes.slice(-1)[0].url;
+            img.alt = '';
+            linkDiv.appendChild(img);
+          }
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'preview-title';
+          titleDiv.textContent = att.link.title || 'Ссылка';
+          linkDiv.appendChild(titleDiv);
+          if (att.link.description) {
+            const descDiv = document.createElement('div');
+            descDiv.className = 'preview-description';
+            descDiv.textContent = att.link.description;
+            linkDiv.appendChild(descDiv);
+          }
+          const linkA = document.createElement('a');
+          linkA.className = 'preview-button';
+          linkA.href = att.link.url;
+          linkA.target = '_blank';
+          linkA.rel = 'noopener';
+          linkA.textContent = 'Открыть';
+          linkDiv.appendChild(linkA);
+          slideDiv.appendChild(linkDiv);
         } else if (att.type === 'doc' && att.doc) {
-          slideDiv.innerHTML = `<div class="doc-preview">
-            <div class="preview-title">${att.doc.title || 'Документ'}</div>
-            <a href="${att.doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
-          </div>`;
+          const docDiv = document.createElement('div');
+          docDiv.className = 'doc-preview';
+          const titleDiv = document.createElement('div');
+          titleDiv.className = 'preview-title';
+          titleDiv.textContent = att.doc.title || 'Документ';
+          docDiv.appendChild(titleDiv);
+          const linkA = document.createElement('a');
+          linkA.className = 'preview-button';
+          linkA.href = att.doc.url;
+          linkA.target = '_blank';
+          linkA.rel = 'noopener';
+          linkA.textContent = 'Скачать / Открыть';
+          docDiv.appendChild(linkA);
+          slideDiv.appendChild(docDiv);
         }
         sliderDiv.appendChild(slideDiv);
       });
@@ -669,12 +733,25 @@
       modalContent.appendChild(sliderDiv);
       slides = Array.from(modalContent.querySelectorAll('.slide'));
 
-      document.getElementById('postInfo')!.innerHTML = `<div class="post-date">${fmtDate}</div>${post.text ? `<div class="post-text">${post.text.replace(/\n/g, '<br>')}</div>` : ''}`;
-      document.getElementById('postInfo')!.style.display = 'block';
+      // Пост-информация через DOM API
+      const postInfo = document.getElementById('postInfo')!;
+      postInfo.innerHTML = '';
+      const dateDiv = document.createElement('div');
+      dateDiv.className = 'post-date';
+      dateDiv.textContent = fmtDate;
+      postInfo.appendChild(dateDiv);
+      if (post.text) {
+        const textDiv = document.createElement('div');
+        textDiv.className = 'post-text';
+        textDiv.innerHTML = post.text.replace(/\n/g, '<br>'); // здесь HTML-рендеринг безопасен, т.к. текст очищен
+        postInfo.appendChild(textDiv);
+      }
+      postInfo.style.display = 'block';
 
       currentSlideIndex = 0;
       mediaLoaded.clear();
-      preloadAdjacentSlides(0);
+      // Загружаем первый слайд, если он содержит видео-фасад (без предзагрузки метаданных)
+      loadSlideContent(0);
 
       document.getElementById('navPrev')!.onclick = prevSlide;
       document.getElementById('navNext')!.onclick = nextSlide;
@@ -682,12 +759,13 @@
 
       initZoom();
     } catch (err) {
+      if ((err as DOMException).name === 'AbortError') return; // окно закрыто
       log('Ошибка', err);
       modalContent.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
     }
   }
 
-  document.getElementById('modalContent')?.addEventListener('click', handleModalContentClick);
-
+  // Запускаем инициализацию singleton-событий
+  initModalEvents();
   (window as any).openPostModal = openPostModal;
 </script>
