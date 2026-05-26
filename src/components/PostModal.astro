@@ -103,10 +103,13 @@
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     touch-action: none;
+    content-visibility: auto;
+    contain-intrinsic-size: 100vw 100vh;
   }
   .simple-slider .slide.active {
     opacity: 1;
     visibility: visible;
+    content-visibility: visible;
   }
   .simple-slider .slide img {
     width: 100%;
@@ -114,6 +117,8 @@
     object-fit: contain;
     user-select: none;
     will-change: transform;
+    transform-origin: center;
+    backface-visibility: hidden;
   }
 
   .video-wrapper {
@@ -291,7 +296,7 @@
     .slide-counter { font-size: 12px; padding: 5px 12px; }
     .modal-overlay {
       background: rgba(0, 0, 0, 0.55);
-      backdrop-filter: blur(6px);   /* уменьшенный блюр для мобильных */
+      backdrop-filter: blur(6px);
     }
   }
   @media (max-width: 768px) and (orientation: landscape) {
@@ -308,7 +313,7 @@
   // @ts-nocheck
   declare var Hls: any;
 
-  // Состояние модального окна
+  // ----- СОСТОЯНИЕ -----
   let currentSlideIndex = 0;
   let totalSlides = 0;
   let scale = 1;
@@ -317,16 +322,37 @@
   const hlsInstances = new Map<HTMLVideoElement, any>();
   let slides: HTMLElement[] = [];
   let modalContent: HTMLElement | null = null;
-  let modalAbort = new AbortController(); // для прерывания fetch
+  let modalAbort = new AbortController();
 
-  // Кеш метаданных видео (url, type, poster)
+  // Метаданные медиа (храним для виртуальных слайдов)
+  type MediaMeta = {
+    type: 'photo';
+    url: string;
+    alt: string;
+  } | {
+    type: 'video';
+    ownerId: string;
+    videoId: string;
+    accessKey: string;
+    fallbackUrl: string;
+    poster: string;
+  } | {
+    type: 'link';
+    html: string;
+  } | {
+    type: 'doc';
+    html: string;
+  };
+  let mediaMetaList: MediaMeta[] = [];
+
+  // Кеш загруженных видео метаданных (для предотвращения повторных fetch)
   const videoMetaCache = new Map<number, { url: string; type: string; poster: string; fallbackUrl: string }>();
 
   function log(msg: string, data?: any) {
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
-  // Очистка всех видео и HLS
+  // ----- ОЧИСТКА -----
   function destroyPlayers() {
     hlsInstances.forEach((hls, video) => hls.destroy());
     hlsInstances.clear();
@@ -336,7 +362,6 @@
     videoMetaCache.clear();
   }
 
-  // Сброс зума
   function resetZoom() {
     if (!slides.length) return;
     const slide = slides[currentSlideIndex];
@@ -349,7 +374,7 @@
     }
   }
 
-  // Инициализация зума (один раз)
+  // ----- ZOOM (один раз на контейнере) -----
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
@@ -386,9 +411,81 @@
     container.addEventListener('touchend', () => { initialDistance = 0; });
   }
 
-  // Переключение слайдов
+  // ----- ВИРТУАЛИЗАЦИЯ СЛАЙДОВ -----
+  function renderVirtualSlides() {
+    const slider = document.querySelector('.simple-slider');
+    if (!slider) return;
+    slider.innerHTML = '';
+    slides = [];
+
+    const range = getVirtualRange();
+    range.forEach(index => {
+      const slide = createSlideElement(index);
+      slider.appendChild(slide);
+      slides.push(slide);
+    });
+  }
+
+  function getVirtualRange(): number[] {
+    const indices: number[] = [];
+    if (totalSlides === 0) return [];
+    const prev = (currentSlideIndex - 1 + totalSlides) % totalSlides;
+    const next = (currentSlideIndex + 1) % totalSlides;
+    if (totalSlides === 1) {
+      indices.push(0);
+    } else if (totalSlides === 2) {
+      indices.push(currentSlideIndex);
+      indices.push(next);
+    } else {
+      indices.push(prev);
+      indices.push(currentSlideIndex);
+      indices.push(next);
+    }
+    return indices;
+  }
+
+  function createSlideElement(index: number): HTMLElement {
+    const meta = mediaMetaList[index];
+    const slide = document.createElement('div');
+    slide.className = `slide ${index === currentSlideIndex ? 'active' : ''}`;
+    slide.dataset.type = meta.type;
+
+    if (meta.type === 'photo') {
+      const img = document.createElement('img');
+      const targetWidth = window.innerWidth * window.devicePixelRatio;
+      const sizes = meta.url ? [meta.url] : []; // уже выбран лучший URL ранее
+      img.src = index === currentSlideIndex ? meta.url : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
+      img.dataset.src = meta.url;
+      img.alt = meta.alt;
+      img.loading = index === currentSlideIndex ? 'eager' : 'lazy';
+      img.decoding = 'async';
+      if (index === currentSlideIndex) {
+        img.fetchPriority = 'high';
+      }
+      slide.appendChild(img);
+    } else if (meta.type === 'video') {
+      const facade = document.createElement('div');
+      facade.className = 'video-facade';
+      facade.style.backgroundImage = `url(${meta.poster})`;
+      facade.dataset.ownerId = meta.ownerId;
+      facade.dataset.videoId = meta.videoId;
+      facade.dataset.accessKey = meta.accessKey;
+      facade.dataset.fallbackUrl = meta.fallbackUrl;
+      const playBtn = document.createElement('div');
+      playBtn.className = 'video-play-btn';
+      facade.appendChild(playBtn);
+      slide.appendChild(facade);
+    } else if (meta.type === 'link' || meta.type === 'doc') {
+      slide.innerHTML = meta.html;
+    }
+
+    return slide;
+  }
+
+  // ----- НАВИГАЦИЯ -----
   function goToSlide(index: number) {
     if (!slides.length || index === currentSlideIndex) return;
+    // Очищаем старый слайд
     const prev = slides[currentSlideIndex];
     if (prev) {
       const v = prev.querySelector('video');
@@ -396,22 +493,24 @@
       if (v) v.pause();
       if (iframe) iframe.remove();
     }
-    slides[currentSlideIndex]?.classList.remove('active');
-    slides[index]?.classList.add('active');
     currentSlideIndex = index;
+    // Перестраиваем виртуальный набор
+    renderVirtualSlides();
+    // Обновляем счётчик
     const counter = document.getElementById('slideCounter');
     if (counter) counter.textContent = `${index + 1} / ${totalSlides}`;
     resetZoom();
+    // Ленивая загрузка текущего слайда
     loadSlideContent(index);
   }
 
   function nextSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex + 1) % totalSlides); }
   function prevSlide() { if (totalSlides > 1) goToSlide((currentSlideIndex - 1 + totalSlides) % totalSlides); }
 
-  // Ленивая загрузка контента слайда (теперь fetch видео только здесь)
+  // ----- ЗАГРУЗКА КОНТЕНТА СЛАЙДА -----
   async function loadSlideContent(index: number) {
     if (mediaLoaded.has(index)) return;
-    const slide = slides[index];
+    const slide = slides.find(s => s.classList.contains('active'));
     if (!slide) return;
 
     // Изображение
@@ -424,20 +523,14 @@
     const facade = slide.querySelector('.video-facade') as HTMLElement;
     if (!facade) return;
 
-    // Если метаданные уже есть в кеше – строим плеер сразу
-    const videoIndex = index;
-    if (videoMetaCache.has(videoIndex)) {
-      const meta = videoMetaCache.get(videoIndex)!;
-      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl);
-      return;
-    }
+    const ownerId = facade.dataset.ownerId;
+    const videoId = facade.dataset.videoId;
+    const accessKey = facade.dataset.accessKey;
+    const fallbackUrl = facade.dataset.fallbackUrl || '';
 
-    // Иначе запрашиваем метаданные через API
-    const { ownerId, videoId, accessKey, fallbackUrl } = facade.dataset;
-    if (!ownerId || !videoId) {
-      // Если нет данных для запроса, просто используем VK iframe (запасной вариант)
-      const iframeSrc = `https://vk.com/video_ext.php?oid=${ownerId}&id=${videoId}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
-      buildPlayerFromFacade(facade, iframeSrc, 'vk_iframe', '', fallbackUrl || '');
+    if (videoMetaCache.has(index)) {
+      const meta = videoMetaCache.get(index)!;
+      buildPlayerFromFacade(facade, meta.url, meta.type, meta.poster, meta.fallbackUrl);
       return;
     }
 
@@ -453,19 +546,15 @@
         url = vd.hls || vd.mp4;
         poster = vd.poster || '';
       } else {
-        // fallback iframe VK
         type = 'vk_iframe';
         url = `https://vk.com/video_ext.php?oid=${ownerId}&id=${videoId}&hash=${accessKey}&hd=2&autoplay=0&js_api=1&disable_related_videos=1`;
         poster = '';
       }
-      // Сохраняем в кеш
-      videoMetaCache.set(videoIndex, { url, type, poster, fallbackUrl: fallbackUrl || '' });
-      // Строим плеер
-      buildPlayerFromFacade(facade, url, type, poster, fallbackUrl || '');
+      videoMetaCache.set(index, { url, type, poster, fallbackUrl });
+      buildPlayerFromFacade(facade, url, type, poster, fallbackUrl);
     } catch (err) {
-      if ((err as DOMException).name === 'AbortError') return; // запрос отменён
+      if ((err as DOMException).name === 'AbortError') return;
       log('Ошибка загрузки видео', err);
-      // Показываем фолбэк
       const wrapper = document.createElement('div');
       wrapper.className = 'video-wrapper';
       wrapper.innerHTML = `<div class="video-fallback"><p>Видео не загрузилось. <a href="${fallbackUrl || '#'}" target="_blank" rel="noopener">Открыть во ВКонтакте</a></p></div>`;
@@ -474,7 +563,6 @@
     }
   }
 
-  // Создание плеера (video/iframe) и замена фасада
   function buildPlayerFromFacade(facade: HTMLElement, url: string, type: string, poster: string, fallbackUrl: string) {
     const wrapper = document.createElement('div');
     wrapper.className = 'video-wrapper';
@@ -527,7 +615,7 @@
     }
   }
 
-  // Обработчик клика по фасаду (делегирование)
+  // ----- ОБРАБОТЧИК ФАСАДА -----
   function handleModalContentClick(e: MouseEvent) {
     const btn = (e.target as HTMLElement).closest('.video-play-btn');
     if (!btn) return;
@@ -541,7 +629,7 @@
     }
   }
 
-  // Закрытие модального окна
+  // ----- ЗАКРЫТИЕ -----
   function closeModal() {
     const modal = document.getElementById('postModal');
     if (!modal) return;
@@ -549,16 +637,16 @@
     modal.classList.remove('open');
     modal.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
-    // Прерываем все незавершённые запросы
     modalAbort.abort();
     modalAbort = new AbortController();
     destroyPlayers();
     if (modalContent) modalContent.innerHTML = '';
     slides = [];
     totalSlides = 0;
+    mediaMetaList = [];
   }
 
-  // Инициализация singleton-обработчиков (один раз)
+  // ----- SINGLETON INIT -----
   let eventsInitialized = false;
   function initModalEvents() {
     if (eventsInitialized) return;
@@ -570,8 +658,8 @@
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && document.getElementById('postModal')?.classList.contains('open')) closeModal();
     });
+    document.addEventListener('astro:before-swap', closeModal);
 
-    // Свайп для закрытия (на контейнере, с RAF)
     const container = document.getElementById('modalContainer');
     if (container) {
       let startY = 0, currentY = 0, swiping = false, rafId = 0;
@@ -605,11 +693,10 @@
       });
     }
 
-    // Обработчик клика по фасаду (один раз)
     document.getElementById('modalContent')?.addEventListener('click', handleModalContentClick);
   }
 
-  // Главная функция открытия
+  // ----- ОТКРЫТИЕ -----
   async function openPostModal(ownerId: string, postId: string) {
     const modal = document.getElementById('postModal');
     modalContent = document.getElementById('modalContent');
@@ -620,7 +707,6 @@
     modal.setAttribute('aria-hidden', 'false');
     document.documentElement.style.overflow = 'hidden';
 
-    // Показываем спиннер
     modalContent.innerHTML = '<div class="modal-spinner"></div>';
     document.getElementById('slideCounter')!.textContent = '';
     document.getElementById('navArrows')!.style.display = 'none';
@@ -644,96 +730,53 @@
 
       const date = new Date(post.date * 1000);
       const fmtDate = date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-      const mediaItems = (post.attachments || []).filter((a: any) => /photo|video|link|doc/.test(a.type));
-      totalSlides = mediaItems.length;
+      const attachments = (post.attachments || []).filter((a: any) => /photo|video|link|doc/.test(a.type));
+      totalSlides = attachments.length;
 
-      // Строим слайдер через DOM API
-      const sliderDiv = document.createElement('div');
-      sliderDiv.className = 'simple-slider';
-
-      mediaItems.forEach((att: any, idx: number) => {
-        const slideDiv = document.createElement('div');
-        slideDiv.className = `slide ${idx === 0 ? 'active' : ''}`;
-        slideDiv.dataset.type = att.type;
-
+      // Сохраняем метаданные
+      mediaMetaList = attachments.map((att: any) => {
         if (att.type === 'photo' && att.photo) {
           const sizes = att.photo.sizes || [];
-          const best = sizes.reduce((prev: any, curr: any) => (curr.width || 0) > (prev.width || 0) ? curr : prev, sizes[0]);
-          const url = best?.url || '';
-          const img = document.createElement('img');
-          img.src = idx === 0 ? url : 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg"%3E%3C/svg%3E';
-          img.dataset.src = url;
-          img.alt = `Фото ${idx + 1}`;
-          img.loading = idx === 0 ? 'eager' : 'lazy';
-          img.decoding = 'async';
-          slideDiv.appendChild(img);
+          // Адаптивный выбор размера
+          const targetWidth = window.innerWidth * window.devicePixelRatio;
+          const best = sizes.find((s: any) => s.width >= targetWidth) || sizes[sizes.length - 1];
+          return {
+            type: 'photo' as const,
+            url: best?.url || '',
+            alt: `Фото`,
+          };
         } else if (att.type === 'video' && att.video) {
           const v = att.video;
-          const accessKey = v.access_key || '';
-          const poster = '';
-          const fallbackUrl = `https://vk.com/video${v.owner_id}_${v.id}`;
-          const facadeDiv = document.createElement('div');
-          facadeDiv.className = 'video-facade';
-          facadeDiv.style.backgroundImage = `url(${poster})`;
-          facadeDiv.dataset.ownerId = v.owner_id;
-          facadeDiv.dataset.videoId = v.id;
-          facadeDiv.dataset.accessKey = accessKey;
-          facadeDiv.dataset.fallbackUrl = fallbackUrl;
-          const playBtn = document.createElement('div');
-          playBtn.className = 'video-play-btn';
-          facadeDiv.appendChild(playBtn);
-          slideDiv.appendChild(facadeDiv);
+          return {
+            type: 'video' as const,
+            ownerId: String(v.owner_id),
+            videoId: String(v.id),
+            accessKey: v.access_key || '',
+            fallbackUrl: `https://vk.com/video${v.owner_id}_${v.id}`,
+            poster: '',
+          };
         } else if (att.type === 'link' && att.link) {
-          const linkDiv = document.createElement('div');
-          linkDiv.className = 'link-preview';
-          if (att.link.photo?.sizes?.length) {
-            const img = document.createElement('img');
-            img.src = att.link.photo.sizes.slice(-1)[0].url;
-            img.alt = '';
-            linkDiv.appendChild(img);
-          }
-          const titleDiv = document.createElement('div');
-          titleDiv.className = 'preview-title';
-          titleDiv.textContent = att.link.title || 'Ссылка';
-          linkDiv.appendChild(titleDiv);
-          if (att.link.description) {
-            const descDiv = document.createElement('div');
-            descDiv.className = 'preview-description';
-            descDiv.textContent = att.link.description;
-            linkDiv.appendChild(descDiv);
-          }
-          const linkA = document.createElement('a');
-          linkA.className = 'preview-button';
-          linkA.href = att.link.url;
-          linkA.target = '_blank';
-          linkA.rel = 'noopener';
-          linkA.textContent = 'Открыть';
-          linkDiv.appendChild(linkA);
-          slideDiv.appendChild(linkDiv);
+          const html = `<div class="link-preview">
+            ${att.link.photo?.sizes?.length ? `<img src="${att.link.photo.sizes.slice(-1)[0].url}" alt="" />` : ''}
+            <div class="preview-title">${att.link.title || 'Ссылка'}</div>
+            ${att.link.description ? `<div class="preview-description">${att.link.description}</div>` : ''}
+            <a href="${att.link.url}" target="_blank" rel="noopener" class="preview-button">Открыть</a>
+          </div>`;
+          return { type: 'link' as const, html };
         } else if (att.type === 'doc' && att.doc) {
-          const docDiv = document.createElement('div');
-          docDiv.className = 'doc-preview';
-          const titleDiv = document.createElement('div');
-          titleDiv.className = 'preview-title';
-          titleDiv.textContent = att.doc.title || 'Документ';
-          docDiv.appendChild(titleDiv);
-          const linkA = document.createElement('a');
-          linkA.className = 'preview-button';
-          linkA.href = att.doc.url;
-          linkA.target = '_blank';
-          linkA.rel = 'noopener';
-          linkA.textContent = 'Скачать / Открыть';
-          docDiv.appendChild(linkA);
-          slideDiv.appendChild(docDiv);
+          const html = `<div class="doc-preview">
+            <div class="preview-title">${att.doc.title || 'Документ'}</div>
+            <a href="${att.doc.url}" target="_blank" rel="noopener" class="preview-button">Скачать / Открыть</a>
+          </div>`;
+          return { type: 'doc' as const, html };
         }
-        sliderDiv.appendChild(slideDiv);
+        return { type: 'photo' as const, url: '', alt: '' }; // fallback
       });
 
-      modalContent.innerHTML = '';
-      modalContent.appendChild(sliderDiv);
-      slides = Array.from(modalContent.querySelectorAll('.slide'));
+      // Виртуализированный рендер
+      renderVirtualSlides();
 
-      // Пост-информация через DOM API
+      // Пост-информация
       const postInfo = document.getElementById('postInfo')!;
       postInfo.innerHTML = '';
       const dateDiv = document.createElement('div');
@@ -743,14 +786,13 @@
       if (post.text) {
         const textDiv = document.createElement('div');
         textDiv.className = 'post-text';
-        textDiv.innerHTML = post.text.replace(/\n/g, '<br>'); // здесь HTML-рендеринг безопасен, т.к. текст очищен
+        textDiv.innerHTML = post.text.replace(/\n/g, '<br>');
         postInfo.appendChild(textDiv);
       }
       postInfo.style.display = 'block';
 
       currentSlideIndex = 0;
       mediaLoaded.clear();
-      // Загружаем первый слайд, если он содержит видео-фасад (без предзагрузки метаданных)
       loadSlideContent(0);
 
       document.getElementById('navPrev')!.onclick = prevSlide;
@@ -759,13 +801,12 @@
 
       initZoom();
     } catch (err) {
-      if ((err as DOMException).name === 'AbortError') return; // окно закрыто
+      if ((err as DOMException).name === 'AbortError') return;
       log('Ошибка', err);
       modalContent.innerHTML = '<div style="color:#fff; text-align:center; padding:40px;">Не удалось загрузить пост</div>';
     }
   }
 
-  // Запускаем инициализацию singleton-событий
   initModalEvents();
   (window as any).openPostModal = openPostModal;
 </script>
