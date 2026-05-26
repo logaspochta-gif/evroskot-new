@@ -330,7 +330,7 @@
   let zoomInitialized = false;
   const mediaLoaded = new Set<number>();
   const hlsInstances = new Map<HTMLVideoElement, any>();
-  const iframeTimeouts = new Map<HTMLIFrameElement, number>(); // для очистки таймаутов
+  const iframeTimeouts = new Map<HTMLIFrameElement, number>(); // для очистки таймаутов iframe
   let modalContent: HTMLElement | null = null;
   let modalAbort = new AbortController();
   let modalSession = 0;
@@ -354,7 +354,7 @@
     console.log(`[PostModal] ${msg}`, data !== undefined ? data : '');
   }
 
-  // ----- ОЧИСТКА -----
+  // ----- ТОЧЕЧНАЯ ОЧИСТКА ОДНОГО ПЛЕЕРА -----
   function destroyPlayerForVideo(video: HTMLVideoElement) {
     const hls = hlsInstances.get(video);
     if (hls) {
@@ -366,9 +366,11 @@
     video.load();
   }
 
+  // ----- ОЧИСТКА СЛАЙДА (удаление iframeTimeout) -----
   function cleanupSlide(slide: HTMLElement) {
     const video = slide.querySelector('video');
     if (video) destroyPlayerForVideo(video);
+
     const iframe = slide.querySelector('iframe');
     if (iframe) {
       const timeoutId = iframeTimeouts.get(iframe);
@@ -388,7 +390,7 @@
       video.load();
     });
     hlsInstances.clear();
-    // Очищаем все таймауты iframe
+    // очищаем все таймауты iframe при полной очистке
     iframeTimeouts.forEach((timeoutId) => clearTimeout(timeoutId));
     iframeTimeouts.clear();
     mediaLoaded.clear();
@@ -402,7 +404,7 @@
     if (img) { img.style.transform = 'scale(1)'; currentSlide.classList.remove('zoomed'); scale = 1; }
   }
 
-  // ----- ZOOM -----
+  // ----- ZOOM (стабилизация жестов) -----
   function initZoom() {
     if (zoomInitialized) return;
     zoomInitialized = true;
@@ -421,6 +423,7 @@
       scale = zoomed ? 1 : 2;
     }, { passive: true });
 
+    // сброс при начале нового касания
     container.addEventListener('touchstart', (e) => {
       if (e.touches.length !== 2) initialDistance = 0;
     }, { passive: true });
@@ -447,7 +450,7 @@
     container.addEventListener('touchcancel', () => { initialDistance = 0; });
   }
 
-  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР -----
+  // ----- ВИРТУАЛЬНЫЙ РЕНДЕР (window shift) -----
   function getVirtualRange(): number[] {
     if (totalSlides === 0) return [];
     if (totalSlides === 1) return [0];
@@ -562,22 +565,16 @@
     return slide;
   }
 
-  // ----- НАВИГАЦИЯ -----
+  // ----- НАВИГАЦИЯ (с точечной очисткой HLS) -----
   function goToSlide(index: number) {
     if (totalSlides === 0 || index === currentSlideIndex) return;
     const prevSlide = renderedSlides.get(currentSlideIndex);
     if (prevSlide) {
       const v = prevSlide.querySelector('video');
       const iframe = prevSlide.querySelector('iframe');
+      // уничтожаем HLS плеер уходящего слайда
       if (v) destroyPlayerForVideo(v);
-      if (iframe) {
-        const timeoutId = iframeTimeouts.get(iframe);
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-          iframeTimeouts.delete(iframe);
-        }
-        iframe.remove();
-      }
+      if (iframe) iframe.remove();
     }
     currentSlideIndex = index;
     updateVirtualSlides();
@@ -724,7 +721,7 @@
     }
   }
 
-  // ----- ЗАКРЫТИЕ -----
+  // ----- ЗАКРЫТИЕ (сброс свайпа и очистка) -----
   function closeModal() {
     const modal = refs.modal;
     if (!modal) return;
@@ -735,15 +732,14 @@
     modal.setAttribute('aria-hidden', 'true');
     document.documentElement.style.overflow = '';
 
-    // Снимаем инертность с main
-    const main = document.querySelector('main');
-    if (main) main.removeAttribute('inert');
-
-    // Сброс инлайн-стилей контейнера
+    // сброс инлайн-стилей контейнера после свайпа
     if (refs.container) {
       refs.container.style.transform = '';
       refs.container.style.opacity = '';
     }
+
+    const main = document.querySelector('main');
+    if (main) main.removeAttribute('inert');
 
     modalAbort.abort();
     modalAbort = new AbortController();
@@ -937,12 +933,15 @@
     }
   }
 
-  initModalEvents();
-
-  // Используем событие для открытия модалки
-  document.addEventListener('post-modal:open', ((e: CustomEvent) => {
-    if (e.detail) {
-      openPostModal(e.detail.ownerId, e.detail.postId);
+  // ----- СОБЫТИЙНАЯ ШИНА ДЛЯ ОТКРЫТИЯ -----
+  document.addEventListener('post-modal:open', (e: Event) => {
+    const customEvent = e as CustomEvent<{ ownerId: string; postId: string }>;
+    if (customEvent.detail) {
+      openPostModal(customEvent.detail.ownerId, customEvent.detail.postId);
     }
-  }) as EventListener);
+  });
+
+  initModalEvents();
+  // Для обратной совместимости оставляем window, но лучше использовать события
+  (window as any).openPostModal = openPostModal;
 </script>
