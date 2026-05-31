@@ -5,10 +5,10 @@ compatibility_flags = ["nodejs_compat"]
 
 workers_dev = false
 
-# Route
-#[[routes]]
-#pattern = "new.evroskot.ru/*"
-#zone_name = "evroskot.ru"
+# Route — раскомментировано и настроено для evroskot.ru
+[[routes]]
+pattern = "evroskot.ru/*"
+zone_name = "evroskot.ru"
 
 # Static assets
 [assets]
