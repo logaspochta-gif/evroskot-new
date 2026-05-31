@@ -18,10 +18,18 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
   <div class="splide breeds-splide" aria-label="Породы скота">
     <div class="splide__track">
       <ul class="splide__list">
-        <!-- Голштинская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={holsteinImg} alt="Голштинская порода" loading="lazy" class="breed-image" />
+            <Image 
+              src={holsteinImg} 
+              alt="Голштинская порода" 
+              width="800" 
+              height="600" 
+              format="webp" 
+              quality={80} 
+              loading="eager" 
+              class="breed-image" 
+            />
             <div class="breed-body">
               <h3>Голштинская</h3>
               <p>Лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика датской селекции.</p>
@@ -29,10 +37,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Джерсейская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={jerseyImg} alt="Джерсейская порода" loading="lazy" class="breed-image" />
+            <Image src={jerseyImg} alt="Джерсейская порода" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Джерсейская</h3>
               <p>Молоко с жирностью до 6%. Светло-коричневая масть. Компактное телосложение и долголетие.</p>
@@ -40,10 +47,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Красная Датская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={redDanishImg} alt="Красная Датская порода" loading="lazy" class="breed-image" />
+            <Image src={redDanishImg} alt="Красная Датская порода" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Красная Датская</h3>
               <p>Универсальная порода двойного назначения. Красно-пёстрая масть. Отличное здоровье и плодовитость.</p>
@@ -51,10 +57,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Шароле -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={charolaisImg} alt="Шароле" loading="lazy" class="breed-image" />
+            <Image src={charolaisImg} alt="Шароле" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Шароле</h3>
               <p>Мясная порода с высокой энергией роста. Кремово-белая масть. Тяжёлые быки до 1 400 кг.</p>
@@ -62,10 +67,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Абердин-Ангус -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={aberdeenAngusImg} alt="Абердин-Ангус" loading="lazy" class="breed-image" />
+            <Image src={aberdeenAngusImg} alt="Абердин-Ангус" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Абердин-Ангус</h3>
               <p>Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость отёлов и скороспелость.</p>
@@ -73,10 +77,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Герефордская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={herefordImg} alt="Герефордская порода" loading="lazy" class="breed-image" />
+            <Image src={herefordImg} alt="Герефордская порода" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Герефордская</h3>
               <p>Красно-белая масть. Выносливость и неприхотливость. Отличная адаптация к пастбищному содержанию.</p>
@@ -84,10 +87,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Лимузин -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={limousinImg} alt="Лимузин" loading="lazy" class="breed-image" />
+            <Image src={limousinImg} alt="Лимузин" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Лимузин</h3>
               <p>Золотисто-красная масть. Высокий выход постного мяса. Отличные материнские качества.</p>
@@ -95,10 +97,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
             </div>
           </article>
         </li>
-        <!-- Симментальская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <Image src={simmentalImg} alt="Симментальская порода" loading="lazy" class="breed-image" />
+            <Image src={simmentalImg} alt="Симментальская порода" width="800" height="600" format="webp" quality={80} loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Симментальская</h3>
               <p>Палево-пёстрая масть. Двойное назначение: молоко и мясо. Крепкая конституция и высокая продуктивность.</p>
@@ -117,7 +118,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
 
 <style>
   #breeds {
-    scroll-margin-top: 100px; /* подберите под высоту вашего фиксированного меню */
+    scroll-margin-top: 100px;
   }
 
   .breeds-section {
@@ -176,7 +177,6 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
     height: 100%;
   }
 
-  /* Стили для изображения, которое генерирует компонент Image */
   .breed-image {
     width: 100%;
     height: 55vh;
@@ -190,11 +190,11 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
   }
 
   .breed-body {
-    padding: 24px 24px 28px;
+    padding: 28px 28px 32px;  /* увеличил отступы, чтобы кнопка не прижималась вплотную */
     display: flex;
     flex-direction: column;
     flex: 1;
-    gap: 12px;
+    gap: 16px;
   }
 
   .breed-body h3 {
@@ -219,7 +219,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: auto;
+    margin-top: 12px;        /* дополнительный отступ сверху */
     transition: gap 0.2s ease;
     cursor: pointer;
   }
@@ -228,7 +228,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
     gap: 12px;
   }
 
-  /* 3D эффект */
+  /* 3D эффект — уменьшил масштаб активного слайда */
   .splide__slide {
     display: flex;
     align-items: center;
@@ -240,7 +240,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
   }
 
   .splide__slide.is-active {
-    transform: scale(1.15);
+    transform: scale(1.08);   /* было 1.15 — уменьшил, чтобы кнопка не уходила за край */
     opacity: 1;
     z-index: 3;
   }
@@ -295,6 +295,9 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
     .splide__slide.is-next {
       transform: scale(0.85) rotateY(15deg) translateX(10%);
     }
+    .splide__slide.is-active {
+      transform: scale(1.05);
+    }
   }
 
   @media (max-width: 768px) {
@@ -305,7 +308,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
       height: 40vh;
     }
     .breed-body {
-      padding: 20px 16px 24px;
+      padding: 20px 20px 24px;
     }
     .breed-body h3 {
       font-size: 1.2rem;
