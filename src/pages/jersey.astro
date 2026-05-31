@@ -1,0 +1,412 @@
+---
+// src/pages/jersey.astro
+// Страница кейса: джерсейская порода в Германии
+---
+
+<!doctype html>
+<html lang="ru">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Кейс: Джерсейская порода в Германии | Scanova A/S</title>
+        <meta
+            name="description"
+            content="Фермер Кристофер Кин из Германии достиг 100 000 кг молока от коровы джерсейской породы. Спокойный нрав, долголетие, высокие жиры."
+        />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            /* Глобальные стили в духе evroskot.ru */
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family: "Inter", sans-serif;
+                background-color: #ffffff;
+                color: #1a2c3e;
+                line-height: 1.5;
+            }
+            .container {
+                max-width: 1280px;
+                margin: 0 auto;
+                padding: 0 24px;
+            }
+            /* Шапка (упрощённо, можно заменить на вашу глобальную) */
+            .navbar {
+                padding: 24px 0;
+                border-bottom: 1px solid #eef2f5;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+            }
+            .logo {
+                font-size: 1.5rem;
+                font-weight: 700;
+                color: #1a5d3c;
+                text-decoration: none;
+            }
+            .nav-links {
+                display: flex;
+                gap: 32px;
+            }
+            .nav-links a {
+                text-decoration: none;
+                color: #2c4b6c;
+                font-weight: 500;
+            }
+            /* Hero секция */
+            .hero {
+                padding: 60px 0 40px;
+                text-align: center;
+                background: linear-gradient(to bottom, #f8fafc, #ffffff);
+            }
+            .hero h1 {
+                font-size: 2.8rem;
+                font-weight: 700;
+                color: #1a5d3c;
+                margin-bottom: 16px;
+                letter-spacing: -0.02em;
+            }
+            .hero .subhead {
+                font-size: 1.2rem;
+                color: #4a627a;
+                max-width: 800px;
+                margin: 0 auto;
+            }
+            .hero-image {
+                margin-top: 32px;
+                border-radius: 24px;
+                overflow: hidden;
+                box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
+            }
+            .hero-image img {
+                width: 100%;
+                height: auto;
+                display: block;
+            }
+            /* Блок с цифрами */
+            .stats-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+                gap: 24px;
+                margin: 60px 0;
+            }
+            .stat-card {
+                background: #f9fafb;
+                border-radius: 20px;
+                padding: 28px 20px;
+                text-align: center;
+                transition:
+                    transform 0.2s,
+                    box-shadow 0.2s;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+                border: 1px solid #eef2f5;
+            }
+            .stat-card:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.1);
+            }
+            .stat-number {
+                font-size: 2.8rem;
+                font-weight: 800;
+                color: #1a5d3c;
+                line-height: 1.2;
+            }
+            .stat-label {
+                font-size: 0.9rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                font-weight: 600;
+                color: #4a627a;
+                margin-top: 12px;
+            }
+            .stat-desc {
+                font-size: 0.9rem;
+                color: #5a6e85;
+                margin-top: 8px;
+            }
+            /* Типовой текстовый блок */
+            .text-block {
+                margin: 48px 0;
+            }
+            .text-block h2 {
+                font-size: 2rem;
+                font-weight: 600;
+                margin-bottom: 20px;
+                color: #1e3a5f;
+            }
+            .text-block p {
+                font-size: 1.05rem;
+                color: #2c4b6c;
+                margin-bottom: 1rem;
+            }
+            .feature-list {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                gap: 24px;
+                margin: 40px 0;
+            }
+            .feature-item {
+                background: #fefdf9;
+                border-left: 4px solid #1a5d3c;
+                padding: 20px;
+                border-radius: 12px;
+                background: #fafcfd;
+            }
+            .feature-item h3 {
+                font-size: 1.3rem;
+                font-weight: 600;
+                color: #1a5d3c;
+                margin-bottom: 12px;
+            }
+            .quote {
+                background: #eef4f0;
+                padding: 40px;
+                border-radius: 28px;
+                text-align: center;
+                margin: 48px 0;
+                font-style: italic;
+                font-size: 1.3rem;
+                color: #1a2c3e;
+                font-weight: 500;
+            }
+            .gallery {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 24px;
+                margin: 48px 0;
+            }
+            .gallery img {
+                flex: 1 1 300px;
+                border-radius: 20px;
+                width: 100%;
+                object-fit: cover;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+            }
+            .cta {
+                text-align: center;
+                background: #1e3a5f;
+                color: white;
+                padding: 64px 20px;
+                border-radius: 32px;
+                margin: 60px 0;
+            }
+            .cta h3 {
+                font-size: 2rem;
+                margin-bottom: 16px;
+            }
+            .cta .btn {
+                display: inline-block;
+                background: #ffffff;
+                color: #1e3a5f;
+                padding: 12px 32px;
+                border-radius: 40px;
+                text-decoration: none;
+                font-weight: 600;
+                margin-top: 16px;
+                transition: all 0.2s;
+            }
+            .cta .btn:hover {
+                background: #ffcd3c;
+                color: #1e3a5f;
+                transform: scale(1.02);
+            }
+            footer {
+                text-align: center;
+                padding: 40px 0;
+                border-top: 1px solid #eef2f5;
+                color: #6c86a3;
+                font-size: 0.85rem;
+            }
+            @media (max-width: 768px) {
+                .hero h1 {
+                    font-size: 2rem;
+                }
+                .stat-number {
+                    font-size: 2rem;
+                }
+                .container {
+                    padding: 0 16px;
+                }
+                .navbar {
+                    flex-direction: column;
+                    gap: 16px;
+                }
+                .nav-links {
+                    gap: 20px;
+                    flex-wrap: wrap;
+                    justify-content: center;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <!-- Простая шапка – замените на ваш компонент при необходимости -->
+            <div class="navbar">
+                <a href="/" class="logo">Scanova A/S</a>
+                <div class="nav-links">
+                    <a href="/porody">Породы</a>
+                    <a href="/my-predlagaem">Услуги</a>
+                    <a href="/o-kompanii">О компании</a>
+                    <a href="/novosti">Новости</a>
+                    <a href="#contact">Контакты</a>
+                </div>
+            </div>
+
+            <!-- Hero секция -->
+            <div class="hero">
+                <h1>VikingJersey Germany – Christopher Kiehne</h1>
+                <div class="subhead">
+                    Как джерсейская порода помогла достичь 100 000 кг молока от
+                    одной коровы и сократить расходы на здоровье копыт
+                </div>
+                <div class="hero-image">
+                    <!-- Замените на реальное фото с вашего сервера -->
+                    <img
+                        src="https://placehold.co/1200x600/DFE6E9/2C3E50?text=Ферма+Кристофера+Кина"
+                        alt="Фермер с джерсейскими коровами"
+                    />
+                </div>
+            </div>
+
+            <!-- Ключевые цифры -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">100 000+ кг</div>
+                    <div class="stat-label">МОЛОКА ОТ КОРОВЫ</div>
+                    <div class="stat-desc">7,48% жира • 4,4% белка</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">7 лактаций</div>
+                    <div class="stat-label">СРЕДНЯЯ ПРОДУКТИВНАЯ ЖИЗНЬ</div>
+                    <div class="stat-desc">Выбраковка &lt; 3%</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">0,85</div>
+                    <div class="stat-label">ЭКОЛОГИЧЕСКИЙ СЛЕД*</div>
+                    <div class="stat-desc">Меньше выбросов на кг молока</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number">&lt;10 коров</div>
+                    <div class="stat-label">ПОТРЕБОВАЛА ОБРЕЗКУ КОПЫТ</div>
+                    <div class="stat-desc">За всё время</div>
+                </div>
+            </div>
+
+            <!-- Текстовая история -->
+            <div class="text-block">
+                <h2>История успеха: ставка на джерсеев</h2>
+                <p>
+                    Кристофер Кин, владелец фермы в Германии, перешёл на
+                    джерсейскую породу несколько лет назад. Его цель была не
+                    только в увеличении жирности молока, но и в создании
+                    устойчивой системы с минимальными затратами на ветеринарию.
+                    Сегодня его стадо демонстрирует впечатляющие результаты:
+                    средняя продуктивность коров составляет 7 лактаций, а
+                    уровень выбраковки не превышает 3%.
+                </p>
+                <p>
+                    «Коровы настолько спокойны, что подходят к вам, чтобы их
+                    погладили, – рассказывает Кристофер. – Отёлы проходят
+                    незаметно, и помощь требуется крайне редко. Здоровье копыт –
+                    это отдельная история: за всё время едва ли десяти животным
+                    потребовалась обрезка».
+                </p>
+            </div>
+
+            <!-- Преимущества породы -->
+            <div class="feature-list">
+                <div class="feature-item">
+                    <h3>🧬 Спокойный нрав</h3>
+                    <p>
+                        Минимизация стресса для животных и персонала. Джерсеи
+                        идеально подходят для роботизированного доения.
+                    </p>
+                </div>
+                <div class="feature-item">
+                    <h3>🦶 Крепкое здоровье копыт</h3>
+                    <p>
+                        Экономия на копытцевальных ваннах и услугах
+                        специалистов.
+                    </p>
+                </div>
+                <div class="feature-item">
+                    <h3>🥛 Высокая жирность и белок</h3>
+                    <p>
+                        7,48% жира и 4,4% белка – идеальное сырьё для сыров и
+                        премиум-молочных продуктов.
+                    </p>
+                </div>
+                <div class="feature-item">
+                    <h3>🌱 Эффективность конверсии корма</h3>
+                    <p>
+                        Меньший вес животного → меньше кормов → ниже углеродный
+                        след.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Цитата -->
+            <div class="quote">
+                «Я могу продать всех телок в течение двух недель по максимальной
+                цене. Спрос на джерсеев невероятно высок».
+                <div
+                    style="margin-top: 12px; font-weight: normal; font-size: 0.9rem;"
+                >
+                    — Christopher Kiehne, фермер
+                </div>
+            </div>
+
+            <!-- Условия содержания -->
+            <div class="text-block">
+                <h2>Современный коровник с роботом</h2>
+                <p>
+                    С 2022 года животные содержатся в переоборудованном
+                    помещении с зоной отдыха на соломе, твердыми полами для
+                    ходьбы, доильным роботом и естественной вентиляцией. Обилие
+                    света и свежего воздуха – ключевые факторы здоровья вымени и
+                    долголетия.
+                </p>
+            </div>
+
+            <!-- Фотогалерея (замените ссылки) -->
+            <div class="gallery">
+                <img
+                    src="https://placehold.co/600x400/E6E9F0/2C3E50?text=Робот+доения"
+                    alt="Доильный робот"
+                />
+                <img
+                    src="https://placehold.co/600x400/E6E9F0/2C3E50?text=Джерсейские+коровы+на+пастбище"
+                    alt="Джерсеи на пастбище"
+                />
+                <img
+                    src="https://placehold.co/600x400/E6E9F0/2C3E50?text=Зона+отдыха+с+соломой"
+                    alt="Комфортное родильное отделение"
+                />
+            </div>
+
+            <!-- Призыв к действию -->
+            <div class="cta" id="contact">
+                <h3>Хотите такие же результаты?</h3>
+                <p>
+                    Поставки племенных джерсеев из Дании. Индивидуальный подбор
+                    генетики под ваше стадо.
+                </p>
+                <a href="#" class="btn">Оставить заявку</a>
+            </div>
+
+            <footer>
+                © 2026 Scanova A/S — племенной скот из Дании. Все права
+                защищены.
+            </footer>
+        </div>
+    </body>
+</html>
