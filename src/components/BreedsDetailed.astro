@@ -1,5 +1,14 @@
 ---
 // src/components/BreedsDetailed.astro
+import { Image } from "astro:assets";
+import holsteinImg from "../assets/images/breeds/holstein.webp";
+import jerseyImg from "../assets/images/breeds/jersey.webp";
+import redDanishImg from "../assets/images/breeds/red-danish.webp";
+import charolaisImg from "../assets/images/breeds/charolais.webp";
+import aberdeenAngusImg from "../assets/images/breeds/aberdeen-angus.webp";
+import herefordImg from "../assets/images/breeds/hereford.webp";
+import limousinImg from "../assets/images/breeds/limousin.webp";
+import simmentalImg from "../assets/images/breeds/simmental.webp";
 ---
 
 <section class="breeds-section" id="breeds">
@@ -9,14 +18,10 @@
   <div class="splide breeds-splide" aria-label="Породы скота">
     <div class="splide__track">
       <ul class="splide__list">
+        <!-- Голштинская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1746401671955-60e6e1039904?auto=format&fit=crop&w=800&q=80"
-              alt="Голштинская"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={holsteinImg} alt="Голштинская порода" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Голштинская</h3>
               <p>Лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика датской селекции.</p>
@@ -24,14 +29,10 @@
             </div>
           </article>
         </li>
+        <!-- Джерсейская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1592249991251-5abf6a8beac6?auto=format&fit=crop&w=800&q=80"
-              alt="Джерсейская"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={jerseyImg} alt="Джерсейская порода" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Джерсейская</h3>
               <p>Молоко с жирностью до 6%. Светло-коричневая масть. Компактное телосложение и долголетие.</p>
@@ -39,14 +40,10 @@
             </div>
           </article>
         </li>
+        <!-- Красная Датская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1570042225831-d98fa7577f1e?auto=format&fit=crop&w=800&q=80"
-              alt="Красная Датская"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={redDanishImg} alt="Красная Датская порода" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Красная Датская</h3>
               <p>Универсальная порода двойного назначения. Красно-пёстрая масть. Отличное здоровье и плодовитость.</p>
@@ -54,14 +51,10 @@
             </div>
           </article>
         </li>
+        <!-- Шароле -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1617038264886-89bc294cf78a?auto=format&fit=crop&w=800&q=80"
-              alt="Шароле"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={charolaisImg} alt="Шароле" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Шароле</h3>
               <p>Мясная порода с высокой энергией роста. Кремово-белая масть. Тяжёлые быки до 1 400 кг.</p>
@@ -69,14 +62,10 @@
             </div>
           </article>
         </li>
+        <!-- Абердин-Ангус -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1606103921002-1c0fbb75dbf1?auto=format&fit=crop&w=800&q=80"
-              alt="Абердин-Ангус"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={aberdeenAngusImg} alt="Абердин-Ангус" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Абердин-Ангус</h3>
               <p>Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость отёлов и скороспелость.</p>
@@ -84,14 +73,10 @@
             </div>
           </article>
         </li>
+        <!-- Герефордская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1594751963761-7ee9e1fdba39?auto=format&fit=crop&w=800&q=80"
-              alt="Герефордская"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={herefordImg} alt="Герефордская порода" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Герефордская</h3>
               <p>Красно-белая масть. Выносливость и неприхотливость. Отличная адаптация к пастбищному содержанию.</p>
@@ -99,14 +84,10 @@
             </div>
           </article>
         </li>
+        <!-- Лимузин -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1585086158078-df8c2e343a79?auto=format&fit=crop&w=800&q=80"
-              alt="Лимузин"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={limousinImg} alt="Лимузин" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Лимузин</h3>
               <p>Золотисто-красная масть. Высокий выход постного мяса. Отличные материнские качества.</p>
@@ -114,14 +95,10 @@
             </div>
           </article>
         </li>
+        <!-- Симментальская -->
         <li class="splide__slide">
           <article class="breed-card">
-            <img
-              src="https://images.unsplash.com/photo-1598045755602-63d2749f1fb3?auto=format&fit=crop&w=800&q=80"
-              alt="Симментальская"
-              loading="lazy"
-              class="breed-image"
-            />
+            <Image src={simmentalImg} alt="Симментальская порода" loading="lazy" class="breed-image" />
             <div class="breed-body">
               <h3>Симментальская</h3>
               <p>Палево-пёстрая масть. Двойное назначение: молоко и мясо. Крепкая конституция и высокая продуктивность.</p>
@@ -139,6 +116,10 @@
 </section>
 
 <style>
+  #breeds {
+    scroll-margin-top: 100px; /* подберите под высоту вашего фиксированного меню */
+  }
+
   .breeds-section {
     --breeds-radius: 28px;
     --breeds-card-bg: var(--card-bg, #141414);
@@ -195,9 +176,10 @@
     height: 100%;
   }
 
+  /* Стили для изображения, которое генерирует компонент Image */
   .breed-image {
     width: 100%;
-    height: 65vh;          /* почти весь экран по высоте */
+    height: 55vh;
     object-fit: cover;
     display: block;
     transition: transform 0.6s ease;
@@ -208,15 +190,15 @@
   }
 
   .breed-body {
-    padding: 32px 28px;
+    padding: 24px 24px 28px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
     flex: 1;
+    gap: 12px;
   }
 
   .breed-body h3 {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     margin: 0;
     font-weight: 700;
     color: var(--breeds-text);
@@ -226,26 +208,27 @@
     margin: 0;
     color: var(--breeds-muted);
     line-height: 1.5;
-    font-size: 1rem;
+    font-size: 0.95rem;
     flex: 1;
   }
 
   .breed-link-text {
     color: var(--breeds-accent);
     font-weight: 600;
-    font-size: 1.05rem;
+    font-size: 1rem;
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: 12px;
+    margin-top: auto;
     transition: gap 0.2s ease;
+    cursor: pointer;
   }
 
   .breed-card:hover .breed-link-text {
     gap: 12px;
   }
 
-  /* === Увеличенный 3D револьверный эффект === */
+  /* 3D эффект */
   .splide__slide {
     display: flex;
     align-items: center;
@@ -278,7 +261,7 @@
     z-index: 2;
   }
 
-  /* Стрелки больше и виднее */
+  /* Стрелки Splide */
   :global(.breeds-splide .splide__arrow) {
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(12px);
@@ -301,13 +284,12 @@
     height: 24px;
   }
 
-  /* Адаптив */
   @media (max-width: 1024px) {
     .breed-image {
-      height: 55vh;
+      height: 45vh;
     }
     .breed-body h3 {
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
     .splide__slide.is-prev,
     .splide__slide.is-next {
@@ -320,13 +302,16 @@
       padding: 40px 0;
     }
     .breed-image {
-      height: 45vh;
+      height: 40vh;
     }
     .breed-body {
-      padding: 24px 20px;
+      padding: 20px 16px 24px;
     }
     .breed-body h3 {
-      font-size: 1.3rem;
+      font-size: 1.2rem;
+    }
+    .breed-body p {
+      font-size: 0.85rem;
     }
     .splide__slide {
       transform: scale(0.9);
@@ -354,9 +339,9 @@
     if (el instanceof HTMLElement) {
       new Splide(el, {
         type: 'loop',
-        perPage: 2,           // два слайда на больших экранах, но активный – крупный
+        perPage: 2,
         perMove: 1,
-        gap: 48,              // большой зазор для воздушности
+        gap: 48,
         focus: 'center',
         padding: { left: '8%', right: '8%' },
         updateOnMove: true,
@@ -366,7 +351,7 @@
         keyboard: 'global',
         breakpoints: {
           1024: {
-            perPage: 1,       // на планшетах один слайд
+            perPage: 1,
             gap: 0,
             padding: { left: '12%', right: '12%' },
           },
