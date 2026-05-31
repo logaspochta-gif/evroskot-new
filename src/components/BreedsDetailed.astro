@@ -140,46 +140,47 @@
 
 <style>
   .breeds-section {
-    --breeds-radius: 20px;
+    --breeds-radius: 28px;
     --breeds-card-bg: var(--card-bg, #141414);
-    --breeds-border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
+    --breeds-border: 1px solid var(--border, rgba(255, 255, 255, 0.2));
     --breeds-text: #fff;
-    --breeds-muted: rgba(255, 255, 255, 0.7);
+    --breeds-muted: rgba(255, 255, 255, 0.8);
     --breeds-accent: var(--accent, #10b981);
-    --breeds-transition: 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    --breeds-transition: 0.5s cubic-bezier(0.2, 0.9, 0.4, 1.1);
 
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: clamp(60px, 8vh, 100px) 5%;
+    padding: clamp(40px, 6vh, 80px) 2%;
     background: #000;
-    overflow: hidden;
+    overflow-x: clip;
   }
 
   .section-title {
     text-align: center;
-    font-size: clamp(2rem, 5vw, 2.8rem);
+    font-size: clamp(2rem, 6vw, 3.5rem);
     font-weight: 900;
-    margin: 0 0 0.5rem;
+    margin: 0 0 0.75rem;
     color: var(--breeds-text);
+    letter-spacing: -0.02em;
   }
 
   .section-subtitle {
     text-align: center;
     color: var(--breeds-muted);
-    margin-bottom: 2rem;
-    font-size: clamp(1rem, 2.5vw, 1.1rem);
+    margin-bottom: 3rem;
+    font-size: clamp(1rem, 2.5vw, 1.25rem);
+    max-width: 700px;
   }
 
   .accent { color: var(--breeds-accent); }
 
   .breeds-splide {
     width: 100%;
-    max-width: 1400px;
-    padding: 0 60px;
-    perspective: 1600px;
+    max-width: 1600px;
+    margin: 0 auto;
   }
 
   .breed-card {
@@ -187,27 +188,35 @@
     border-radius: var(--breeds-radius);
     overflow: hidden;
     border: var(--breeds-border);
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 30px 50px rgba(0, 0, 0, 0.8);
     transition: transform var(--breeds-transition), box-shadow var(--breeds-transition), border-color var(--breeds-transition);
-    will-change: transform;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .breed-image {
     width: 100%;
-    height: 240px;
+    height: 65vh;          /* почти весь экран по высоте */
     object-fit: cover;
     display: block;
+    transition: transform 0.6s ease;
+  }
+
+  .breed-card:hover .breed-image {
+    transform: scale(1.02);
   }
 
   .breed-body {
-    padding: 24px;
+    padding: 32px 28px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 12px;
+    flex: 1;
   }
 
   .breed-body h3 {
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     margin: 0;
     font-weight: 700;
     color: var(--breeds-text);
@@ -217,91 +226,122 @@
     margin: 0;
     color: var(--breeds-muted);
     line-height: 1.5;
-    font-size: 0.95rem;
+    font-size: 1rem;
     flex: 1;
   }
 
   .breed-link-text {
     color: var(--breeds-accent);
     font-weight: 600;
+    font-size: 1.05rem;
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    margin-top: auto;
+    gap: 6px;
+    margin-top: 12px;
     transition: gap 0.2s ease;
   }
 
   .breed-card:hover .breed-link-text {
-    gap: 8px;
+    gap: 12px;
   }
 
-  /* === 3D Револьверный эффект === */
+  /* === Увеличенный 3D револьверный эффект === */
   .splide__slide {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease;
+    transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.5s ease;
     will-change: transform;
-    transform: scale(0.8);
-    opacity: 0.55;
+    transform: scale(0.85);
+    opacity: 0.6;
   }
 
   .splide__slide.is-active {
-    transform: scale(1.08);
+    transform: scale(1.15);
     opacity: 1;
-    z-index: 2;
+    z-index: 3;
   }
 
   .splide__slide.is-active .breed-card {
-    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.9);
+    box-shadow: 0 40px 70px rgba(0, 0, 0, 0.95);
   }
 
   .splide__slide.is-prev {
-    transform: scale(0.8) rotateY(30deg) translateX(25%);
-    opacity: 0.65;
-    z-index: 1;
+    transform: scale(0.85) rotateY(25deg) translateX(20%);
+    opacity: 0.7;
+    z-index: 2;
   }
 
   .splide__slide.is-next {
-    transform: scale(0.8) rotateY(-30deg) translateX(-25%);
-    opacity: 0.65;
-    z-index: 1;
+    transform: scale(0.85) rotateY(-25deg) translateX(-20%);
+    opacity: 0.7;
+    z-index: 2;
   }
 
-  /* Стрелки Splide */
+  /* Стрелки больше и виднее */
   :global(.breeds-splide .splide__arrow) {
-    background: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(8px);
-    width: 48px;
-    height: 48px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(12px);
+    width: 56px;
+    height: 56px;
     border-radius: 50%;
-    color: #fff;
-    transition: background 0.3s, transform 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
   }
 
   :global(.breeds-splide .splide__arrow:hover) {
-    background: rgba(255, 255, 255, 0.3);
+    background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
+    border-color: var(--breeds-accent);
   }
 
   :global(.breeds-splide .splide__arrow svg) {
     fill: #fff;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
+  }
+
+  /* Адаптив */
+  @media (max-width: 1024px) {
+    .breed-image {
+      height: 55vh;
+    }
+    .breed-body h3 {
+      font-size: 1.5rem;
+    }
+    .splide__slide.is-prev,
+    .splide__slide.is-next {
+      transform: scale(0.85) rotateY(15deg) translateX(10%);
+    }
   }
 
   @media (max-width: 768px) {
-    .breeds-splide {
-      padding: 0 40px;
+    .breeds-section {
+      padding: 40px 0;
     }
     .breed-image {
-      height: 200px;
+      height: 45vh;
     }
-    .splide__slide.is-prev {
-      transform: scale(0.8) rotateY(15deg) translateX(10%);
+    .breed-body {
+      padding: 24px 20px;
     }
+    .breed-body h3 {
+      font-size: 1.3rem;
+    }
+    .splide__slide {
+      transform: scale(0.9);
+    }
+    .splide__slide.is-active {
+      transform: scale(1.05);
+    }
+    .splide__slide.is-prev,
     .splide__slide.is-next {
-      transform: scale(0.8) rotateY(-15deg) translateX(-10%);
+      transform: scale(0.9) rotateY(0deg) translateX(0);
+      opacity: 0.5;
+    }
+    :global(.breeds-splide .splide__arrow) {
+      width: 44px;
+      height: 44px;
     }
   }
 </style>
@@ -314,9 +354,9 @@
     if (el instanceof HTMLElement) {
       new Splide(el, {
         type: 'loop',
-        perPage: 3,
+        perPage: 2,           // два слайда на больших экранах, но активный – крупный
         perMove: 1,
-        gap: 32,
+        gap: 48,              // большой зазор для воздушности
         focus: 'center',
         padding: { left: '8%', right: '8%' },
         updateOnMove: true,
@@ -325,9 +365,14 @@
         arrows: true,
         keyboard: 'global',
         breakpoints: {
+          1024: {
+            perPage: 1,       // на планшетах один слайд
+            gap: 0,
+            padding: { left: '12%', right: '12%' },
+          },
           768: {
             perPage: 1,
-            padding: { left: '20%', right: '20%' },
+            padding: { left: '5%', right: '5%' },
           },
         },
       }).mount();
