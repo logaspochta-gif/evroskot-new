@@ -1,6 +1,6 @@
 ---
 // src/pages/jersey.astro
-// Страница кейса: джерсейская порода в Германии
+import Header from '../components/Header.astro';
 ---
 
 <!doctype html>
@@ -20,7 +20,7 @@
             rel="stylesheet"
         />
         <style>
-            /* Глобальные стили в духе evroskot.ru */
+            /* Стили для контента страницы (без шапки) */
             * {
                 margin: 0;
                 padding: 0;
@@ -31,35 +31,12 @@
                 background-color: #ffffff;
                 color: #1a2c3e;
                 line-height: 1.5;
+                padding-top: 80px; /* отступ под фиксированную шапку */
             }
             .container {
                 max-width: 1280px;
                 margin: 0 auto;
                 padding: 0 24px;
-            }
-            /* Шапка (упрощённо, можно заменить на вашу глобальную) */
-            .navbar {
-                padding: 24px 0;
-                border-bottom: 1px solid #eef2f5;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                flex-wrap: wrap;
-            }
-            .logo {
-                font-size: 1.5rem;
-                font-weight: 700;
-                color: #1a5d3c;
-                text-decoration: none;
-            }
-            .nav-links {
-                display: flex;
-                gap: 32px;
-            }
-            .nav-links a {
-                text-decoration: none;
-                color: #2c4b6c;
-                font-weight: 500;
             }
             /* Hero секция */
             .hero {
@@ -103,9 +80,7 @@
                 border-radius: 20px;
                 padding: 28px 20px;
                 text-align: center;
-                transition:
-                    transform 0.2s,
-                    box-shadow 0.2s;
+                transition: transform 0.2s, box-shadow 0.2s;
                 box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
                 border: 1px solid #eef2f5;
             }
@@ -132,7 +107,6 @@
                 color: #5a6e85;
                 margin-top: 8px;
             }
-            /* Типовой текстовый блок */
             .text-block {
                 margin: 48px 0;
             }
@@ -235,32 +209,14 @@
                 .container {
                     padding: 0 16px;
                 }
-                .navbar {
-                    flex-direction: column;
-                    gap: 16px;
-                }
-                .nav-links {
-                    gap: 20px;
-                    flex-wrap: wrap;
-                    justify-content: center;
-                }
             }
         </style>
     </head>
     <body>
-        <div class="container">
-            <!-- Простая шапка – замените на ваш компонент при необходимости -->
-            <div class="navbar">
-                <a href="/" class="logo">Scanova A/S</a>
-                <div class="nav-links">
-                    <a href="/porody">Породы</a>
-                    <a href="/my-predlagaem">Услуги</a>
-                    <a href="/o-kompanii">О компании</a>
-                    <a href="/novosti">Новости</a>
-                    <a href="#contact">Контакты</a>
-                </div>
-            </div>
+        <!-- Подключаем глобальную шапку -->
+        <Header />
 
+        <div class="container">
             <!-- Hero секция -->
             <div class="hero">
                 <h1>VikingJersey Germany – Christopher Kiehne</h1>
@@ -269,7 +225,6 @@
                     одной коровы и сократить расходы на здоровье копыт
                 </div>
                 <div class="hero-image">
-                    <!-- Замените на реальное фото с вашего сервера -->
                     <img
                         src="https://placehold.co/1200x600/DFE6E9/2C3E50?text=Ферма+Кристофера+Кина"
                         alt="Фермер с джерсейскими коровами"
@@ -301,7 +256,6 @@
                 </div>
             </div>
 
-            <!-- Текстовая история -->
             <div class="text-block">
                 <h2>История успеха: ставка на джерсеев</h2>
                 <p>
@@ -322,7 +276,6 @@
                 </p>
             </div>
 
-            <!-- Преимущества породы -->
             <div class="feature-list">
                 <div class="feature-item">
                     <h3>🧬 Спокойный нрав</h3>
@@ -354,7 +307,6 @@
                 </div>
             </div>
 
-            <!-- Цитата -->
             <div class="quote">
                 «Я могу продать всех телок в течение двух недель по максимальной
                 цене. Спрос на джерсеев невероятно высок».
@@ -365,7 +317,6 @@
                 </div>
             </div>
 
-            <!-- Условия содержания -->
             <div class="text-block">
                 <h2>Современный коровник с роботом</h2>
                 <p>
@@ -377,7 +328,6 @@
                 </p>
             </div>
 
-            <!-- Фотогалерея (замените ссылки) -->
             <div class="gallery">
                 <img
                     src="https://placehold.co/600x400/E6E9F0/2C3E50?text=Робот+доения"
@@ -393,7 +343,6 @@
                 />
             </div>
 
-            <!-- Призыв к действию -->
             <div class="cta" id="contact">
                 <h3>Хотите такие же результаты?</h3>
                 <p>
