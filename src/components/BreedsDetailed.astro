@@ -40,7 +40,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Лидер по удоям молока. Чёрно-пёстрая масть. Выдающаяся генетика
                 датской селекции.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/holstein" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -84,7 +84,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Универсальная порода двойного назначения. Красно-пёстрая масть.
                 Отличное здоровье и плодовитость.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/danish-red" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -106,7 +106,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Мясная порода с высокой энергией роста. Кремово-белая масть.
                 Тяжёлые быки до 1 400 кг.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/charolais" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -128,7 +128,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Чёрная комолая порода. Мраморное мясо высшего качества. Лёгкость
                 отёлов и скороспелость.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/angus" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -150,7 +150,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Красно-белая масть. Выносливость и неприхотливость. Отличная
                 адаптация к пастбищному содержанию.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/hereford" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -172,7 +172,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Золотисто-красная масть. Высокий выход постного мяса. Отличные
                 материнские качества.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/limousin" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -194,7 +194,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
                 Палево-пёстрая масть. Двойное назначение: молоко и мясо. Крепкая
                 конституция и высокая продуктивность.
               </p>
-              <span class="breed-link-text">Подробнее →</span>
+              <a href="/simmental" class="breed-link-text">Подробнее →</a>
             </div>
           </article>
         </li>
@@ -286,7 +286,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
   }
 
   .breed-body {
-    padding: 28px 28px 32px; /* увеличил отступы, чтобы кнопка не прижималась вплотную */
+    padding: 28px 28px 32px;
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -315,16 +315,21 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-top: 12px; /* дополнительный отступ сверху */
+    margin-top: 12px;
     transition: gap 0.2s ease;
     cursor: pointer;
+    text-decoration: none;
+  }
+
+  .breed-link-text:hover {
+    gap: 12px;
   }
 
   .breed-card:hover .breed-link-text {
     gap: 12px;
   }
 
-  /* 3D эффект — уменьшил масштаб активного слайда */
+  /* 3D эффект */
   .splide__slide {
     display: flex;
     align-items: center;
@@ -338,9 +343,7 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
   }
 
   .splide__slide.is-active {
-    transform: scale(
-      1.08
-    ); /* было 1.15 — уменьшил, чтобы кнопка не уходила за край */
+    transform: scale(1.08);
     opacity: 1;
     z-index: 3;
   }
@@ -418,18 +421,22 @@ import simmentalImg from "../assets/images/breeds/simmental.jpg";
     }
     .splide__slide {
       transform: scale(0.9);
+      opacity: 0.6;
     }
     .splide__slide.is-active {
       transform: scale(1.05);
     }
+    /* ОТКЛЮЧАЕМ 3D ПОВОРОТЫ ДЛЯ ПЛАВНОСТИ */
     .splide__slide.is-prev,
     .splide__slide.is-next {
-      transform: scale(0.9) rotateY(0deg) translateX(0);
+      transform: scale(0.9) translateX(0);
       opacity: 0.5;
     }
     :global(.breeds-splide .splide__arrow) {
       width: 44px;
       height: 44px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: none; /* убираем размытие на мобильных */
     }
   }
 </style>
