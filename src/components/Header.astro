@@ -5,12 +5,7 @@
 <header class="navbar" id="navbar">
   <div class="logo">
     <a href="/" class="logo-link" aria-label="Scanova A/S — главная страница">
-      <img
-        src="/favicon.svg"
-        alt=""
-        class="logo-icon"
-        aria-hidden="true"
-      />
+      <img src="/favicon.svg" alt="" class="logo-icon" aria-hidden="true" />
       <span class="logo-text">
         Scanova <span class="accent">A/S</span>
       </span>
@@ -67,19 +62,30 @@
     padding: 1.2rem 5%;
     background: rgba(0, 0, 0, 0.05);
     backdrop-filter: blur(5px);
-    transition: background 0.3s ease, box-shadow 0.3s ease;
+    transition:
+      background 0.3s ease,
+      box-shadow 0.3s ease;
   }
 
-  .logo { display: flex; align-items: center; flex-shrink: 0; }
+  .logo {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+  }
 
   .logo-link {
     display: inline-flex;
     align-items: center;
     text-decoration: none;
     position: relative;
-    transition: opacity 0.25s ease, transform 0.25s ease;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
   }
-  .logo-link:hover { transform: translateY(-1px); opacity: 0.92; }
+  .logo-link:hover {
+    transform: translateY(-1px);
+    opacity: 0.92;
+  }
   .logo-link:focus-visible {
     outline: 2px solid rgba(16, 185, 129, 0.65);
     outline-offset: 6px;
@@ -105,13 +111,16 @@
     line-height: 1;
     color: #ffffff;
     font-family: Inter, system-ui, sans-serif;
-    text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     white-space: nowrap;
   }
 
-  .accent { color: var(--accent, #10b981); position: relative; }
+  .accent {
+    color: var(--accent, #10b981);
+    position: relative;
+  }
   .accent::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 50%;
     bottom: -3px;
@@ -121,7 +130,9 @@
     background: linear-gradient(90deg, transparent, var(--accent), transparent);
     opacity: 0;
     transform: translateX(-50%);
-    transition: width 0.3s ease, opacity 0.3s ease;
+    transition:
+      width 0.3s ease,
+      opacity 0.3s ease;
   }
   .logo-link:hover .accent::after {
     width: 70%;
@@ -141,9 +152,11 @@
     padding-bottom: 5px;
     transition: opacity 0.3s ease;
   }
-  .menu a:hover { opacity: 0.85; }
+  .menu a:hover {
+    opacity: 0.85;
+  }
   .menu a::after {
-    content: '';
+    content: "";
     position: absolute;
     left: 50%;
     bottom: -6px;
@@ -153,7 +166,9 @@
     background: var(--accent);
     transition: width 0.3s ease;
   }
-  .menu a:hover::after { width: 60%; }
+  .menu a:hover::after {
+    width: 60%;
+  }
 
   .btn-contact {
     background: var(--accent);
@@ -162,7 +177,9 @@
     border-radius: 10px;
     font-weight: 700;
     font-size: inherit;
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition:
+      background 0.3s ease,
+      transform 0.3s ease;
   }
   .btn-contact:hover {
     background: var(--accent-hover);
@@ -173,6 +190,7 @@
   .dropdown {
     position: relative;
     display: inline-block;
+    vertical-align: middle; /* ← добавить */
   }
 
   .dropdown-toggle {
@@ -194,7 +212,10 @@
     opacity: 0;
     visibility: hidden;
     transform: translateY(10px);
-    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0.25s ease;
     z-index: 50;
     border: 1px solid rgba(255, 255, 255, 0.12);
   }
@@ -209,7 +230,9 @@
     color: #fff;
     text-decoration: none;
     font-size: 0.9rem;
-    transition: background 0.2s, color 0.2s;
+    transition:
+      background 0.2s,
+      color 0.2s;
   }
 
   .dropdown-menu li a:hover {
@@ -246,8 +269,12 @@
 
   /* Мобильная версия */
   @media (max-width: 992px) {
-    .navbar { padding: 1rem 5%; }
-    .burger { display: flex; }
+    .navbar {
+      padding: 1rem 5%;
+    }
+    .burger {
+      display: flex;
+    }
     .menu {
       position: absolute;
       top: 75px;
@@ -282,7 +309,7 @@
       padding: 0.5rem 0 0.5rem 1.2rem;
       margin-top: 0;
       min-width: 0;
-      display: none;          /* скрыто по умолчанию, покажем через JS */
+      display: none; /* скрыто по умолчанию, покажем через JS */
     }
 
     .dropdown-menu.show {
@@ -300,44 +327,52 @@
   }
 
   @media (max-width: 768px) {
-    .logo-text { font-size: 1.15rem; }
-    .logo-icon { height: 1.3em; }
+    .logo-text {
+      font-size: 1.15rem;
+    }
+    .logo-icon {
+      height: 1.3em;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .logo-link,
     .menu a,
     .btn-contact,
-    .logo-icon { transition: none; }
-    .logo-link:hover { transform: none; }
+    .logo-icon {
+      transition: none;
+    }
+    .logo-link:hover {
+      transform: none;
+    }
   }
 </style>
 
 <script>
-  const burger = document.getElementById('burger');
-  const menu = document.getElementById('menu');
+  const burger = document.getElementById("burger");
+  const menu = document.getElementById("menu");
   if (burger && menu) {
-    burger.addEventListener('click', () => {
-      const expanded = burger.getAttribute('aria-expanded') === 'true';
-      burger.setAttribute('aria-expanded', String(!expanded));
-      menu.classList.toggle('active');
+    burger.addEventListener("click", () => {
+      const expanded = burger.getAttribute("aria-expanded") === "true";
+      burger.setAttribute("aria-expanded", String(!expanded));
+      menu.classList.toggle("active");
     });
-    menu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        menu.classList.remove('active');
-        burger.setAttribute('aria-expanded', 'false');
+    menu.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("click", () => {
+        menu.classList.remove("active");
+        burger.setAttribute("aria-expanded", "false");
       });
     });
   }
 
   // Логика открытия/закрытия подменю на мобильных
-  const dropdownToggle = document.querySelector('.dropdown-toggle');
-  const dropdownMenu = document.querySelector('.dropdown-menu');
+  const dropdownToggle = document.querySelector(".dropdown-toggle");
+  const dropdownMenu = document.querySelector(".dropdown-menu");
   if (dropdownToggle && dropdownMenu) {
-    dropdownToggle.addEventListener('click', (e) => {
+    dropdownToggle.addEventListener("click", (e) => {
       if (window.innerWidth <= 992) {
-        e.preventDefault();   // предотвращаем переход по якорю
-        dropdownMenu.classList.toggle('show');
+        e.preventDefault(); // предотвращаем переход по якорю
+        dropdownMenu.classList.toggle("show");
       }
     });
   }
