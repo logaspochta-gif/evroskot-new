@@ -31,7 +31,22 @@
 
   <nav class="menu" id="menu" role="navigation">
     <a href="/#hero">Главная</a>
-    <a href="/#breeds">Породы</a>
+    
+    <!-- Выпадающее меню "Породы" -->
+    <div class="dropdown">
+      <a href="/#breeds" class="dropdown-toggle">Породы</a>
+      <ul class="dropdown-menu">
+        <li><a href="/breeds/holstein">Голштинская</a></li>
+        <li><a href="/breeds/jersey">Джерсейская</a></li>
+        <li><a href="/breeds/danish-red">Красная Датская</a></li>
+        <li><a href="/breeds/charolais">Шароле</a></li>
+        <li><a href="/breeds/angus">Абердин-Ангус</a></li>
+        <li><a href="/breeds/hereford">Герефордская</a></li>
+        <li><a href="/breeds/limousin">Лимузин</a></li>
+        <li><a href="/breeds/simmental">Симментальская</a></li>
+      </ul>
+    </div>
+
     <a href="/#about">О компании</a>
     <a href="/#staldren">Staldren®</a>
     <a href="/news-pages">Новости</a>
@@ -154,6 +169,84 @@
     transform: translateY(-2px);
   }
 
+  /* ===== ВЫПАДАЮЩЕЕ МЕНЮ ===== */
+  .dropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .dropdown-toggle {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding-bottom: 5px;
+  }
+
+  .dropdown-toggle::after {
+    content: '▼';
+    font-size: 0.6rem;
+    margin-left: 4px;
+    transition: transform 0.3s ease;
+  }
+
+  .dropdown:hover .dropdown-toggle::after {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-menu {
+    position: absolute;
+    top: calc(100% + 12px);
+    left: -20px;
+    background: rgba(10, 10, 10, 0.98);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 16px;
+    padding: 12px 0;
+    min-width: 220px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.25s ease, visibility 0.25s ease, transform 0.25s ease;
+    list-style: none;
+    margin: 0;
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.6);
+    z-index: 1001;
+  }
+
+  .dropdown:hover .dropdown-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .dropdown-menu li {
+    padding: 0;
+    margin: 0;
+  }
+
+  .dropdown-menu a {
+    display: block;
+    padding: 10px 24px;
+    color: #fff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .dropdown-menu a:hover {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--accent);
+    opacity: 1;
+  }
+
+  .dropdown-menu a::after {
+    display: none; /* убираем подчёркивание для пунктов dropdown */
+  }
+
   /* Бургер */
   .burger {
     display: none;
@@ -198,6 +291,34 @@
       visibility: visible;
       transform: translateY(0);
     }
+
+    /* На мобильных — выпадающее меню внутри бургера */
+    .dropdown {
+      flex-direction: column;
+      align-items: flex-start;
+      width: 100%;
+    }
+
+    .dropdown-menu {
+      position: static;
+      background: transparent;
+      border: none;
+      padding: 0 0 0 16px;
+      box-shadow: none;
+      opacity: 1;
+      visibility: visible;
+      transform: none;
+      display: none;
+      min-width: 0;
+    }
+
+    .dropdown:hover .dropdown-menu {
+      display: block;
+    }
+
+    .dropdown-menu a {
+      padding: 8px 16px;
+    }
   }
 
   @media (max-width: 768px) {
@@ -209,8 +330,12 @@
     .logo-link,
     .menu a,
     .btn-contact,
-    .logo-icon { transition: none; }
+    .logo-icon,
+    .dropdown-menu { transition: none; }
     .logo-link:hover { transform: none; }
+    .dropdown:hover .dropdown-menu {
+      transition: none;
+    }
   }
 </style>
 
