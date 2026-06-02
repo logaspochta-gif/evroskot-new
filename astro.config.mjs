@@ -1,18 +1,19 @@
-// astro.config.mjs
 import { defineConfig } from 'astro/config';
-import favicons from 'astro-favicons';
 import cloudflare from '@astrojs/cloudflare';
 import sitemap from '@astrojs/sitemap';
+import favicons from 'astro-favicons';
 
 export default defineConfig({
-  site: 'https://evroskot.ru',        // обязательно для sitemap и канонических URL
+  site: 'https://evroskot.ru',
+
   output: 'server',
-  adapter: cloudflare({
-    imageService: 'cloudflare',       // используем Cloudflare Images для оптимизации
-  }),
+
+  adapter: cloudflare(),
+
   prefetch: {
-    defaultStrategy: 'tap',           // предзагрузка при касании на тач‑устройствах
+    defaultStrategy: 'tap',
   },
+
   integrations: [
     favicons({
       masterPicture: './public/favicon.svg',
@@ -26,8 +27,9 @@ export default defineConfig({
     }),
     sitemap({
       filter: (page) => {
-        // Исключаем из sitemap служебные или черновые страницы
-        if (page.includes('/admin') || page.includes('/draft')) return false;
+        if (page.includes('/admin') || page.includes('/draft')) {
+          return false;
+        }
         return true;
       },
       changefreq: 'weekly',
