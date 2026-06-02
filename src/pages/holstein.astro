@@ -1,6 +1,12 @@
 ---
 // src/pages/holstein.astro
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { Image } from "astro:assets";
+// Локальные изображения — положите файлы в src/assets/images/holstein/
+import heroImg from "../assets/images/holstein/vikingholstein-hero.jpg";
+import gallery1 from "../assets/images/holstein/vikingholstein-1.webp";
+import gallery2 from "../assets/images/holstein/vikingholstein-2.webp";
+import gallery3 from "../assets/images/holstein/vikingholstein-3.webp";
 ---
 
 <BaseLayout
@@ -8,12 +14,19 @@ import BaseLayout from "../layouts/BaseLayout.astro";
   description="Голштинская порода — лидер по удоям молока. Выдающаяся генетика датской селекции. Продуктивность до 14 000 кг молока за лактацию. Поставки из Дании."
   disableSnap={true}
 >
-  <!-- Hero Section -->
+  <!-- Hero Section с оптимизированным изображением -->
   <section class="hero-breed">
-    <div
-      class="hero-breed__bg"
-      style="background-image: url('https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingholstein.jpg');"
-    >
+    <div class="hero-breed__image">
+      <Image 
+        src={heroImg} 
+        alt="Голштинская корова VikingHolstein на лугу" 
+        width="1920" 
+        height="1080" 
+        format="webp" 
+        quality={85} 
+        loading="eager" 
+        class="hero-breed__img" 
+      />
       <div class="hero-breed__overlay"></div>
     </div>
     <div class="hero-breed__content">
@@ -81,11 +94,13 @@ import BaseLayout from "../layouts/BaseLayout.astro";
         <iframe
           width="560"
           height="315"
-          src="https://youtu.be/DOGcyy6wXfM?si=YCUKtDnOJBixU2kH"
-          title="YouTube video player"
+          src="https://www.youtube.com/embed/DOGcyy6wXfM"
+          title="Видео о голштинской породе VikingHolstein"
           frameborder="0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-          allowfullscreen></iframe>
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
       </div>
       <div class="quote-block">
         <blockquote>
@@ -105,35 +120,50 @@ import BaseLayout from "../layouts/BaseLayout.astro";
           <div class="stat-label">Молока за лактацию</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">3,8-4,2%</div>
+          <div class="stat-number">3,8–4,2%</div>
           <div class="stat-label">Жирность молока</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">600-700 кг</div>
+          <div class="stat-number">600–700 кг</div>
           <div class="stat-label">Вес взрослой коровы</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">5-6</div>
+          <div class="stat-number">5–6</div>
           <div class="stat-label">Средняя продуктивная жизнь (лактаций)</div>
         </div>
       </div>
     </section>
 
-    <!-- Галерея -->
+    <!-- Галерея с оптимизированными изображениями -->
     <section class="content-section">
       <h2>Галерея</h2>
       <div class="gallery">
-        <img
-          src="https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingholstein.jpg"
-          alt="Голштинская корова"
+        <Image 
+          src={gallery1} 
+          alt="Голштинская корова на пастбище" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
         />
-        <img
-          src="https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingholstein2.jpg"
-          alt="Голштинские коровы на пастбище"
+        <Image 
+          src={gallery2} 
+          alt="Стадо голштинских коров на выгуле" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
         />
-        <img
-          src="https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingholstein3.jpg"
-          alt="Голштинская корова в стойле"
+        <Image 
+          src={gallery3} 
+          alt="Голштинская корова в стойле" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
         />
       </div>
     </section>
@@ -153,7 +183,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 </BaseLayout>
 
 <style>
-  /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (те же, что и на сайте) ===== */
+  /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===== */
   :root {
     --dark: #0a0a0a;
     --accent: #10b981;
@@ -165,40 +195,40 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     --transition-base: 0.25s ease;
   }
 
-  /* ===== БАЗОВЫЕ СТИЛИ СТРАНИЦЫ ===== */
   .container {
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
-  /* ===== HERO BREED ===== */
+  /* ===== HERO С ИЗОБРАЖЕНИЕМ ЧЕРЕЗ <Image> ===== */
   .hero-breed {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh; /* полный экран */
+    min-height: 100dvh;
     text-align: center;
     color: var(--text);
     overflow: hidden;
   }
 
-  .hero-breed__bg {
+  .hero-breed__image {
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center;
+  }
+
+  .hero-breed__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .hero-breed__overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-      to bottom,
-      rgba(0, 0, 0, 0.3),
-      rgba(0, 0, 0, 0.7)
-    );
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
   }
 
   .hero-breed__content {
@@ -248,7 +278,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     transform: scale(1.02);
   }
 
-  /* ===== CONTENT SECTIONS ===== */
+  /* ===== КОНТЕНТНЫЕ БЛОКИ ===== */
   .content-section {
     margin: 80px 0;
   }
@@ -261,7 +291,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     text-align: center;
   }
 
-  /* ===== FEATURES GRID ===== */
+  /* ===== СЕТКА ПРЕИМУЩЕСТВ ===== */
   .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -273,17 +303,14 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     border: 1px solid var(--border);
     border-radius: 20px;
     padding: 32px 24px;
-    transition:
-      transform 0.2s,
-      border-color 0.2s,
-      box-shadow 0.2s;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
     text-align: center;
   }
 
   .feature-card:hover {
     transform: translateY(-5px);
     border-color: var(--accent);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.4);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.4);
   }
 
   .feature-icon {
@@ -305,7 +332,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     margin: 0;
   }
 
-  /* ===== VIDEO ===== */
+  /* ===== ВИДЕО ===== */
   .video-wrapper {
     position: relative;
     padding-bottom: 56.25%;
@@ -348,7 +375,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     color: var(--muted);
   }
 
-  /* ===== STATS GRID ===== */
+  /* ===== ХАРАКТЕРИСТИКИ ===== */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -361,15 +388,12 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     border-radius: 20px;
     padding: 28px 20px;
     text-align: center;
-    transition:
-      transform 0.2s,
-      box-shadow 0.2s,
-      border-color 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
   }
 
   .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.3);
     border-color: var(--accent);
   }
 
@@ -389,7 +413,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     margin-top: 12px;
   }
 
-  /* ===== GALLERY ===== */
+  /* ===== ГАЛЕРЕЯ ===== */
   .gallery {
     display: flex;
     flex-wrap: wrap;
@@ -400,8 +424,9 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     flex: 1 1 300px;
     border-radius: 20px;
     width: 100%;
+    height: auto;
     object-fit: cover;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     transition: transform 0.2s;
   }
 
@@ -409,7 +434,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
     transform: scale(1.02);
   }
 
-  /* ===== CTA ===== */
+  /* ===== ПРИЗЫВ К ДЕЙСТВИЮ ===== */
   .cta-section {
     margin: 80px 0;
   }

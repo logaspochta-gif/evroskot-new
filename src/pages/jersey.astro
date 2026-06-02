@@ -1,6 +1,12 @@
 ---
 // src/pages/jersey.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from "astro:assets";
+// Локальные изображения — положите файлы в src/assets/images/jersey/
+import heroImg from "../assets/images/jersey/vikingjersey-hero.jpg";
+import gallery1 from "../assets/images/jersey/vikingjersey-1.webp";
+import gallery2 from "../assets/images/jersey/vikingjersey-2.webp";
+import gallery3 from "../assets/images/jersey/vikingjersey-3.webp";
 ---
 
 <BaseLayout
@@ -8,9 +14,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   description="Джерсейская порода — идеальный выбор для роботизированного доения. Высокая жирность молока, отличное здоровье и спокойный нрав. Поставки из Дании."
   disableSnap={true}
 >
-  <!-- Hero Section -->
+  <!-- Hero Section с оптимизированным изображением -->
   <section class="hero-breed">
-    <div class="hero-breed__bg" style="background-image: url('https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingjersey.jpg');">
+    <div class="hero-breed__image">
+      <Image 
+        src={heroImg} 
+        alt="Джерсейская корова VikingJersey на пастбище" 
+        width="1920" 
+        height="1080" 
+        format="webp" 
+        quality={85} 
+        loading="eager" 
+        class="hero-breed__img" 
+      />
       <div class="hero-breed__overlay"></div>
     </div>
     <div class="hero-breed__content">
@@ -60,10 +76,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           width="560" 
           height="315" 
           src="https://www.youtube.com/embed/3uMZ8HvS5-U" 
-          title="YouTube video player" 
+          title="Видео о джерсейской породе VikingJersey" 
           frameborder="0" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
           allowfullscreen
+          loading="lazy"
         ></iframe>
       </div>
       <div class="quote-block">
@@ -87,23 +104,47 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="stat-label">Содержание белка</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">350-400 кг</div>
+          <div class="stat-number">350–400 кг</div>
           <div class="stat-label">Вес взрослой коровы</div>
         </div>
         <div class="stat-card">
-          <div class="stat-number">7-8</div>
+          <div class="stat-number">7–8</div>
           <div class="stat-label">Средняя продуктивная жизнь (лактаций)</div>
         </div>
       </div>
     </section>
 
-    <!-- Галерея -->
+    <!-- Галерея с оптимизированными изображениями -->
     <section class="content-section">
       <h2>Галерея</h2>
       <div class="gallery">
-        <img src="https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingjersey.jpg" alt="Джерсейская корова">
-        <img src="https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingjersey2.jpg" alt="Джерсейские коровы на пастбище">
-        <img src="https://www.vikinggenetics.com/493f0b/globalassets/0.-pictures/dairy-breeds/vikingjersey3.jpg" alt="Джерсейская корова в стойле">
+        <Image 
+          src={gallery1} 
+          alt="Джерсейская корова на пастбище" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
+        />
+        <Image 
+          src={gallery2} 
+          alt="Стадо джерсейских коров на выгуле" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
+        />
+        <Image 
+          src={gallery3} 
+          alt="Джерсейская корова в стойле" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
+        />
       </div>
     </section>
 
@@ -119,7 +160,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 
 <style>
-  /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ (те же, что и на сайте) ===== */
+  /* ===== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ===== */
   :root {
     --dark: #0a0a0a;
     --accent: #10b981;
@@ -131,30 +172,34 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     --transition-base: 0.25s ease;
   }
 
-  /* ===== БАЗОВЫЕ СТИЛИ СТРАНИЦЫ ===== */
   .container {
     max-width: 1280px;
     margin: 0 auto;
     padding: 0 24px;
   }
 
-  /* ===== HERO BREED ===== */
+  /* ===== HERO С ИЗОБРАЖЕНИЕМ ЧЕРЕЗ <Image> ===== */
   .hero-breed {
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh; /* полный экран */
+    min-height: 100dvh;
     text-align: center;
     color: var(--text);
     overflow: hidden;
   }
 
-  .hero-breed__bg {
+  .hero-breed__image {
     position: absolute;
     inset: 0;
-    background-size: cover;
-    background-position: center;
+  }
+
+  .hero-breed__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
 
   .hero-breed__overlay {
@@ -210,7 +255,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     transform: scale(1.02);
   }
 
-  /* ===== CONTENT SECTIONS ===== */
+  /* ===== КОНТЕНТНЫЕ БЛОКИ ===== */
   .content-section {
     margin: 80px 0;
   }
@@ -223,7 +268,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     text-align: center;
   }
 
-  /* ===== FEATURES GRID ===== */
+  /* ===== СЕТКА ПРЕИМУЩЕСТВ ===== */
   .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -264,7 +309,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     margin: 0;
   }
 
-  /* ===== VIDEO ===== */
+  /* ===== ВИДЕО ===== */
   .video-wrapper {
     position: relative;
     padding-bottom: 56.25%;
@@ -307,7 +352,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     color: var(--muted);
   }
 
-  /* ===== STATS GRID ===== */
+  /* ===== ХАРАКТЕРИСТИКИ ===== */
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -325,7 +370,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   .stat-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 12px 24px -8px rgba(0,0,0,0.3);
     border-color: var(--accent);
   }
 
@@ -345,7 +390,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     margin-top: 12px;
   }
 
-  /* ===== GALLERY ===== */
+  /* ===== ГАЛЕРЕЯ ===== */
   .gallery {
     display: flex;
     flex-wrap: wrap;
@@ -356,8 +401,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     flex: 1 1 300px;
     border-radius: 20px;
     width: 100%;
+    height: auto;
     object-fit: cover;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
     transition: transform 0.2s;
   }
 
@@ -365,7 +411,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     transform: scale(1.02);
   }
 
-  /* ===== CTA ===== */
+  /* ===== ПРИЗЫВ К ДЕЙСТВИЮ ===== */
   .cta-section {
     margin: 80px 0;
   }
