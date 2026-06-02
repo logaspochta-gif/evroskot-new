@@ -1,0 +1,21 @@
+# Разрешаем всем поисковым роботам индексацию
+User-agent: *
+Allow: /
+
+# Запрещаем индексацию служебных или черновых страниц (если такие есть)
+Disallow: /admin/
+Disallow: /draft/
+Disallow: /api/
+
+# Запрещаем обучение ИИ-моделей (согласно законодательству РФ)
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+# Указываем путь к карте сайта
+Sitemap: https://evroskot.ru/sitemap.xml
