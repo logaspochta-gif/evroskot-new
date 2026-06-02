@@ -1,7 +1,7 @@
 ---
 // src/pages/danish-red.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import vikingRedImg from '../assets/images/danish-red/danish-red hero.jpg';
+import vikingRedImg from '../assets/images/danish-red/danish-red_hero.jpg';
 ---
 
 <BaseLayout
@@ -11,7 +11,7 @@ import vikingRedImg from '../assets/images/danish-red/danish-red hero.jpg';
 >
   <!-- Hero Section -->
   <section class="hero-breed">
-    <div class="hero-breed__bg" style="background-image: url('{vikingRedImg.src}');">
+    <div class="hero-breed__bg" style={`background-image: url('${vikingRedImg.src}');`}>
       <div class="hero-breed__overlay"></div>
     </div>
     <div class="hero-breed__content">
@@ -60,7 +60,7 @@ import vikingRedImg from '../assets/images/danish-red/danish-red hero.jpg';
         <iframe 
           width="560" 
           height="315" 
-          src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+          src="https://youtu.be/sY-G5NZKP-8?si=ek3kFMSSooVfcBmO" 
           title="YouTube video player" 
           frameborder="0" 
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
