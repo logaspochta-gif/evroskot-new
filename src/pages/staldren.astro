@@ -1,0 +1,558 @@
+---
+// src/pages/staldren.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Staldren® — Зоогигиеническое средство для животных | Scanova A/S"
+  description="Staldren® — эффективный порошковый препарат для дезинфекции, осушения подстилки и улучшения микроклимата в животноводческих помещениях. Безопасно для всех видов животных."
+  disableSnap={true}
+>
+  <!-- Hero Section -->
+  <section class="hero-breed">
+    <div class="hero-breed__image">
+      <img 
+        src="https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=1920&q=85"
+        alt="Применение Staldren в коровнике" 
+        class="hero-breed__img"
+        loading="eager"
+      />
+      <div class="hero-breed__overlay"></div>
+    </div>
+    <div class="hero-breed__content">
+      <div class="container">
+        <h1 class="hero-breed__title">Staldren®</h1>
+        <p class="hero-breed__subtitle">«Чистый хлев» — залог здоровья поголовья</p>
+        <p class="hero-breed__description">Эффективное зоогигиеническое средство для дезинфекции, осушения подстилки и профилактики заболеваний. Разработано датской компанией J.N. Jorenku. Более 50 лет на рынке Европы.</p>
+        <a href="/#contact" class="btn btn--primary">Заказать Staldren</a>
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <!-- Описание продукта -->
+    <section class="content-section">
+      <h2>Что такое Staldren®?</h2>
+      <div class="text-block">
+        <p>
+          <strong>Staldren®</strong> (в переводе с датского — «чистый хлев») — это минеральный порошковый препарат, предназначенный для обработки животноводческих помещений, подстилки и выгульных площадок. Он эффективно поглощает влагу, нейтрализует аммиак и патогенные микроорганизмы, создавая оптимальный микроклимат для животных.
+        </p>
+        <p>
+          Продукт производится датской компанией <strong>J.N. Jorenku</strong> и экспортируется более чем в 50 стран мира. Staldren® рекомендован ветеринарными службами Европы и успешно применяется в хозяйствах различного масштаба.
+        </p>
+        <p>
+          Препарат безопасен для людей, животных и окружающей среды. Не содержит антибиотиков, гормонов и химических дезинфектантов.
+        </p>
+      </div>
+    </section>
+
+    <!-- Преимущества (карточки) -->
+    <section class="content-section">
+      <h2>Почему выбирают Staldren®?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🛡️</span>
+          <h3>Дезинфекция и дезодорация</h3>
+          <p>Уничтожает бактерии, вирусы и грибки в подстилке и на поверхностях. Снижает уровень аммиака в помещении до безопасных значений.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">💧</span>
+          <h3>Мощный осушитель</h3>
+          <p>Быстро впитывает избыточную влагу, предотвращая развитие патогенной микрофлоры. Подстилка остаётся сухой до 48 часов.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🐄</span>
+          <h3>Профилактика заболеваний</h3>
+          <p>Регулярное применение Staldren® снижает заболеваемость маститом, копытными инфекциями и респираторными болезнями.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🌍</span>
+          <h3>Экологичность</h3>
+          <p>100% природный минеральный состав. Безопасен при контакте с животными, не загрязняет окружающую среду.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Доказанная эффективность (научные данные) -->
+    <section class="content-section">
+      <h2>Доказанная эффективность</h2>
+      <div class="text-block">
+        <p>
+          Эффективность препарата подтверждена независимыми научными исследованиями, проведёнными кафедрой гигиены животных Витебской государственной академии ветеринарной медицины (Беларусь) в 2012 году. Исследования проводились на молочном комплексе с беспривязным содержанием и в индивидуальных домиках для телят.
+        </p>
+      </div>
+
+      <h3 style="text-align: center; margin: 40px 0 20px;">Результаты испытаний в коровнике</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">на 13,8%</div>
+          <div class="stat-label">Снижение влажности</div>
+          <div class="stat-desc">воздуха в помещении</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">на 20%</div>
+          <div class="stat-label">Снижение микробной обсеменённости</div>
+          <div class="stat-desc">воздуха в коровнике</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">на 55,2%</div>
+          <div class="stat-label">Снижение аммиака</div>
+          <div class="stat-desc">в воздухе помещений</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">на 52,1%</div>
+          <div class="stat-label">Снижение спор грибов</div>
+          <div class="stat-desc">в воздухе помещений</div>
+        </div>
+      </div>
+
+      <h3 style="text-align: center; margin: 40px 0 20px;">Результаты испытаний в домиках для телят</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">на 4%</div>
+          <div class="stat-label">Снижение влажности</div>
+          <div class="stat-desc">воздуха в домиках</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">на 25,7%</div>
+          <div class="stat-label">Снижение микробной обсеменённости</div>
+          <div class="stat-desc">воздуха в домиках</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">на 31,5%</div>
+          <div class="stat-label">Снижение аммиака</div>
+          <div class="stat-desc">в воздухе домиков</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">на 43,5%</div>
+          <div class="stat-label">Снижение спор грибов</div>
+          <div class="stat-desc">в воздухе домиков</div>
+        </div>
+      </div>
+
+      <div class="text-block" style="margin-top: 40px;">
+        <h3>Дополнительные эффекты</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin-bottom: 8px;">✅ Полное устранение сероводорода, индола и скатола</li>
+          <li style="margin-bottom: 8px;">✅ Уничтожение стафилококков и кишечной палочки на поверхностях (пол, стены, кормушки)</li>
+          <li style="margin-bottom: 8px;">✅ Повышение концентрации кислорода в воздухе</li>
+          <li style="margin-bottom: 8px;">✅ Придание приятного хвойного запаха в помещении</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Как работает -->
+    <section class="content-section">
+      <h2>Как действует Staldren®?</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">pH 3,5</div>
+          <div class="stat-label">кислая среда</div>
+          <div class="stat-desc">Губительна для большинства патогенов</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">до 300%</div>
+          <div class="stat-label">впитываемость влаги</div>
+          <div class="stat-desc">от собственного веса</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">24–48 ч</div>
+          <div class="stat-label">длительность действия</div>
+          <div class="stat-desc">после однократной обработки</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">50+</div>
+          <div class="stat-label">лет на рынке</div>
+          <div class="stat-desc">Проверен временем и практикой</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Инструкция по применению -->
+    <section class="content-section">
+      <h2>Как применять Staldren®</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">1</span>
+          <h3>Очистите поверхность</h3>
+          <p>Удалите загрязнения и остатки старой подстилки.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">2</span>
+          <h3>Равномерно рассыпьте</h3>
+          <p>Распределите порошок по поверхности из расчёта 50–100 г/м².</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">3</span>
+          <h3>Увлажните (опционально)</h3>
+          <p>Слегка сбрызните водой для активации.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">4</span>
+          <h3>Повторяйте регулярно</h3>
+          <p>Обработку проводят 1–2 раза в неделю или по мере необходимости.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Видео (плейсхолдер) -->
+    <section class="content-section">
+      <h2>Посмотрите видео о Staldren®</h2>
+      <div class="video-wrapper">
+        <iframe 
+          width="560" 
+          height="315" 
+          src="https://www.youtube.com/embed/g5GJbQl2Dvo?si=Ku1XbQlS8Z0pQ06F" 
+          title="Видео о применении Staldren" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+    </section>
+
+    <!-- Галерея -->
+    <section class="content-section">
+      <h2>Галерея</h2>
+      <div class="gallery">
+        <img src="https://jorenku.dk/wp-content/uploads/2021/06/staldren_pakker.jpg" alt="Упаковка Staldren" loading="lazy" />
+        <img src="https://jorenku.dk/wp-content/uploads/2021/06/staldren_stroelse.jpg" alt="Применение Staldren на подстилке" loading="lazy" />
+        <img src="https://jorenku.dk/wp-content/uploads/2021/06/staldren_kalve.jpg" alt="Телята на обработанной подстилке" loading="lazy" />
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-block">
+        <h2>Закажите Staldren® уже сегодня</h2>
+        <p>Свяжитесь с нами, чтобы получить консультацию, прайс-лист и условия доставки.</p>
+        <a href="/#contact" class="btn btn--primary">Оставить заявку</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  :root {
+    --dark: #0a0a0a;
+    --accent: #10b981;
+    --accent-hover: #059669;
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, 0.7);
+    --border: rgba(255, 255, 255, 0.1);
+    --card-bg: #141414;
+    --transition-base: 0.25s ease;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .hero-breed {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    text-align: center;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .hero-breed__image {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-breed__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-breed__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+  }
+
+  .hero-breed__content {
+    position: relative;
+    z-index: 2;
+    padding: 40px 0;
+  }
+
+  .hero-breed__title {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-breed__subtitle {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 500;
+    max-width: 700px;
+    margin: 0 auto 24px;
+    color: var(--muted);
+  }
+
+  .hero-breed__description {
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto 32px;
+    color: var(--muted);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 12px 32px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn--primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn--primary:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  .content-section {
+    margin: 80px 0;
+  }
+
+  .content-section:first-of-type {
+    margin-top: 40px;
+  }
+
+  .content-section h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .content-section h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .text-block {
+    max-width: 900px;
+    margin: 0 auto;
+    font-size: 1.05rem;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .text-block p {
+    margin-bottom: 1.2rem;
+  }
+
+  .text-block strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .text-block ul {
+    margin-top: 16px;
+  }
+
+  .text-block ul li {
+    font-size: 1.05rem;
+    color: var(--muted);
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+  }
+
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+  }
+
+  .feature-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .feature-card p {
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 20px;
+    margin-bottom: 32px;
+  }
+
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .quote-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 800px;
+  }
+
+  .quote-block blockquote {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--text);
+    margin: 0 0 16px;
+    line-height: 1.6;
+  }
+
+  .quote-block cite {
+    font-size: 0.95rem;
+    font-style: normal;
+    color: var(--muted);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 20px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent);
+  }
+
+  .stat-number {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 12px;
+  }
+
+  .stat-desc {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .gallery img {
+    flex: 1 1 300px;
+    border-radius: 20px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+
+  .gallery img:hover {
+    transform: scale(1.02);
+  }
+
+  .cta-section {
+    margin: 80px 0;
+  }
+
+  .cta-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 64px 20px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .cta-block h2 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+
+  .cta-block p {
+    color: var(--muted);
+    margin-bottom: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 16px;
+    }
+    .stat-number {
+      font-size: 2rem;
+    }
+  }
+</style>

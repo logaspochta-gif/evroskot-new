@@ -1,0 +1,445 @@
+---
+// src/pages/hereford.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { Image } from "astro:assets";
+import herefordImg from '../assets/images/hereford/hereford_hero.jpg';
+import gallery1 from '../assets/images/hereford/hereford.jpg';
+import gallery2 from '../assets/images/hereford/hereford2.jpg';
+import gallery3 from '../assets/images/hereford/hereford3.jpg';
+---
+
+<BaseLayout
+  title="Герефордская — Выносливость и качество мяса | Scanova A/S"
+  description="Герефордская порода — мировой лидер по неприхотливости и качеству мяса. Красно-белая масть, отличная адаптация к пастбищному содержанию. Поставки из Дании."
+  disableSnap={true}
+>
+  <!-- Hero Section с оптимизированным фоновым изображением -->
+  <section class="hero-breed">
+    <div class="hero-breed__image">
+      <Image 
+        src={herefordImg} 
+        alt="Стадо быков герефордской породы на пастбище" 
+        width="1920" 
+        height="1080" 
+        format="webp" 
+        quality={85} 
+        loading="eager" 
+        class="hero-breed__img" 
+      />
+      <div class="hero-breed__overlay"></div>
+    </div>
+    <div class="hero-breed__content">
+      <div class="container">
+        <h1 class="hero-breed__title">Герефордская</h1>
+        <p class="hero-breed__subtitle">Выносливость, проверенная веками</p>
+        <p class="hero-breed__description">Герефордская порода — одна из старейших и наиболее распространённых мясных пород в мире. Отличается выдающейся адаптивностью, неприхотливостью и высоким качеством мяса.</p>
+        <a href="/#contact" class="btn btn--primary">Связаться с нами</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Основной контент -->
+  <div class="container">
+    <!-- Секция "Почему стоит выбрать герефордскую породу?" -->
+    <section class="content-section">
+      <h2>Почему стоит выбрать герефордскую породу?</h2>
+      <div class="features-grid">
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🛡️</span>
+          <h3>Исключительная выносливость</h3>
+          <p>Герефорды отлично переносят жару, холод и любые погодные условия. Идеально подходят для круглогодичного пастбищного содержания.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🥩</span>
+          <h3>Качественное мраморное мясо</h3>
+          <p>Мясо герефордов отличается тонковолокнистой структурой и равномерным распределением жира, что обеспечивает превосходный вкус и нежность.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">🐄</span>
+          <h3>Отличные материнские качества</h3>
+          <p>Коровы герефордской породы — заботливые матери с высокой молочностью. Тёлки легко телятся и дают крепкое потомство.</p>
+        </div>
+        <div class="feature-card">
+          <span class="feature-icon" aria-hidden="true">💰</span>
+          <h3>Экономическая эффективность</h3>
+          <p>Низкие затраты на содержание, высокая конверсия корма и отличная цена на мясо делают герефордов одним из самых рентабельных вариантов для мясного скотоводства.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Секция с видео и историей успеха -->
+    <section class="content-section">
+      <h2>Узнайте больше о породе</h2>
+      <div class="video-wrapper">
+        <iframe 
+          width="560" 
+          height="315" 
+          src="https://www.youtube.com/embed/rFZxFHjPGMc?si=CwiPWmXjsQ_BE-Ho" 
+          title="Видео о герефордской породе" 
+          frameborder="0" 
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+          allowfullscreen
+          loading="lazy"
+        ></iframe>
+      </div>
+      <div class="quote-block">
+        <blockquote>
+          «Герефорды — это наша страховка от любых капризов природы. Они пасутся там, где другие породы просто не выжили бы».
+        </blockquote>
+        <cite>— Фермер, Норвегия</cite>
+      </div>
+    </section>
+
+    <!-- Секция с характеристиками -->
+    <section class="content-section">
+      <h2>Характеристики породы</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number">900–1 200 кг</div>
+          <div class="stat-label">Вес взрослого быка</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">600–800 кг</div>
+          <div class="stat-label">Вес взрослой коровы</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">до 65%</div>
+          <div class="stat-label">Убойный выход</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">до 1 400 г</div>
+          <div class="stat-label">Среднесуточный привес</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Галерея с оптимизированными изображениями -->
+    <section class="content-section">
+      <h2>Галерея</h2>
+      <div class="gallery">
+        <Image 
+          src={gallery1} 
+          alt="Бык герефордской породы на выпасе" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
+        />
+        <Image 
+          src={gallery2} 
+          alt="Стадо герефордов на ферме" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
+        />
+        <Image 
+          src={gallery3} 
+          alt="Корова герефордской породы с телёнком" 
+          width="600" 
+          height="400" 
+          format="webp" 
+          quality={80} 
+          loading="lazy" 
+        />
+      </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section">
+      <div class="cta-block">
+        <h2>Готовы улучшить свое стадо?</h2>
+        <p>Свяжитесь с нами, чтобы обсудить поставку племенных животных герефордской породы из Дании и получить персональное коммерческое предложение.</p>
+        <a href="/#contact" class="btn btn--primary">Оставить заявку</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  :root {
+    --dark: #0a0a0a;
+    --accent: #10b981;
+    --accent-hover: #059669;
+    --text: #ffffff;
+    --muted: rgba(255, 255, 255, 0.7);
+    --border: rgba(255, 255, 255, 0.1);
+    --card-bg: #141414;
+    --transition-base: 0.25s ease;
+  }
+
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* Hero секция с картинкой через <img> */
+  .hero-breed {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    text-align: center;
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .hero-breed__image {
+    position: absolute;
+    inset: 0;
+  }
+
+  .hero-breed__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hero-breed__overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.3), rgba(0,0,0,0.7));
+  }
+
+  .hero-breed__content {
+    position: relative;
+    z-index: 2;
+    padding: 40px 0;
+  }
+
+  .hero-breed__title {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 900;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-breed__subtitle {
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+    font-weight: 500;
+    max-width: 700px;
+    margin: 0 auto 24px;
+    color: var(--muted);
+  }
+
+  .hero-breed__description {
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto 32px;
+    color: var(--muted);
+  }
+
+  .btn {
+    display: inline-block;
+    padding: 12px 32px;
+    border-radius: 40px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s;
+  }
+
+  .btn--primary {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  .btn--primary:hover {
+    background: var(--accent-hover);
+    transform: scale(1.02);
+  }
+
+  .content-section {
+    margin: 80px 0;
+  }
+
+  .content-section:first-of-type {
+    margin-top: 40px;
+  }
+
+  .content-section h2 {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 700;
+    margin-bottom: 40px;
+    color: var(--text);
+    text-align: center;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+  }
+
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 24px;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    text-align: center;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 18px 40px rgba(0,0,0,0.4);
+  }
+
+  .feature-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 20px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .feature-card p {
+    color: var(--muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+
+  .video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    max-width: 100%;
+    border-radius: 20px;
+    margin-bottom: 32px;
+  }
+
+  .video-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .quote-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    text-align: center;
+    margin: 0 auto;
+    max-width: 800px;
+  }
+
+  .quote-block blockquote {
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--text);
+    margin: 0 0 16px;
+    line-height: 1.6;
+  }
+
+  .quote-block cite {
+    font-size: 0.95rem;
+    font-style: normal;
+    color: var(--muted);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 24px;
+  }
+
+  .stat-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 20px;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent);
+  }
+
+  .stat-number {
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1.2;
+  }
+
+  .stat-label {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 12px;
+  }
+
+  .gallery {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+  }
+
+  .gallery img {
+    flex: 1 1 300px;
+    border-radius: 20px;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+  }
+
+  .gallery img:hover {
+    transform: scale(1.02);
+  }
+
+  .cta-section {
+    margin: 80px 0;
+  }
+
+  .cta-block {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 32px;
+    padding: 64px 20px;
+    text-align: center;
+    color: var(--text);
+  }
+
+  .cta-block h2 {
+    font-size: 2rem;
+    margin-bottom: 16px;
+  }
+
+  .cta-block p {
+    color: var(--muted);
+    margin-bottom: 32px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 16px;
+    }
+    .stat-number {
+      font-size: 2rem;
+    }
+  }
+</style>
